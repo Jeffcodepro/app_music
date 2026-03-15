@@ -1,0 +1,256 @@
+/* --- Core Theme (Based on DS7 White Aesthetic) --- */
+:root {
+  --pure-white: #FFFFFF;
+  --stone-light: #EAEAE5;
+  --stone-base: #D6D3D1;
+  --stone-dark: #1C1C1C;
+  --accent-glow: rgba(255, 255, 255, 0.5);
+  --accent-blue: rgba(255, 255, 255, 0.1);
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--pure-white);
+  color: var(--stone-dark);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Custom Animations (Creative & Out of the Box) --- */
+
+/* Floating Orbs Parallax */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 3D Glass Effect */
+.glass-3d {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 
+      0 4px 24px -1px rgba(0, 0, 0, 0.05),
+      inset 0 0 20px rgba(255, 255, 255, 0.5);
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+}
+
+.glass-3d:hover {
+  box-shadow: 
+      0 40px 80px -20px rgba(0, 0, 0, 0.1),
+      inset 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
+/* Static Glass Panel */
+.glass-static {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 
+      0 4px 24px -1px rgba(0, 0, 0, 0.05),
+      inset 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* Reveal & Masked Text (DS7 Signature) */
+.reveal {
+  opacity: 0;
+  transform: translateY(3rem);
+  transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.text-reveal-wrapper {
+  overflow: hidden;
+  display: block;
+}
+
+.text-reveal-content {
+  transform: translateY(110%);
+  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+  display: block;
+}
+
+.active .text-reveal-content {
+  transform: translateY(0);
+}
+
+/* Carousel Background (DS7 Style) */
+.hero-bg-container {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.carousel-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+}
+
+.carousel-slide.active {
+  opacity: 1;
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%) contrast(1.1) brightness(1.05);
+  transform: scale(1.1);
+  transition: transform 12s linear;
+}
+
+.carousel-slide.active img {
+  transform: scale(1);
+}
+
+/* Transparent Lettering (DS7 Signature - Mix Blend Mode) */
+.transparent-text-layer {
+  mix-blend-mode: difference;
+  color: white;
+  z-index: 10;
+}
+
+/* Beam Rotating Border (DS11/15 style) */
+@keyframes rotate-beam {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.btn-beam {
+  position: relative;
+  padding: 2px;
+  border-radius: 9999px;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.btn-beam::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 600px;
+  margin-left: -300px;
+  margin-top: -300px;
+  background: conic-gradient(from 0deg, transparent 70%, var(--accent-glow) 100%);
+  animation: rotate-beam 3s linear infinite;
+  transform-origin: center;
+}
+
+.btn-beam-content {
+  position: relative;
+  background: var(--stone-dark);
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: 9999px;
+  z-index: 1;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: background 0.3s ease;
+}
+
+.btn-beam:hover .btn-beam-content {
+  background: #2D2D2D;
+}
+
+/* Card Beam Rotating Border (adapted for cards) */
+.card-beam {
+  position: relative;
+  padding: 1px; /* Border thickness */
+  border-radius: 50px;
+  overflow: hidden;
+  display: flex;
+  background: rgba(255, 255, 255, 0.06); /* Base faint sonar line */
+}
+
+.card-beam::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2000px; /* Massive to cover any card size */
+  height: 2000px;
+  margin-left: -1000px;
+  margin-top: -1000px;
+  background: conic-gradient(from 0deg, transparent 75%, var(--accent-glow) 100%); /* Adjusted sweep angle */
+  animation: rotate-beam 4s linear infinite;
+  pointer-events: none;
+  transform-origin: center;
+}
+
+.card-beam-content {
+  position: relative;
+  background: var(--stone-dark);
+  border-radius: 49px; /* Slightly less to account for padding */
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+
+/* Grid Background pattern */
+.bg-grid {
+  background-image: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Grain texture */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+}
+
+/* Marquee (DS7 style) */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+.flash-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.flash-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(400px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.4), transparent 80%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.flash-card:hover::after {
+  opacity: 1;
+}
