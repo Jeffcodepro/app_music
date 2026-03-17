@@ -50,6 +50,12 @@
   </head>
 
   <body>
+    <%= render "shared/flash" %>
     <%= yield %>
+    <script>
+      document.addEventListener("turbo:load", function() {
+        if (typeof lucide !== "undefined") lucide.createIcons();
+      });
+    </script>
   </body>
 </html>

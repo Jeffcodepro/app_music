@@ -1,0 +1,19 @@
+<% entries = flash.to_hash.filter_map do |type, message|
+     next if message.blank?
+     normalized = type.to_s
+     next unless %w[notice alert].include?(normalized)
+     [normalized, message]
+   end %>
+
+<% if entries.any? %>
+  <div class="flash-stack" aria-live="polite">
+    <% entries.each do |type, message| %>
+      <div class="flash-item flash-item--<%= type %>" data-controller="flash" data-flash-timeout-value="10000">
+        <p class="flash-item__text"><%= message %></p>
+        <button type="button" class="flash-item__close" data-action="flash#close" aria-label="Fechar notificação">
+          x
+        </button>
+      </div>
+    <% end %>
+  </div>
+<% end %>

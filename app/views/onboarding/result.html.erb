@@ -1,0 +1,31 @@
+<section class="platform-shell">
+  <div class="platform-container platform-container--narrow">
+    <h1 class="platform-title">Resultado do onboarding</h1>
+    <% objective = session[:onboarding_objective].presence || "objetivo não definido" %>
+    <% profile = session[:onboarding_profile] || {} %>
+
+    <div class="platform-grid">
+      <article class="platform-card">
+        <h2>Perfil musical inicial</h2>
+        <p>Objetivo principal: <strong><%= objective.capitalize %></strong></p>
+        <p>Instrumento: <strong><%= profile["instrument"].presence || "não informado" %></strong></p>
+      </article>
+      <article class="platform-card">
+        <h2>Trilha recomendada</h2>
+        <p>Iniciar por Estruturação/Leitura com reforço em Rítmica.</p>
+      </article>
+      <article class="platform-card">
+        <h2>Primeiro módulo sugerido</h2>
+        <p>Nível 1: Fundamentos de leitura e pulsação.</p>
+      </article>
+      <article class="platform-card">
+        <h2>Frequência semanal sugerida</h2>
+        <p><%= profile["study_availability"].presence || "30 min/dia" %>, 5 vezes por semana.</p>
+      </article>
+    </div>
+
+    <div class="platform-actions">
+      <%= link_to "Ir para Dashboard", app_dashboard_path, class: "app-btn app-btn--primary" %>
+    </div>
+  </div>
+</section>

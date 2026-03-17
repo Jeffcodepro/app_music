@@ -1,0 +1,15 @@
+<section class="platform-shell">
+  <div class="platform-container platform-container--narrow">
+    <h1 class="platform-title">Histórico de cobranças</h1>
+
+    <article class="platform-card">
+      <h2>Assinatura mensal e anual</h2>
+      <p>Área preparada para listar faturas, datas e status de pagamento.</p>
+      <ul class="platform-list">
+        <li>Plano atual: <strong><%= current_user.plan.presence || "não selecionado" %></strong></li>
+        <li>Status: ativo</li>
+        <li>Próxima cobrança: pendente de integração com gateway</li>
+      </ul>
+    </article>
+  </div>
+</section>

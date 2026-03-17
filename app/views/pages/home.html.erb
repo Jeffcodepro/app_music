@@ -1,11 +1,3 @@
-<!-- Disable browser scroll restoration to prevent jumping to the bottom on reload -->
-<script>
-  if ('scrollRestoration' in history) {
-    history.scrollRestoration = 'manual';
-  }
-  window.scrollTo(0, 0);
-</script>
-
 <!-- This controller initializes the DS25 3D hovers and parallax effects -->
 <div data-controller="design-system">
   <div class="grain"></div>
@@ -15,51 +7,34 @@
   <div class="orb w-[500px] h-[500px] bg-accent-glow bottom-[10%] right-[-5%]" id="orb-2"></div>
 
   <!-- Navigation (Floating Pill style) -->
-  <nav class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] w-[90%] sm:w-auto">
-      <div class="glass-static px-6 py-4 rounded-full flex items-center justify-between gap-12 border border-white/40">
-          <div class="flex items-center gap-3">
+  <% login_path = respond_to?(:new_user_session_path) ? new_user_session_path : "#cta" %>
+  <% cadastro_path = respond_to?(:new_user_registration_path) ? new_user_registration_path : "#planos" %>
+  <nav class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] w-[94%] lg:w-auto">
+      <div class="glass-static px-5 lg:px-6 py-3.5 lg:py-4 rounded-full flex items-center justify-between gap-4 lg:gap-8 border border-white/40">
+          <a href="#hero" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <div class="w-8 h-8 rounded-full bg-stone-900 flex items-center justify-center text-white">
                   <i data-lucide="play" class="w-4 h-4 ml-0.5"></i>
               </div>
               <span class="font-bold tracking-tighter text-lg">AppMusic</span>
-          </div>
+          </a>
 
-          <div class="hidden md:flex items-center gap-8 text-[10px] uppercase tracking-[0.2em] font-bold text-stone-600">
-              <a href="#como-funciona" class="hover:text-stone-900 transition-colors">Como Funciona</a>
+          <div class="hidden lg:flex items-center gap-6 text-[10px] uppercase tracking-[0.2em] font-bold text-stone-600">
+              <a href="#vantagens" class="hover:text-stone-900 transition-colors">Vantagens</a>
               <a href="#conteudo" class="hover:text-stone-900 transition-colors">Conteúdo</a>
               <a href="#planos" class="hover:text-stone-900 transition-colors">Planos</a>
               <a href="#faq" class="hover:text-stone-900 transition-colors">Dúvidas</a>
           </div>
 
-          <a href="#planos" class="bg-stone-900 text-white px-6 py-2.5 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-stone-800 transition-colors">
-              Começar grátis
-          </a>
+          <div class="flex items-center gap-2">
+              <a href="<%= login_path %>" class="px-4 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold text-stone-700 border border-stone-300/80 hover:text-stone-900 hover:border-stone-400 transition-colors">
+                  Login
+              </a>
+              <a href="<%= cadastro_path %>" class="bg-stone-900 text-white px-4 lg:px-6 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-stone-800 transition-colors">
+                  Cadastro
+              </a>
+          </div>
       </div>
   </nav>
-
-  <!-- 1. CINEMATIC HERO SECTION (Hardware-Accelerated Crossfade Loop) -->
-  <style>
-    /*
-      We use pure CSS specifically to push the crossfade to the GPU,
-      preventing the main JS thread from dropping frames during decoding.
-    */
-    #hero .video-layer {
-      opacity: 1;
-      visibility: visible;
-      transition: opacity 3.5s ease-in-out;
-      transform: translateZ(0); /* Força a aceleração de GPU */
-      will-change: opacity;
-    }
-    #hero .video-secondary {
-      opacity: 0;
-    }
-    #hero.fading .video-primary {
-      opacity: 0;
-    }
-    #hero.fading .video-secondary {
-      opacity: 1;
-    }
-  </style>
 
   <section id="hero" class="relative h-screen w-full flex items-center justify-center overflow-hidden bg-[#0A0A0A]" data-controller="seamless-loop">
 
@@ -91,11 +66,11 @@
         </span>
       </div>
 
-      <h1 class="transparent-text-layer text-[11vw] sm:text-[8vw] font-black leading-[1.05] tracking-tight uppercase">
+      <h1 class="transparent-text-layer hero-title-font text-[clamp(2.8rem,8vw,6.5rem)] font-black leading-[0.95] tracking-[-0.02em] uppercase">
         <span class="text-reveal-wrapper active block">
             <span class="text-reveal-content">Teoria Musical</span>
         </span>
-        <span class="text-reveal-wrapper active block mt-2">
+        <span class="text-reveal-wrapper active block mt-1">
             <span class="text-reveal-content text-transparent bg-clip-text bg-gradient-to-r from-white via-stone-400 to-white" style="transition-delay: 0.2s;">No Ponto Certo</span>
         </span>
       </h1>
@@ -120,57 +95,115 @@
     </div>
   </section>
 
-  <!-- 2. DIFERENCIAIS -->
-  <section id="diferenciais" class="relative z-30 py-32 px-8 max-w-[1400px] mx-auto bg-grid bg-white border-t border-stone-100 mt-0">
-      <div class="mb-20 reveal text-center max-w-4xl mx-auto">
+  <!-- 2. DIFERENCIAIS (Bento Grid) -->
+  <section id="vantagens" class="relative z-30 py-32 px-8 max-w-[1400px] mx-auto bg-grid bg-white border-t border-stone-100 mt-0">
+      <div class="mb-24 reveal text-center max-w-4xl mx-auto flex flex-col items-center">
+          <div class="w-12 h-12 rounded-full border border-stone-200 flex items-center justify-center mb-6 shadow-sm"><i data-lucide="sparkles" class="w-5 h-5 text-stone-900"></i></div>
           <h2 class="text-5xl md:text-6xl font-medium tracking-tighter mb-8 tabular-nums">Muito além de assistir aulas</h2>
           <p class="text-stone-500 font-light text-xl leading-relaxed">
               A plataforma foi criada para ajudar você a entender música com <span class="font-bold text-stone-900">clareza</span>, praticar com <span class="font-bold text-stone-900">constância</span> e evoluir de forma real.
           </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Creative Music-Themed Grid Layout -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-          <div class="reveal border border-stone-100 bg-stone-50 p-10 rounded-3xl hover:shadow-xl transition-all h-full flex flex-col justify-between">
-              <i data-lucide="music-4" class="w-8 h-8 text-stone-900 mb-6"></i>
-              <div>
-                  <h4 class="text-xl font-bold mb-3">Nivelamento inteligente</h4>
-                  <p class="text-stone-500 font-light text-sm leading-relaxed">Descubra seu nível em leitura, ritmo, percepção e harmonia.</p>
+                  <!-- Card 1: Nivelamento Inteligente (The Tuning Fork / Metronome) -->
+          <div class="reveal border border-stone-200 bg-stone-50 p-10 rounded-[40px] hover:-translate-y-2 hover:shadow-xl transition-all relative overflow-hidden group flex flex-col justify-between" style="transition-delay: 0.1s;">
+              <!-- Metronome pendulum abstraction -->
+              <div class="absolute top-[-10%] right-10 w-2 h-32 bg-stone-200 rounded-full origin-top transform rotate-12 group-hover:-rotate-12 transition-transform duration-1000 ease-in-out">
+                  <div class="absolute bottom-[-10px] left-1/2 -translate-x-1/2 w-8 h-8 rounded-full border-4 border-stone-300 bg-stone-100"></div>
+              </div>
+
+              <div class="relative z-10 w-14 h-14 rounded-full bg-white border border-stone-200 flex items-center justify-center mb-12 shadow-sm text-stone-900 group-hover:bg-stone-900 group-hover:text-white transition-colors duration-500">
+                  <i data-lucide="music-4" class="w-6 h-6"></i>
+              </div>
+              <div class="relative z-10">
+                  <h4 class="text-2xl font-bold mb-3">Nivelamento inteligente</h4>
+                  <p class="text-stone-500 font-light text-base leading-relaxed">Descubra seu nível em leitura, ritmo, percepção e harmonia.</p>
               </div>
           </div>
 
-          <div class="reveal border border-stone-100 bg-stone-50 p-10 rounded-3xl hover:shadow-xl transition-all h-full flex flex-col justify-between" style="transition-delay: 0.1s;">
-              <i data-lucide="list-music" class="w-8 h-8 text-stone-900 mb-6"></i>
-              <div>
-                  <h4 class="text-xl font-bold mb-3">Trilha personalizada</h4>
-                  <p class="text-stone-500 font-light text-sm leading-relaxed">Receba um caminho de estudo organizado com base no que você já sabe e no que precisa desenvolver.</p>
+          <!-- Card 2: Trilha personalizada (The Conductor / Sheet Music) -->
+          <div class="reveal lg:col-span-2 border border-stone-200 bg-stone-900 text-white p-12 rounded-[40px] hover:shadow-2xl transition-all relative overflow-hidden group min-h-[320px]">
+              <!-- Animated Stave Background -->
+              <div class="absolute inset-0 opacity-10 flex flex-col justify-center gap-4 group-hover:opacity-20 transition-opacity duration-1000 -rotate-3 scale-110">
+                  <div class="w-full h-[1px] bg-white"></div>
+                  <div class="w-full h-[1px] bg-white"></div>
+                  <div class="w-full h-[1px] bg-white"></div>
+                  <div class="w-full h-[1px] bg-white"></div>
+                  <div class="w-full h-[1px] bg-white"></div>
+              </div>
+              <div class="absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-stone-900 to-transparent z-10"></div>
+
+              <div class="relative z-20 h-full flex flex-col justify-between max-w-lg">
+                  <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/5 text-white mb-6">
+                      <i data-lucide="list-music" class="w-8 h-8"></i>
+                  </div>
+                  <div>
+                      <h4 class="text-3xl font-bold mb-4">Trilha personalizada</h4>
+                      <p class="text-stone-300 font-light text-lg leading-relaxed">Receba um caminho de estudo organizado com base no que você já sabe e no que precisa desenvolver.</p>
+                  </div>
               </div>
           </div>
 
-          <div class="reveal border border-stone-100 bg-stone-50 p-10 rounded-3xl hover:shadow-xl transition-all h-full flex flex-col justify-between" style="transition-delay: 0.2s;">
-              <i data-lucide="mic-2" class="w-8 h-8 text-stone-900 mb-6"></i>
-              <div>
-                  <h4 class="text-xl font-bold mb-3">Prática recorrente</h4>
+          <!-- Divisória removida para evitar conflito com o diff -->
+
+          <!-- Card 3: Prática recorrente (The Vinyl Loop) -->
+          <div class="reveal border border-stone-200 bg-white p-10 rounded-[40px] shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all relative overflow-hidden group flex flex-col justify-end min-h-[300px]" style="transition-delay: 0.2s;">
+              <!-- Spinning Vinyl Decoration -->
+              <div class="absolute -top-16 -right-16 w-48 h-48 bg-stone-900 rounded-full border-8 border-stone-800 shadow-2xl flex items-center justify-center group-hover:rotate-180 transition-transform duration-[2s] ease-linear">
+                  <!-- Grooves -->
+                  <div class="w-40 h-40 rounded-full border border-stone-700 opacity-50 flex items-center justify-center">
+                      <div class="w-32 h-32 rounded-full border border-stone-700 opacity-50 flex items-center justify-center">
+                          <div class="w-24 h-24 rounded-full border border-stone-700 opacity-50 flex items-center justify-center">
+                              <!-- Label -->
+                              <div class="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center">
+                                  <div class="w-2 h-2 rounded-full bg-stone-900"></div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <div class="relative z-10 mt-20">
+                  <div class="flex items-center gap-3 mb-3">
+                      <i data-lucide="mic-2" class="w-6 h-6 text-stone-900"></i>
+                      <h4 class="text-xl font-bold">Prática recorrente</h4>
+                  </div>
                   <p class="text-stone-500 font-light text-sm leading-relaxed">Exercícios por aula, playgrounds automáticos e revisões para fixar o conteúdo.</p>
               </div>
           </div>
 
-          <div class="reveal border border-stone-100 bg-stone-900 text-white p-10 rounded-3xl hover:shadow-xl transition-all h-full flex flex-col justify-between lg:col-span-2" style="transition-delay: 0.3s;">
-              <i data-lucide="bar-chart-2" class="w-8 h-8 text-white mb-6"></i>
-              <div>
+          <!-- Card 4: Evolução visível (The Equalizer) -->
+          <div class="reveal border border-stone-200 bg-[#F9F9F8] p-12 rounded-[40px] hover:shadow-xl hover:bg-[#F9F9F8] transition-all relative overflow-hidden flex flex-col justify-between group group/eq min-h-[300px]" style="transition-delay: 0.3s;">
+             <!-- Animated Equalizer Bars (Background Layer) -->
+             <div class="absolute lg:top-12 right-0 bottom-0 w-32 flex items-end justify-between gap-1 pb-0 opacity-20 group-hover:opacity-100 transition-opacity duration-500 z-0">
+                 <div class="w-full bg-stone-900/10 rounded-t-sm h-[20%] group-hover/eq:h-[80%] transition-all duration-700 ease-in-out"></div>
+                 <div class="w-full bg-stone-900/10 rounded-t-sm h-[40%] group-hover/eq:h-[60%] transition-all duration-500 ease-in-out delay-75"></div>
+                 <div class="w-full bg-stone-900/20 rounded-t-sm h-[30%] group-hover/eq:h-[90%] transition-all duration-1000 ease-in-out delay-150"></div>
+                 <div class="w-full bg-stone-900/30 rounded-t-sm h-[60%] group-hover/eq:h-[40%] transition-all duration-300 ease-in-out delay-75"></div>
+                 <div class="w-full bg-stone-900/40 rounded-t-sm h-[10%] group-hover/eq:h-[100%] transition-all duration-700 ease-in-out delay-200"></div>
+             </div>
+
+             <!-- Text Content (Foreground Layer) -->
+             <div class="relative z-10 w-16 h-16 rounded-full bg-white border border-stone-100 shadow-sm flex items-center justify-center mb-6 text-stone-900">
+                  <i data-lucide="bar-chart-2" class="w-8 h-8"></i>
+              </div>
+             <div class="relative z-10 max-w-[200px] bg-[#F9F9F8]/60 backdrop-blur-sm p-2 -ml-2 rounded-xl">
                   <h4 class="text-2xl font-bold mb-3">Evolução visível</h4>
-                  <p class="text-stone-400 font-light text-lg leading-relaxed max-w-2xl">Acompanhe seu progresso, suba de nível e avance com mais segurança em uma jornada que tangibiliza o seu aprendizado.</p>
+                  <p class="text-stone-500 font-light text-sm leading-relaxed">Acompanhe seu progresso, suba de nível e avance com segurança.</p>
               </div>
           </div>
 
-          <div class="reveal border border-stone-100 bg-stone-50 text-stone-900 p-10 rounded-3xl hover:shadow-xl transition-all h-full flex flex-col justify-between" style="transition-delay: 0.4s;">
-              <i data-lucide="users" class="w-8 h-8 text-stone-900 mb-6"></i>
+          <!-- Card 5: Diversão em grupo -->
+          <div class="reveal border border-stone-200 bg-stone-50 p-10 rounded-[40px] shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all flex flex-col justify-between group" style="transition-delay: 0.4s;">
+              <i data-lucide="users" class="w-10 h-10 text-stone-900 mb-6 opacity-40 group-hover:opacity-100 transition-opacity"></i>
               <div>
                   <h4 class="text-xl font-bold mb-3">Diversão em grupo</h4>
-                  <p class="text-stone-500 font-light text-sm leading-relaxed">Participe de experiências ao vivo com perguntas visuais e sonoras, pontuação por velocidade e ranking em tempo real.</p>
+                  <p class="text-stone-500 font-light text-sm leading-relaxed">Participe de experiências ao vivo com perguntas e ranking em tempo real.</p>
               </div>
           </div>
-
       </div>
   </section>
 
@@ -191,12 +224,14 @@
                   </div>
               </div>
 
-              <div class="w-full md:w-1/2 reveal glass-3d p-12 rounded-[50px] bg-white/5 border border-white/10 flex items-center justify-center min-h-[400px]" style="transition-delay: 0.2s;">
+              <div class="w-full md:w-1/2 reveal glass-static sound-wave-card p-12 rounded-[50px] bg-white/5 border border-white/10 flex items-center justify-center min-h-[400px]" style="transition-delay: 0.2s;">
                   <div class="relative w-full h-full flex items-center justify-center">
-                      <!-- Abstract illustration of structure vs confusion -->
-                      <div class="absolute w-40 h-40 border border-white/20 rounded-full animate-[spin_10s_linear_infinite] border-dashed"></div>
+                      <!-- Wave layers -->
+                      <div class="absolute w-44 h-44 border border-white/20 rounded-full sound-wave-ring wave-delay-1"></div>
+                      <div class="absolute w-32 h-32 border border-white/30 rounded-full sound-wave-ring wave-delay-2"></div>
+                      <div class="absolute w-44 h-44 border border-white/20 rounded-full animate-[spin_10s_linear_infinite] border-dashed"></div>
                       <div class="absolute w-32 h-32 border border-white/20 rounded-full animate-[spin_7s_linear_infinite_reverse]"></div>
-                      <div class="absolute w-20 h-20 bg-stone-800 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.1)]">
+                      <div class="absolute w-20 h-20 bg-stone-800 rounded-full sound-wave-core flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.1)]">
                           <i data-lucide="music" class="w-8 h-8 text-white"></i>
                       </div>
                   </div>
@@ -216,8 +251,8 @@
           </div>
 
           <!-- 5 steps list/grid -->
-          <div class="space-y-4">
-              <div class="reveal border border-white/10 bg-white/5 p-8 rounded-3xl flex flex-col md:flex-row gap-8 items-start md:items-center hover:bg-white/10 transition-colors">
+          <div class="space-y-4 scroll-steps" data-scroll-steps>
+              <div class="step-card border border-white/10 bg-white/5 p-8 rounded-3xl flex flex-col md:flex-row gap-8 items-start md:items-center">
                   <div class="text-6xl font-black text-white/10 italic">1</div>
                   <div>
                       <h4 class="text-2xl font-bold mb-2">Comece do zero ou faça seu nivelamento</h4>
@@ -225,7 +260,7 @@
                   </div>
               </div>
 
-              <div class="reveal border border-white/10 bg-white/5 p-8 rounded-3xl flex flex-col md:flex-row gap-8 items-start md:items-center hover:bg-white/10 transition-colors" style="transition-delay: 0.1s;">
+              <div class="step-card border border-white/10 bg-white/5 p-8 rounded-3xl flex flex-col md:flex-row gap-8 items-start md:items-center">
                   <div class="text-6xl font-black text-white/10 italic">2</div>
                   <div>
                       <h4 class="text-2xl font-bold mb-2">Receba sua trilha personalizada</h4>
@@ -233,7 +268,7 @@
                   </div>
               </div>
 
-              <div class="reveal border border-white/10 bg-white/5 p-8 rounded-3xl flex flex-col md:flex-row gap-8 items-start md:items-center hover:bg-white/10 transition-colors" style="transition-delay: 0.2s;">
+              <div class="step-card border border-white/10 bg-white/5 p-8 rounded-3xl flex flex-col md:flex-row gap-8 items-start md:items-center">
                   <div class="text-6xl font-black text-white/10 italic">3</div>
                   <div>
                       <h4 class="text-2xl font-bold mb-2">Estude do seu jeito</h4>
@@ -241,7 +276,7 @@
                   </div>
               </div>
 
-              <div class="reveal border border-white/10 bg-white/5 p-8 rounded-3xl flex flex-col md:flex-row gap-8 items-start md:items-center hover:bg-white/10 transition-colors" style="transition-delay: 0.3s;">
+              <div class="step-card border border-white/10 bg-white/5 p-8 rounded-3xl flex flex-col md:flex-row gap-8 items-start md:items-center">
                   <div class="text-6xl font-black text-white/10 italic">4</div>
                   <div>
                       <h4 class="text-2xl font-bold mb-2">Pratique de verdade</h4>
@@ -249,7 +284,7 @@
                   </div>
               </div>
 
-              <div class="reveal border border-white/10 bg-white/5 p-8 rounded-3xl flex flex-col md:flex-row gap-8 items-start md:items-center hover:bg-white/10 transition-colors" style="transition-delay: 0.4s;">
+              <div class="step-card border border-white/10 bg-white/5 p-8 rounded-3xl flex flex-col md:flex-row gap-8 items-start md:items-center">
                   <div class="text-6xl font-black text-white/10 italic">5</div>
                   <div>
                       <h4 class="text-2xl font-bold mb-2">Acompanhe sua evolução</h4>
@@ -264,32 +299,32 @@
   <section id="modos-estudo" class="py-32 bg-stone-50 border-t border-stone-200">
       <div class="max-w-[1400px] mx-auto px-8">
           <div class="mb-20 reveal text-center max-w-4xl mx-auto">
-              <h2 class="text-5xl font-medium tracking-tighter mb-8 tabular-nums">Dois modos de aprender, um só objetivo: fazer você evoluir</h2>
-              <p class="text-stone-500 font-light text-lg">
+              <h2 class="text-5xl md:text-6xl font-medium tracking-tighter mb-8 tabular-nums">Dois modos de aprender, um só objetivo: fazer você evoluir</h2>
+              <p class="text-stone-500 font-light text-lg md:text-[1.45rem]">
                   Porque cada aluno aprende de um jeito — e uma boa plataforma precisa respeitar isso.
               </p>
           </div>
 
-          <div class="flex flex-col md:flex-row gap-8 bg-white p-4 rounded-[40px] border border-stone-200 shadow-sm reveal">
-              <div class="w-full md:w-1/2 p-12 bg-stone-50 rounded-[30px] flex flex-col justify-between">
+          <div class="study-modes-shell flex flex-col md:flex-row gap-6 reveal">
+              <div class="study-mode-card study-mode-divider w-full md:w-1/2 p-10 md:p-12 flex flex-col justify-between">
                   <div>
-                      <div class="w-12 h-12 rounded-full bg-stone-900 text-white flex items-center justify-center mb-8">
+                      <div class="study-mode-icon study-mode-icon--dark">
                           <i data-lucide="mic" class="w-5 h-5"></i>
                       </div>
                       <h3 class="text-3xl font-bold mb-4">Modo guiado</h3>
-                      <p class="text-stone-500 font-light leading-relaxed">
+                      <p class="text-stone-500 font-light leading-relaxed text-xl max-w-[520px]">
                           Para quem gosta de estudar com acompanhamento, pausas estratégicas e prática ao longo da aula.
                       </p>
                   </div>
               </div>
 
-              <div class="w-full md:w-1/2 p-12 bg-white rounded-[30px] flex flex-col justify-between border border-stone-200" style="transition-delay: 0.1s;">
+              <div class="study-mode-card w-full md:w-1/2 p-10 md:p-12 flex flex-col justify-between" style="transition-delay: 0.1s;">
                   <div>
-                      <div class="w-12 h-12 rounded-full bg-stone-900/10 text-stone-900 flex items-center justify-center mb-8">
+                      <div class="study-mode-icon text-stone-900">
                           <i data-lucide="key" class="w-5 h-5"></i>
                       </div>
                       <h3 class="text-3xl font-bold mb-4">Modo livre</h3>
-                      <p class="text-stone-800 font-light leading-relaxed">
+                      <p class="text-stone-700 font-light leading-relaxed text-xl max-w-[520px]">
                           Para quem prefere assistir no próprio ritmo, revisar com calma e praticar depois.
                       </p>
                   </div>
@@ -299,69 +334,86 @@
   </section>
 
   <!-- 6. PLAYGROUNDS -->
-  <section id="playgrounds" class="py-32 bg-white relative">
+  <section id="playgrounds" class="py-32 relative bg-[linear-gradient(180deg,#ffffff_0%,#fafaf9_100%)]">
       <div class="max-w-[1400px] mx-auto px-8">
-          <div class="mb-20 reveal flex flex-col md:flex-row gap-12 items-end">
-              <div class="w-full md:w-1/2">
-                  <h2 class="text-5xl font-medium tracking-tighter">Treine quantas vezes precisar</h2>
+          <div class="mb-20 reveal grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
+              <div>
+                  <h2 class="text-[clamp(2.3rem,4.2vw,4rem)] font-medium tracking-tighter leading-[1.03]">Treine quantas vezes precisar</h2>
               </div>
-              <div class="w-full md:w-1/2 pb-2">
+              <div>
                   <p class="text-stone-500 font-light text-lg leading-relaxed">
                       Os playgrounds transformam teoria em prática com exercícios gerados automaticamente por tema, dificuldade e objetivo. Em vez de repetir sempre os mesmos exemplos, você pratica com novas variações e desenvolve domínio real.
                   </p>
               </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-              <div class="reveal flash-card p-10 h-80 rounded-[40px] bg-stone-900 text-white flex flex-col justify-between group">
-                  <div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+              <article class="reveal flash-card group relative h-[20.5rem] rounded-[30px] p-8 bg-stone-950 text-white border border-stone-800/80 flex flex-col">
+                  <div class="mb-10 w-14 h-14 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
                       <i data-lucide="book-open" class="w-6 h-6 text-white"></i>
                   </div>
-                  <div>
-                      <h4 class="text-2xl font-bold mb-3">Leitura</h4>
-                      <p class="text-sm font-light leading-relaxed text-stone-400">
-                          Notas, claves, figuras e reconhecimento visual.
-                      </p>
+                  <h4 class="text-[1.9rem] font-semibold tracking-tight mb-3">Leitura</h4>
+                  <p class="text-sm font-light leading-relaxed text-stone-300 max-w-[20ch]">
+                      Notas, claves, figuras e reconhecimento visual.
+                  </p>
+                  <div class="mt-auto pt-6 border-t border-white/10 flex items-end gap-1.5">
+                      <span class="h-2 w-7 rounded-full bg-white/35"></span>
+                      <span class="h-2 w-11 rounded-full bg-white/60"></span>
+                      <span class="h-2 w-5 rounded-full bg-white"></span>
                   </div>
-              </div>
+              </article>
 
-              <div class="reveal flash-card p-10 h-80 rounded-[40px] bg-stone-50 border border-stone-200 text-stone-900 flex flex-col justify-between group" style="transition-delay: 0.1s;">
-                  <div class="w-14 h-14 rounded-full bg-stone-200 flex items-center justify-center">
-                      <i data-lucide="sliders" class="w-6 h-6 text-stone-900"></i>
+              <article class="reveal flash-card group relative h-[20.5rem] rounded-[30px] p-8 bg-white border border-stone-200 text-stone-900 flex flex-col" style="transition-delay: 0.1s;">
+                  <div class="mb-10 w-14 h-14 rounded-2xl bg-stone-100 border border-stone-200 flex items-center justify-center">
+                      <i data-lucide="activity" class="w-6 h-6 text-stone-900"></i>
                   </div>
-                  <div>
-                      <h4 class="text-2xl font-bold mb-3">Ritmo</h4>
-                      <p class="text-sm font-light leading-relaxed text-stone-500">
-                          Pulsação, subdivisão, compassos e padrões rítmicos.
-                      </p>
+                  <h4 class="text-[1.9rem] font-semibold tracking-tight mb-3">Ritmo</h4>
+                  <p class="text-sm font-light leading-relaxed text-stone-500 max-w-[24ch]">
+                      Pulsação, subdivisão, compassos e padrões rítmicos.
+                  </p>
+                  <div class="mt-auto pt-6 border-t border-stone-200 grid grid-cols-6 gap-1.5">
+                      <span class="h-1.5 rounded-full bg-stone-300"></span>
+                      <span class="h-1.5 rounded-full bg-stone-900"></span>
+                      <span class="h-1.5 rounded-full bg-stone-300"></span>
+                      <span class="h-1.5 rounded-full bg-stone-900"></span>
+                      <span class="h-1.5 rounded-full bg-stone-300"></span>
+                      <span class="h-1.5 rounded-full bg-stone-900"></span>
                   </div>
-              </div>
+              </article>
 
-              <div class="reveal flash-card p-10 h-80 rounded-[40px] bg-stone-50 border border-stone-200 text-stone-900 flex flex-col justify-between group" style="transition-delay: 0.2s;">
-                  <div class="w-14 h-14 rounded-full bg-stone-200 flex items-center justify-center">
+              <article class="reveal flash-card group relative h-[20.5rem] rounded-[30px] p-8 bg-white border border-stone-200 text-stone-900 flex flex-col" style="transition-delay: 0.2s;">
+                  <div class="mb-10 w-14 h-14 rounded-2xl bg-stone-100 border border-stone-200 flex items-center justify-center">
                       <i data-lucide="headphones" class="w-6 h-6 text-stone-900"></i>
                   </div>
-                  <div>
-                      <h4 class="text-2xl font-bold mb-3">Percepção</h4>
-                      <p class="text-sm font-light leading-relaxed text-stone-500">
-                          Intervalos, comparações auditivas e escuta guiada.
-                      </p>
+                  <h4 class="text-[1.9rem] font-semibold tracking-tight mb-3">Percepção</h4>
+                  <p class="text-sm font-light leading-relaxed text-stone-500 max-w-[24ch]">
+                      Intervalos, comparações auditivas e escuta guiada.
+                  </p>
+                  <div class="mt-auto pt-6 border-t border-stone-200 flex items-center gap-2">
+                      <span class="w-2.5 h-2.5 rounded-full bg-stone-300"></span>
+                      <span class="w-12 h-px bg-stone-300"></span>
+                      <span class="w-2.5 h-2.5 rounded-full bg-stone-500"></span>
+                      <span class="w-12 h-px bg-stone-300"></span>
+                      <span class="w-2.5 h-2.5 rounded-full bg-stone-900"></span>
                   </div>
-              </div>
+              </article>
 
-              <div class="reveal flash-card p-10 h-80 rounded-[40px] bg-stone-900 text-white flex flex-col justify-between group" style="transition-delay: 0.3s;">
-                  <div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center">
-                      <i data-lucide="folder-music" class="w-6 h-6 text-white"></i>
+              <article class="reveal flash-card group relative h-[20.5rem] rounded-[30px] p-8 bg-stone-950 text-white border border-stone-800/80 flex flex-col" style="transition-delay: 0.3s;">
+                  <div class="mb-10 w-14 h-14 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
+                      <i data-lucide="music" class="w-6 h-6 text-white"></i>
                   </div>
-                  <div>
-                      <h4 class="text-2xl font-bold mb-3">Harmonia</h4>
-                      <p class="text-sm font-light leading-relaxed text-stone-400">
-                          Escalas, acordes, campo harmônico e funções.
-                      </p>
+                  <h4 class="text-[1.9rem] font-semibold tracking-tight mb-3">Harmonia</h4>
+                  <p class="text-sm font-light leading-relaxed text-stone-300 max-w-[24ch]">
+                      Escalas, acordes, campo harmônico e funções.
+                  </p>
+                  <div class="mt-auto pt-6 border-t border-white/10 flex items-center gap-2">
+                      <span class="w-2 h-2 rounded-full bg-white/70"></span>
+                      <span class="w-2 h-2 rounded-full bg-white"></span>
+                      <span class="w-10 h-px bg-white/30"></span>
+                      <span class="w-2 h-2 rounded-full bg-white/80"></span>
+                      <span class="w-2 h-2 rounded-full bg-white"></span>
                   </div>
-              </div>
-
+              </article>
           </div>
       </div>
   </section>
@@ -443,7 +495,7 @@
   </section>
 
   <!-- 9. CONTEÚDO (5 Areas) -->
-  <section id="conteudo" class="py-32 bg-[#0A0A0A] text-white relative border-t border-white/5">
+  <section id="conteudo" data-reveal-bidirectional-section class="py-32 bg-[#0A0A0A] text-white relative border-t border-white/5">
       <div class="max-w-[1000px] mx-auto px-8 relative z-10">
           <div class="flex flex-col mb-20 reveal text-center items-center">
               <h2 class="text-5xl font-medium tracking-tighter mb-6">Conteúdo estruturado para evoluir com consistência</h2>
@@ -511,38 +563,71 @@
       </div>
   </section>
   <!-- 6. DIFERENCIAIS -->
-  <section id="diferenciais" class="py-32 bg-stone-50 border-t border-stone-200">
-      <div class="max-w-[1400px] mx-auto px-8">
-          <div class="flex flex-col md:flex-row gap-20">
-              <div class="w-full md:w-1/3 reveal">
-                  <h2 class="text-5xl font-medium tracking-tighter mb-8 tabular-nums">Um ensino musical pensado para desenvolver clareza e profundidade</h2>
+  <section id="diferenciais" class="py-32 bg-stone-50 border-t border-stone-200 relative overflow-hidden">
+      <div class="absolute inset-0 pointer-events-none">
+          <div class="absolute -top-20 -right-24 w-80 h-80 rounded-full bg-white/70 blur-3xl"></div>
+          <div class="absolute -bottom-20 -left-24 w-80 h-80 rounded-full bg-stone-200/60 blur-3xl"></div>
+      </div>
+
+      <div class="max-w-[1400px] mx-auto px-8 relative z-10">
+          <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10">
+              <div class="lg:col-span-2 reveal">
+                  <div class="rounded-[36px] border border-stone-200 bg-white/85 backdrop-blur-sm p-8 md:p-10 shadow-[0_30px_70px_-55px_rgba(0,0,0,0.45)]">
+                      <span class="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] font-bold text-stone-500 mb-6">
+                          <span class="w-1.5 h-1.5 rounded-full bg-stone-900"></span>
+                          Método Musical
+                      </span>
+                      <h2 class="text-[clamp(2.2rem,4.2vw,4rem)] font-medium tracking-tighter leading-[1.04] tabular-nums">
+                          Um ensino musical pensado para desenvolver clareza e profundidade
+                      </h2>
+                      <div class="mt-8 flex gap-2">
+                          <span class="h-1.5 w-10 rounded-full bg-stone-900"></span>
+                          <span class="h-1.5 w-6 rounded-full bg-stone-300"></span>
+                          <span class="h-1.5 w-14 rounded-full bg-stone-400"></span>
+                      </div>
+                  </div>
               </div>
 
-              <div class="w-full md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-12">
-                  <div class="reveal border-t border-stone-200 pt-8">
-                      <h4 class="text-2xl font-bold mb-4">Estrutura progressiva</h4>
+              <div class="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <article class="reveal rounded-[30px] border border-stone-200 bg-white p-7 md:p-8 shadow-[0_24px_60px_-50px_rgba(0,0,0,0.5)]">
+                      <div class="w-12 h-12 rounded-2xl bg-stone-100 border border-stone-200 flex items-center justify-center mb-6">
+                          <i data-lucide="book-open" class="w-5 h-5 text-stone-900"></i>
+                      </div>
+                      <h4 class="text-[1.9rem] leading-[1.08] font-semibold tracking-tight mb-4">Estrutura progressiva</h4>
                       <p class="text-stone-500 font-light leading-relaxed">
                           Os conteúdos seguem uma organização lógica para facilitar a assimilação dos conceitos e evitar a sensação de estudo fragmentado.
                       </p>
-                  </div>
-                  <div class="reveal border-t border-stone-200 pt-8" style="transition-delay: 0.1s;">
-                      <h4 class="text-2xl font-bold mb-4">Conexão entre teoria e musicalidade</h4>
+                  </article>
+
+                  <article class="reveal rounded-[30px] border border-stone-200 bg-white p-7 md:p-8 shadow-[0_24px_60px_-50px_rgba(0,0,0,0.5)]" style="transition-delay: 0.1s;">
+                      <div class="w-12 h-12 rounded-2xl bg-stone-100 border border-stone-200 flex items-center justify-center mb-6">
+                          <i data-lucide="music-2" class="w-5 h-5 text-stone-900"></i>
+                      </div>
+                      <h4 class="text-[1.9rem] leading-[1.08] font-semibold tracking-tight mb-4">Conexão entre teoria e musicalidade</h4>
                       <p class="text-stone-500 font-light leading-relaxed">
                           A teoria não é apresentada como um fim em si mesma, mas como uma ferramenta para compreender melhor o que se ouve, se lê e se executa.
                       </p>
-                  </div>
-                  <div class="reveal border-t border-stone-200 pt-8" style="transition-delay: 0.2s;">
-                      <h4 class="text-2xl font-bold mb-4">Aprendizado com mais sentido</h4>
+                  </article>
+
+                  <article class="reveal rounded-[30px] border border-stone-200 bg-white p-7 md:p-8 shadow-[0_24px_60px_-50px_rgba(0,0,0,0.5)]" style="transition-delay: 0.2s;">
+                      <div class="w-12 h-12 rounded-2xl bg-stone-100 border border-stone-200 flex items-center justify-center mb-6">
+                          <i data-lucide="radio" class="w-5 h-5 text-stone-900"></i>
+                      </div>
+                      <h4 class="text-[1.9rem] leading-[1.08] font-semibold tracking-tight mb-4">Aprendizado com mais sentido</h4>
                       <p class="text-stone-500 font-light leading-relaxed">
                           Cada tema foi pensado para se conectar ao anterior, permitindo que o aluno construa entendimento de forma consistente.
                       </p>
-                  </div>
-                  <div class="reveal border-t border-stone-200 pt-8" style="transition-delay: 0.3s;">
-                      <h4 class="text-2xl font-bold mb-4">Formação mais sólida</h4>
+                  </article>
+
+                  <article class="reveal rounded-[30px] border border-stone-200 bg-white p-7 md:p-8 shadow-[0_24px_60px_-50px_rgba(0,0,0,0.5)]" style="transition-delay: 0.3s;">
+                      <div class="w-12 h-12 rounded-2xl bg-stone-100 border border-stone-200 flex items-center justify-center mb-6">
+                          <i data-lucide="metronome" class="w-5 h-5 text-stone-900"></i>
+                      </div>
+                      <h4 class="text-[1.9rem] leading-[1.08] font-semibold tracking-tight mb-4">Formação mais sólida</h4>
                       <p class="text-stone-500 font-light leading-relaxed">
                           A plataforma atende quem deseja fortalecer fundamentos, organizar conhecimentos já adquiridos ou aprofundar a compreensão musical de maneira mais refinada.
                       </p>
-                  </div>
+                  </article>
               </div>
           </div>
       </div>
@@ -558,78 +643,82 @@
               </p>
           </div>
 
-          <div class="flex flex-col md:flex-row gap-8 max-w-4xl mx-auto">
-
-              <!-- Plano Gratuito -->
-              <div class="w-full md:w-1/2 reveal bg-white border border-stone-200 rounded-[40px] p-10 flex flex-col justify-between hover:shadow-xl transition-shadow relative overflow-hidden group">
-                  <div class="absolute top-0 left-0 w-full h-1 bg-stone-200 group-hover:bg-stone-900 transition-colors"></div>
-                  <div>
-                      <h3 class="text-2xl font-bold mb-2">Acesso gratuito</h3>
-                      <div class="text-4xl font-black tabular-nums tracking-tighter mb-8 max-w-[200px]">R$0<span class="text-lg text-stone-400 font-light">/mês</span></div>
-
-                      <p class="text-stone-500 font-light text-sm leading-relaxed mb-8">
-                          Faça seu nivelamento, acesse os primeiros conteúdos e conheça a dinâmica da plataforma <strong class="text-stone-900 font-medium">(sem tempo limite)</strong>.
-                      </p>
-
-                      <ul class="space-y-4 mb-8">
-                          <li class="flex items-start gap-3 text-sm text-stone-600 font-light">
-                              <i data-lucide="check" class="w-5 h-5 text-stone-300 shrink-0"></i>
-                              <span>Teste de nivelamento</span>
-                          </li>
-                          <li class="flex items-start gap-3 text-sm text-stone-600 font-light">
-                              <i data-lucide="check" class="w-5 h-5 text-stone-300 shrink-0"></i>
-                              <span>Aulas fundamentais</span>
-                          </li>
-                          <li class="flex items-start gap-3 text-sm text-stone-600 font-light">
-                              <i data-lucide="check" class="w-5 h-5 text-stone-300 shrink-0"></i>
-                              <span>Conhecer o método</span>
-                          </li>
-                      </ul>
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+              <article class="reveal rounded-[32px] border border-stone-200 bg-white p-8 flex flex-col">
+                  <div class="mb-5">
+                      <p class="text-[10px] uppercase tracking-[0.24em] text-stone-500 font-bold mb-3">Primeira Nota</p>
+                      <h3 class="text-3xl font-bold tracking-tight">R$0<span class="text-base text-stone-400 font-light">/mês</span></h3>
+                      <p class="text-sm text-stone-500 mt-3">Objetivo: validar produto, atrair entrada e entregar valor real.</p>
                   </div>
+                  <ul class="space-y-3 text-sm text-stone-600 font-light mb-8">
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>nivelamento inicial</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>uma trilha principal ativa</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>modo guiado e modo livre</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>exercícios por aula</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>playground básico limitado</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>início do modo carreira</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>entrada em salas ao vivo como aluno</span></li>
+                  </ul>
+                  <a href="<%= new_user_registration_path %>" class="mt-auto w-full text-center py-3.5 rounded-full border border-stone-200 text-stone-900 font-semibold hover:bg-stone-100 transition-colors">Começar grátis</a>
+              </article>
 
-                  <a href="#" class="w-full inline-block text-center py-4 rounded-full border border-stone-200 text-stone-900 font-medium hover:bg-stone-50 transition-colors">
-                      Criar conta grátis
-                  </a>
-              </div>
-
-              <!-- Plano Completo -->
-              <div class="w-full md:w-1/2 reveal bg-stone-900 text-white rounded-[40px] p-10 flex flex-col justify-between hover:shadow-2xl transition-all scale-[1.02] relative" style="transition-delay: 0.1s;">
-                  <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-white text-stone-900 font-bold text-xs uppercase tracking-widest py-1.5 px-4 rounded-full">
-                      Recomendado
+              <article class="reveal rounded-[32px] border border-stone-200 bg-white p-8 flex flex-col" style="transition-delay: 0.08s;">
+                  <div class="mb-5">
+                      <p class="text-[10px] uppercase tracking-[0.24em] text-stone-500 font-bold mb-3">Pulso</p>
+                      <h3 class="text-3xl font-bold tracking-tight">R$ 34,90<span class="text-base text-stone-400 font-light">/mês</span></h3>
+                      <p class="text-xs text-stone-500 mt-1">R$ 329,90/ano</p>
+                      <p class="text-sm text-stone-500 mt-3">Plano para constância e base sólida.</p>
                   </div>
-                  <div>
-                      <h3 class="text-2xl font-bold mb-2">Acesso completo</h3>
-                      <div class="text-4xl font-black tabular-nums tracking-tighter mb-8">Mergulhe fundo</div>
+                  <ul class="space-y-3 text-sm text-stone-600 font-light mb-8">
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>tudo do gratuito</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>trilha personalizada mais completa</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>mais prática diária</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>playground expandido</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>revisões automáticas</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>mais checkpoints na carreira</span></li>
+                  </ul>
+                  <a href="<%= new_user_registration_path %>" class="mt-auto w-full text-center py-3.5 rounded-full border border-stone-900 bg-stone-900 text-white font-semibold hover:bg-stone-800 transition-colors">Criar conta</a>
+              </article>
 
-                      <p class="text-stone-400 font-light text-sm leading-relaxed mb-8">
-                          Acesse todas as trilhas, aulas, playgrounds, materiais e experiências ao vivo por uma assinatura <strong class="text-white font-medium">acessível e justa</strong>.
-                      </p>
-
-                      <ul class="space-y-4 mb-8">
-                          <li class="flex items-start gap-3 text-sm text-stone-300 font-light">
-                              <i data-lucide="check" class="w-5 h-5 text-white shrink-0"></i>
-                              <span>Acesso a 100% das aulas</span>
-                          </li>
-                          <li class="flex items-start gap-3 text-sm text-stone-300 font-light">
-                              <i data-lucide="check" class="w-5 h-5 text-white shrink-0"></i>
-                              <span>Trilhas personalizadas</span>
-                          </li>
-                          <li class="flex items-start gap-3 text-sm text-stone-300 font-light">
-                              <i data-lucide="check" class="w-5 h-5 text-white shrink-0"></i>
-                              <span>Playgrounds e Exercícios</span>
-                          </li>
-                          <li class="flex items-start gap-3 text-sm text-stone-300 font-light">
-                              <i data-lucide="check" class="w-5 h-5 text-white shrink-0"></i>
-                              <span>Experiências ao vivo em grupo</span>
-                          </li>
-                      </ul>
+              <article class="reveal rounded-[32px] border border-stone-900 bg-stone-900 text-white p-8 flex flex-col relative" style="transition-delay: 0.16s;">
+                  <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-stone-900 text-[10px] uppercase tracking-widest font-bold rounded-full px-3 py-1">Recomendado</span>
+                  <div class="mb-5">
+                      <p class="text-[10px] uppercase tracking-[0.24em] text-stone-300 font-bold mb-3">Harmonia</p>
+                      <h3 class="text-3xl font-bold tracking-tight">R$ 49,90<span class="text-base text-stone-400 font-light">/mês</span></h3>
+                      <p class="text-xs text-stone-400 mt-1">R$ 469,90/ano</p>
+                      <p class="text-sm text-stone-300 mt-3">Plano para aprofundamento e treino consistente.</p>
                   </div>
+                  <ul class="space-y-3 text-sm text-stone-300 font-light mb-8">
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-white"></i><span>tudo do Pulso</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-white"></i><span>mais trilhas simultâneas</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-white"></i><span>mais liberdade no playground</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-white"></i><span>exercícios mistos entre áreas</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-white"></i><span>desafios semanais</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-white"></i><span>carreira mais profunda</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-white"></i><span>ranking por categoria</span></li>
+                  </ul>
+                  <a href="<%= new_user_registration_path %>" class="mt-auto w-full text-center py-3.5 rounded-full bg-white text-stone-900 font-semibold hover:bg-stone-200 transition-colors">Criar conta</a>
+              </article>
 
-                  <a href="#" class="w-full inline-block text-center auto-neon bg-white text-stone-900 font-bold py-4 rounded-full hover:bg-stone-200 hover:scale-[1.02] transition-all">
-                      Assinar agora
-                  </a>
-              </div>
-
+              <article class="reveal rounded-[32px] border border-stone-200 bg-white p-8 flex flex-col" style="transition-delay: 0.24s;">
+                  <div class="mb-5">
+                      <p class="text-[10px] uppercase tracking-[0.24em] text-stone-500 font-bold mb-3">Maestro</p>
+                      <h3 class="text-3xl font-bold tracking-tight">R$ 69,90<span class="text-base text-stone-400 font-light">/mês</span></h3>
+                      <p class="text-xs text-stone-500 mt-1">R$ 649,90/ano</p>
+                      <p class="text-sm text-stone-500 mt-3">Plano de experiência total.</p>
+                  </div>
+                  <ul class="space-y-3 text-sm text-stone-600 font-light mb-8">
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>tudo do Harmonia</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>acesso total às trilhas</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>playground ilimitado</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>simulados</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>feedback inteligente</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>treino adaptativo</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>carreira total</span></li>
+                      <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-stone-400"></i><span>ranking completo e temporadas</span></li>
+                  </ul>
+                  <a href="<%= new_user_registration_path %>" class="mt-auto w-full text-center py-3.5 rounded-full border border-stone-900 bg-stone-900 text-white font-semibold hover:bg-stone-800 transition-colors">Criar conta</a>
+              </article>
           </div>
       </div>
   </section>
@@ -720,10 +809,3 @@
       </div>
   </footer>
 </div>
-
-<!-- Re-initialize Lucide Icons on Turbo load if needed -->
-<script>
-  if (typeof lucide !== 'undefined') {
-    lucide.createIcons();
-  }
-</script>

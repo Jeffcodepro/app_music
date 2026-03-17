@@ -2,18 +2,26 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   connect() {
+    this.configureScrollRestoration();
     this.initReveal();
-    
+
     // Bind the mousemove handler
     this.mouseMoveHandler = this.handleMouseMove.bind(this);
     document.addEventListener('mousemove', this.mouseMoveHandler);
 
     this.init3DCardHover();
+    this.initScrollSteps();
+    this.initLucideIcons();
   }
 
   disconnect() {
     if (this.mouseMoveHandler) {
       document.removeEventListener('mousemove', this.mouseMoveHandler);
+    }
+
+    if (this.scrollStepsRequestTick) {
+      window.removeEventListener('scroll', this.scrollStepsRequestTick);
+      window.removeEventListener('resize', this.scrollStepsRequestTick);
     }
   }
 
@@ -23,11 +31,23 @@ export default class extends Controller {
     
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if(entry.isIntersecting) {
-                entry.target.classList.add('active');
+            const isBidirectional = entry.target.hasAttribute('data-reveal-bidirectional') ||
+              Boolean(entry.target.closest('[data-reveal-bidirectional-section]'));
+
+            if (entry.isIntersecting) {
+              entry.target.classList.add('active');
+
+              // Default behavior for the rest of the page remains one-way.
+              if (!isBidirectional) observer.unobserve(entry.target);
+              return;
+            }
+
+            // Bidirectional mode: fade out when the element leaves the viewport.
+            if (isBidirectional) {
+              entry.target.classList.remove('active');
             }
         });
-    }, { threshold: 0.1 });
+    }, { threshold: 0, rootMargin: '0px 0px -4% 0px' });
 
     revealElements.forEach(el => observer.observe(el));
   }
@@ -77,5 +97,64 @@ export default class extends Controller {
             card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
         });
     });
+  }
+
+  initLucideIcons() {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+
+  configureScrollRestoration() {
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+
+    if (!window.location.hash) {
+      window.scrollTo(0, 0);
+    }
+  }
+
+  initScrollSteps() {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion || window.innerWidth < 768) return;
+
+    const wrappers = document.querySelectorAll("[data-scroll-steps]");
+    if (!wrappers.length) return;
+
+    let ticking = false;
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+    const update = () => {
+      wrappers.forEach((wrapper) => {
+        const section = wrapper.closest("section");
+        const cards = wrapper.querySelectorAll(".step-card");
+        if (!section || !cards.length) return;
+
+        const vh = window.innerHeight;
+        const sectionRect = section.getBoundingClientRect();
+        const scrollRange = sectionRect.height + vh * 0.2;
+        const scrolled = clamp((vh * 0.96) - sectionRect.top, 0, scrollRange);
+        const segment = scrollRange / cards.length;
+
+        cards.forEach((card, index) => {
+          const progress = clamp((scrolled - (index * segment)) / (segment * 0.45), 0, 1);
+          const opacity = 0.02 + (progress * 0.98);
+          card.style.opacity = opacity.toFixed(3);
+        });
+      });
+
+      ticking = false;
+    };
+
+    this.scrollStepsRequestTick = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+
+    window.addEventListener("scroll", this.scrollStepsRequestTick, { passive: true });
+    window.addEventListener("resize", this.scrollStepsRequestTick);
+    this.scrollStepsRequestTick();
   }
 }

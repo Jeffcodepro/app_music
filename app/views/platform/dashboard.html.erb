@@ -1,0 +1,90 @@
+<section class="platform-shell">
+  <div class="platform-container">
+    <% streak = platform_streak_days(current_user) %>
+    <% xp = platform_xp_total(current_user) %>
+    <% minutes = platform_practice_minutes(current_user) %>
+    <% active_days = platform_activity_days_count(current_user) %>
+    <% lessons_count = current_user.study_activities.count %>
+    <% profile_fields = [
+      current_user.full_name,
+      current_user.phone,
+      current_user.primary_instrument,
+      current_user.study_goal,
+      (current_user.avatar.attached? ? "avatar" : nil)
+    ] %>
+    <% profile_percent = ((profile_fields.compact.size.to_f / 5) * 100).round %>
+
+    <section class="dashboard-clean">
+      <article class="dashboard-clean__welcome">
+        <div class="dashboard-clean__identity">
+          <%= user_avatar(current_user, css_class: "dashboard-clean__avatar") %>
+          <div>
+            <p>Bem-vindo</p>
+            <h1><%= current_user.full_name.presence || "Aluno" %></h1>
+          </div>
+        </div>
+        <div class="dashboard-clean__profile">
+          <span>Perfil <%= profile_percent %>% completo</span>
+          <strong><%= xp %> XP</strong>
+        </div>
+      </article>
+
+      <div class="dashboard-clean__metrics">
+        <article>
+          <i data-lucide="play-circle"></i>
+          <strong><%= lessons_count %></strong>
+          <p>Aulas assistidas</p>
+        </article>
+        <article>
+          <i data-lucide="clock-3"></i>
+          <strong><%= minutes %></strong>
+          <p>Minutos praticados</p>
+        </article>
+        <article>
+          <i data-lucide="flame"></i>
+          <strong><%= streak %></strong>
+          <p>Dias estudando</p>
+        </article>
+        <article>
+          <i data-lucide="calendar-check-2"></i>
+          <strong><%= active_days %></strong>
+          <p>Dias com atividade</p>
+        </article>
+      </div>
+    </section>
+
+    <div class="platform-grid">
+      <article class="platform-card">
+        <h2>Progresso</h2>
+        <p>Dias de sequência: <strong><%= streak %></strong></p>
+        <p>XP acumulado: <strong><%= xp %></strong></p>
+        <p>Minutos praticados: <strong><%= minutes %></strong></p>
+        <p>Dias com estudo: <strong><%= active_days %></strong></p>
+      </article>
+
+      <article class="platform-card">
+        <h2>Visão geral</h2>
+        <p>Resumo de progresso semanal, trilha ativa e próximos passos.</p>
+        <div class="platform-actions">
+          <%= link_to "Ir para Trilhas", app_trilhas_path, class: "app-btn app-btn--primary" %>
+        </div>
+      </article>
+      <article class="platform-card">
+        <h2>Próxima ação</h2>
+        <p>Retomar a aula mais recente e completar a prática sugerida.</p>
+        <div class="platform-actions">
+          <%= link_to "Abrir Aulas", app_aulas_path, class: "app-btn" %>
+          <%= link_to "Ir para Prática", app_pratica_path, class: "app-btn" %>
+        </div>
+      </article>
+      <article class="platform-card">
+        <h2>Atalhos</h2>
+        <p>Acesso rápido para trilhas, aulas, playgrounds e modo carreira.</p>
+        <div class="platform-actions">
+          <%= link_to "Modo Carreira", app_carreira_path, class: "app-btn" %>
+          <%= link_to "Arena ao Vivo", app_arena_path, class: "app-btn" %>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>

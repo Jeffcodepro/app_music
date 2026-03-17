@@ -1,0 +1,94 @@
+<section class="platform-shell lesson-catalog-shell">
+  <div class="platform-container">
+    <% if @mode == "guiado" %>
+      <header class="lesson-hero">
+        <div class="lesson-fake-player">
+          <div class="lesson-fake-player__overlay"></div>
+          <div class="lesson-fake-player__content">
+            <span class="lesson-player-pill">Modo guiado</span>
+            <h1><%= @selected_area_label %></h1>
+            <p>Temporada ativa: <strong>Nível <%= @season_number %></strong> · Episódios por aula com progressão pedagógica.</p>
+            <div class="lesson-fake-player__actions">
+              <button type="button" class="app-btn app-btn--primary">
+                <i data-lucide="play"></i>
+                Iniciar aula
+              </button>
+              <%= link_to app_aulas_path(mode: "guiado"), class: "app-btn" do %>
+                <i data-lucide="grid-2x2"></i>
+                Trocar tema
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="lesson-controls">
+        <article class="platform-card lesson-controls__card">
+          <h2>Velocidade</h2>
+          <div class="lesson-chip-row">
+            <% @playback_speeds.each do |speed| %>
+              <button type="button" class="lesson-chip <%= "is-active" if speed == "1.0x" %>"><%= speed %></button>
+            <% end %>
+          </div>
+        </article>
+
+        <article class="platform-card lesson-controls__card">
+          <h2>Temporada (Nível)</h2>
+          <div class="lesson-chip-row">
+            <% @seasons.each do |season| %>
+              <button type="button" class="lesson-chip <%= "is-active" if season == "Nível #{@season_number}" %>"><%= season %></button>
+            <% end %>
+          </div>
+        </article>
+
+        <article class="platform-card lesson-controls__card">
+          <h2>Episódios (Aulas)</h2>
+          <div class="lesson-chip-row">
+            <% @episode_cards.each do |episode| %>
+              <button type="button" class="lesson-chip lesson-chip--episode">
+                <span>A<%= episode[:number] %></span>
+              </button>
+            <% end %>
+          </div>
+        </article>
+      </section>
+
+      <% @content_rows.each do |row| %>
+        <section class="lesson-row">
+          <div class="lesson-row__head">
+            <h2><%= row[:title] %></h2>
+            <p><%= row[:subtitle] %></p>
+          </div>
+
+          <div class="lesson-card-grid">
+            <% row[:items].each do |item| %>
+              <article class="lesson-video-card">
+                <div class="lesson-video-card__thumb">
+                  <span class="lesson-video-card__episode">Aula <%= item[:number] %></span>
+                  <i data-lucide="play-circle"></i>
+                </div>
+                <div class="lesson-video-card__body">
+                  <h3><%= item[:title] %></h3>
+                  <p><%= item[:duration] %></p>
+                  <div class="lesson-video-card__progress">
+                    <span style="width: <%= item[:progress] %>%"></span>
+                  </div>
+                </div>
+              </article>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+    <% else %>
+      <h1 class="platform-title">Modo livre</h1>
+      <article class="platform-card">
+        <h2>Navegação livre</h2>
+        <p>Esta área será liberada na próxima etapa. Por agora, use o modo guiado para navegar por tema, nível e episódios.</p>
+        <div class="platform-actions">
+          <%= link_to "Voltar para aulas", app_aulas_path, class: "app-btn" %>
+          <%= link_to "Abrir modo guiado", app_aulas_path(mode: "guiado"), class: "app-btn app-btn--primary" %>
+        </div>
+      </article>
+    <% end %>
+  </div>
+</section>

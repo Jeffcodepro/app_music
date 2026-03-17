@@ -1,0 +1,128 @@
+<section class="platform-shell">
+  <div class="platform-container">
+    <h1 class="platform-title">Minha conta</h1>
+
+    <div class="account-layout">
+      <aside class="account-sidebar-card">
+        <p class="account-sidebar-kicker">Painel da conta</p>
+        <h2>Configurações</h2>
+        <nav class="account-sidebar-nav">
+          <a href="#perfil"><i data-lucide="user-round"></i> Perfil</a>
+          <a href="#assinatura"><i data-lucide="credit-card"></i> Assinatura</a>
+          <a href="#seguranca"><i data-lucide="shield-check"></i> Segurança</a>
+        </nav>
+      </aside>
+
+      <div class="account-content">
+        <section class="platform-card account-panel account-section" id="perfil">
+          <p class="account-panel-kicker">Profile settings</p>
+          <h2>Informações da conta</h2>
+          <p class="muted">Atualize seus dados de perfil e preferências da sua jornada musical.</p>
+
+          <%= form_with model: current_user, url: update_app_perfil_path, method: :patch, class: "account-form" do |f| %>
+            <div class="account-avatar-row">
+              <%= user_avatar(current_user, css_class: "account-avatar-preview") %>
+              <div>
+                <label class="account-label">Foto de perfil</label>
+                <%= f.file_field :avatar, accept: "image/*", class: "platform-input" %>
+              </div>
+            </div>
+
+            <div class="account-form-grid">
+              <div>
+                <label class="account-label">Nome completo</label>
+                <%= f.text_field :full_name, class: "platform-input", required: true %>
+              </div>
+              <div>
+                <label class="account-label">Telefone</label>
+                <%= f.telephone_field :phone, class: "platform-input", placeholder: "(11) 90000-0000" %>
+              </div>
+              <div class="account-field-full">
+                <label class="account-label">E-mail</label>
+                <input type="email" value="<%= current_user.email %>" class="platform-input" readonly>
+              </div>
+              <div>
+                <label class="account-label">Instrumento principal</label>
+                <%= f.text_field :primary_instrument, class: "platform-input", placeholder: "Violão, piano, canto..." %>
+              </div>
+              <div>
+                <label class="account-label">Objetivo principal</label>
+                <%= f.text_field :study_goal, class: "platform-input", placeholder: "Melhorar leitura, percepção..." %>
+              </div>
+            </div>
+
+            <div class="platform-actions">
+              <%= f.submit "Salvar alterações", class: "app-btn app-btn--primary" %>
+              <%= link_to "Cancelar", app_perfil_path, class: "app-btn" %>
+            </div>
+          <% end %>
+        </section>
+
+        <div class="account-sections">
+          <section class="platform-card account-panel account-section" id="assinatura">
+            <h3>Assinatura</h3>
+            <p>Plano atual: <strong><%= current_user.plan.presence || "não selecionado" %></strong></p>
+
+            <% plans = [
+              {
+                name: "Primeira Nota",
+                monthly: "R$ 0/mês",
+                badge: "Gratuito",
+                points: ["Nivelamento inicial", "Uma trilha principal ativa", "Modo guiado e modo livre"]
+              },
+              {
+                name: "Pulso",
+                monthly: "R$ 34,90/mês",
+                badge: "R$ 329,90/ano",
+                points: ["Tudo do gratuito", "Mais prática diária", "Revisões automáticas"]
+              },
+              {
+                name: "Harmonia",
+                monthly: "R$ 49,90/mês",
+                badge: "R$ 469,90/ano",
+                points: ["Tudo do Pulso", "Mais trilhas simultâneas", "Desafios semanais"]
+              },
+              {
+                name: "Maestro",
+                monthly: "R$ 69,90/mês",
+                badge: "R$ 649,90/ano",
+                points: ["Tudo do Harmonia", "Playground ilimitado", "Treino adaptativo"]
+              }
+            ] %>
+
+            <div class="account-plan-grid">
+              <% plans.each do |plan| %>
+                <% active = current_user.plan.to_s == plan[:name] %>
+                <article class="account-plan-card <%= 'is-current' if active %>">
+                  <p class="account-plan-name"><%= plan[:name] %></p>
+                  <h4><%= plan[:monthly] %></h4>
+                  <p class="account-plan-badge"><%= plan[:badge] %></p>
+                  <ul>
+                    <% plan[:points].each do |point| %>
+                      <li><%= point %></li>
+                    <% end %>
+                  </ul>
+
+                  <% if active %>
+                    <span class="account-plan-current">Plano atual</span>
+                  <% else %>
+                    <%= button_to "Escolher #{plan[:name]}", update_app_plan_path, method: :patch, params: { plan: plan[:name] }, class: "app-btn app-btn--primary account-plan-cta" %>
+                  <% end %>
+                </article>
+              <% end %>
+            </div>
+          </section>
+
+          <section class="platform-card account-panel account-section" id="seguranca">
+            <h3>Segurança e sessão</h3>
+            <p>Gerencie acesso da conta e fluxo de onboarding.</p>
+            <div class="platform-actions">
+              <%= link_to "Refazer onboarding", onboarding_welcome_path, class: "app-btn" %>
+              <%= button_to "Deslogar", destroy_user_session_path, method: :delete, class: "app-btn app-btn--danger" %>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

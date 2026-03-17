@@ -1,0 +1,74 @@
+<section class="platform-shell aulas-shell">
+  <div class="platform-container">
+    <header class="aulas-header">
+      <h1 class="platform-title">Aulas</h1>
+      <p class="aulas-subtitle">Escolha o modo de estudo e monte sua sessão.</p>
+    </header>
+
+    <div class="aulas-mode-grid">
+      <article class="platform-card aulas-mode-card <%= "is-active" if @selected_mode == "guiado" %>">
+        <div class="aulas-mode-card__head">
+          <span class="aulas-badge aulas-badge--guided">Modo guiado</span>
+          <i data-lucide="sparkles"></i>
+        </div>
+        <h2>Estudo orientado por tema</h2>
+        <p>Fluxo recomendado com trilha pedagógica e sequência de aulas por nível.</p>
+        <div class="platform-actions">
+          <%= link_to "Selecionar modo guiado", app_aulas_path(mode: "guiado"), class: "app-btn app-btn--primary" %>
+        </div>
+      </article>
+
+      <article class="platform-card aulas-mode-card <%= "is-active" if @selected_mode == "livre" %>">
+        <div class="aulas-mode-card__head">
+          <span class="aulas-badge aulas-badge--free">Modo livre</span>
+          <i data-lucide="compass"></i>
+        </div>
+        <h2>Navegação sem sequência fixa</h2>
+        <p>Explore conteúdos em qualquer ordem e monte sua rotina de forma autônoma.</p>
+        <div class="platform-actions">
+          <%= link_to "Selecionar modo livre", app_aulas_path(mode: "livre"), class: "app-btn" %>
+        </div>
+      </article>
+    </div>
+
+    <% if @selected_mode == "guiado" %>
+      <section class="aulas-guided-topics">
+        <div class="aulas-section-head">
+          <h2>Temas do modo guiado</h2>
+          <p>Ao escolher um tema, você entra na aba de aulas em formato de catálogo com player e episódios.</p>
+        </div>
+
+        <div class="aulas-topic-grid">
+          <% @guided_topics.each do |topic| %>
+            <%= link_to app_lesson_path("guia-#{topic[:slug]}", mode: "guiado", area: topic[:slug]), class: "aulas-topic-card #{'is-recommended' if topic[:slug] == @selected_area}" do %>
+              <span class="aulas-topic-tag">Tema</span>
+              <h3><%= topic[:title] %></h3>
+              <p><%= topic[:description] %></p>
+              <div class="aulas-topic-footer">
+                <% if topic[:slug] == @selected_area %>
+                  <span class="aulas-topic-highlight">Recomendado para você agora</span>
+                <% else %>
+                  <span class="aulas-topic-highlight">Abrir catálogo</span>
+                <% end %>
+                <i data-lucide="arrow-right"></i>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </section>
+    <% elsif @selected_mode == "livre" %>
+      <article class="platform-card aulas-placeholder-card">
+        <h2>Modo livre em construção</h2>
+        <p>A navegação livre será adicionada em seguida. Neste momento, o modo guiado já está pronto para seleção de temas e acesso ao catálogo de aulas.</p>
+        <div class="platform-actions">
+          <%= link_to "Abrir modo guiado", app_aulas_path(mode: "guiado"), class: "app-btn app-btn--primary" %>
+        </div>
+      </article>
+    <% else %>
+      <article class="platform-card aulas-placeholder-card">
+        <h2>Próximo passo</h2>
+        <p>Escolha um dos modos acima para continuar.</p>
+      </article>
+    <% end %>
+  </div>
+</section>

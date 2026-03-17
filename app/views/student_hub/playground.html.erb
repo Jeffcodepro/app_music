@@ -1,0 +1,33 @@
+<section class="platform-shell">
+  <div class="platform-container">
+    <h1 class="platform-title">Playground</h1>
+
+    <article class="platform-card">
+      <h2>Gerador de treino por tema</h2>
+      <p>Escolha área, subtema, dificuldade, quantidade de questões e modo treino/desafio.</p>
+      <div class="platform-columns">
+        <div>
+          <h3>Áreas iniciais</h3>
+          <ul class="platform-list">
+            <li>Leitura</li>
+            <li>Ritmo</li>
+            <li>Percepção</li>
+            <li>Harmonia</li>
+            <li>Apreciação</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Configuração</h3>
+          <ul class="platform-list">
+            <li>Dificuldade</li>
+            <li>Número de questões</li>
+            <li>Modo treino ou desafio</li>
+          </ul>
+        </div>
+      </div>
+      <div class="platform-actions">
+        <%= link_to "Iniciar treino", app_pratica_path(mode: "livre"), class: "app-btn app-btn--primary" %>
+      </div>
+    </article>
+  </div>
+</section>

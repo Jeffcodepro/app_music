@@ -1,0 +1,46 @@
+<aside class="app-sidebar" data-app-shell-target="sidebar">
+  <div class="app-sidebar__header">
+    <button type="button" class="app-sidebar__toggle" data-action="app-shell#toggle" aria-label="Expandir ou recolher menu lateral">
+      <i data-lucide="panel-left-close"></i>
+      <span data-app-shell-target="label">Menu</span>
+    </button>
+  </div>
+
+  <% current_path = request.path %>
+  <nav class="app-side-menu" aria-label="Navegação principal da plataforma">
+    <%= link_to app_dashboard_path, class: "app-side-item #{current_path == app_dashboard_path ? 'is-active' : ''}" do %>
+      <i data-lucide="layout-dashboard"></i>
+      <span data-app-shell-target="label">Dashboard</span>
+    <% end %>
+
+    <%= link_to app_trilhas_path, class: "app-side-item #{current_path == app_trilhas_path ? 'is-active' : ''}" do %>
+      <i data-lucide="route"></i>
+      <span data-app-shell-target="label">Trilhas de estudo</span>
+    <% end %>
+
+    <%= link_to app_aulas_path, class: "app-side-item #{current_path == app_aulas_path ? 'is-active' : ''}" do %>
+      <i data-lucide="book-open-text"></i>
+      <span data-app-shell-target="label">Aulas</span>
+    <% end %>
+
+    <%= link_to app_pratica_path, class: "app-side-item #{current_path == app_pratica_path ? 'is-active' : ''}" do %>
+      <i data-lucide="drum"></i>
+      <span data-app-shell-target="label">Prática e playgrounds</span>
+    <% end %>
+
+    <%= link_to app_carreira_path, class: "app-side-item #{current_path == app_carreira_path ? 'is-active' : ''}" do %>
+      <i data-lucide="trophy"></i>
+      <span data-app-shell-target="label">Modo carreira</span>
+    <% end %>
+
+    <%= link_to app_arena_path, class: "app-side-item #{current_path == app_arena_path ? 'is-active' : ''}" do %>
+      <i data-lucide="radio"></i>
+      <span data-app-shell-target="label">Arena Musical ao Vivo</span>
+    <% end %>
+
+    <%= link_to app_perfil_path, class: "app-side-item #{current_path == app_perfil_path ? 'is-active' : ''}" do %>
+      <i data-lucide="settings"></i>
+      <span data-app-shell-target="label">Minha conta</span>
+    <% end %>
+  </nav>
+</aside>

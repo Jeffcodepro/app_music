@@ -1,0 +1,47 @@
+<section class="min-h-screen bg-stone-100 py-16 px-6 flex items-center">
+  <div class="max-w-xl w-full mx-auto">
+    <div class="mb-8 text-center">
+      <a href="<%= root_path %>" class="inline-flex items-center gap-2 text-stone-500 hover:text-stone-800 transition-colors text-sm font-semibold uppercase tracking-wider">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar para AppMusic
+      </a>
+      <h1 class="mt-6 text-4xl md:text-5xl font-semibold tracking-tight text-stone-900">Login</h1>
+      <p class="mt-3 text-stone-500 text-lg">Acesse sua jornada musical.</p>
+    </div>
+
+    <div class="bg-white border border-stone-200 rounded-[32px] p-8 md:p-10 shadow-[0_30px_70px_-55px_rgba(0,0,0,0.45)]">
+      <%= simple_form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-6" }) do |f| %>
+        <%= f.input :email, required: false, autofocus: true, input_html: { autocomplete: "email" }, label: "E-mail" %>
+        <%= f.input :password, required: false, input_html: { autocomplete: "current-password" }, label: "Senha" %>
+        <%= f.input :remember_me, as: :boolean, label: "Manter conectado" if devise_mapping.rememberable? %>
+
+        <%= f.button :submit, "Entrar", class: "w-full bg-stone-900 hover:bg-stone-800 text-white font-semibold py-4 rounded-full transition-colors" %>
+      <% end %>
+
+      <div class="flex items-center gap-3 text-xs text-stone-400 uppercase tracking-widest my-6">
+        <span class="h-px bg-stone-200 flex-1"></span>
+        ou continue com
+        <span class="h-px bg-stone-200 flex-1"></span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <%= button_to user_google_oauth2_omniauth_authorize_path, method: :post, data: { turbo: false }, class: "w-full py-3 rounded-xl border border-stone-200 hover:border-stone-400 text-stone-700 font-medium inline-flex items-center justify-center gap-2" do %>
+          <svg class="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.5 3.9-5.5 3.9-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C17 3.4 14.7 2.4 12 2.4 6.8 2.4 2.6 6.6 2.6 11.8S6.8 21.2 12 21.2c6.9 0 9.1-4.8 9.1-7.3 0-.5-.1-.9-.1-1.2H12z"/>
+            <path fill="#34A853" d="M3.7 7.3l3.2 2.4c.9-1.8 2.8-3 5.1-3 1.9 0 3.2.8 3.9 1.5l2.7-2.6C17 3.4 14.7 2.4 12 2.4c-3.7 0-6.8 2.1-8.3 4.9z"/>
+            <path fill="#FBBC05" d="M12 21.2c2.6 0 4.9-.9 6.5-2.5l-3-2.5c-.8.6-1.9 1-3.5 1-2.3 0-4.2-1.5-4.9-3.6l-3.2 2.5c1.4 2.9 4.5 5.1 8.1 5.1z"/>
+            <path fill="#4285F4" d="M21.1 13.9c0-.5-.1-.9-.1-1.2H12v3.9h5.5c-.3 1.2-1.1 2.1-2 2.7l3 2.5c1.8-1.6 2.6-4 2.6-6.9z"/>
+          </svg>
+          Continuar com Google
+        <% end %>
+        <%= button_to user_apple_omniauth_authorize_path, method: :post, data: { turbo: false }, class: "w-full py-3 rounded-xl border border-stone-200 hover:border-stone-400 text-stone-700 font-medium inline-flex items-center justify-center gap-2" do %>
+          <i class="fa-brands fa-apple text-base" aria-hidden="true"></i>
+          Continuar com Apple
+        <% end %>
+      </div>
+
+      <div class="mt-6">
+        <%= render "devise/shared/links" %>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,29 @@
+<section class="platform-shell">
+  <div class="platform-container">
+    <h1 class="platform-title">Trilhas de estudo</h1>
+
+    <article class="platform-card trilhas-topic-section">
+      <div class="trilhas-topic-section__head">
+        <h2>Temas da trilha de estudos</h2>
+        <p>Veja um resumo de cada tema e abra o detalhamento completo para entender o que será estudado em cada etapa.</p>
+      </div>
+
+      <div class="trilhas-topic-grid">
+        <% @study_track_themes.each do |theme| %>
+          <article class="trilhas-topic-card trilhas-topic-card--<%= theme[:slug] %>">
+            <div class="trilhas-topic-card__heading">
+              <div class="trilhas-topic-card__icon" aria-hidden="true">
+                <i data-lucide="<%= theme[:icon] || "music" %>"></i>
+              </div>
+              <h3><%= theme[:title] %></h3>
+            </div>
+            <p><%= theme[:short_description] %></p>
+            <div class="platform-actions trilhas-topic-card__actions">
+              <%= link_to "Saiba mais", app_trilha_tema_path(theme[:slug]), class: "app-btn" %>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    </article>
+  </div>
+</section>

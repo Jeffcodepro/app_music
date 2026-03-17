@@ -1,0 +1,28 @@
+<section class="platform-shell">
+  <div class="platform-container platform-container--narrow">
+    <h1 class="platform-title">Configuração inicial do perfil</h1>
+    <article class="platform-card">
+      <% initial = session[:onboarding_profile] || {} %>
+      <%= form_with url: update_onboarding_profile_path, method: :patch, class: "space-y-4" do |f| %>
+        <div>
+          <%= f.label :display_name, "Nome" %>
+          <%= f.text_field :display_name, value: initial["display_name"], class: "platform-input" %>
+        </div>
+        <div>
+          <%= f.label :instrument, "Instrumento principal (opcional)" %>
+          <%= f.text_field :instrument, value: initial["instrument"], class: "platform-input" %>
+        </div>
+        <div>
+          <%= f.label :study_availability, "Disponibilidade de estudo" %>
+          <%= f.select :study_availability,
+                       [["15 min/dia", "15 min/dia"], ["30 min/dia", "30 min/dia"], ["45+ min/dia", "45+ min/dia"]],
+                       { selected: initial["study_availability"] },
+                       { class: "platform-input" } %>
+        </div>
+        <div class="pt-2">
+          <%= f.submit "Ver resultado do onboarding", class: "app-btn app-btn--primary" %>
+        </div>
+      <% end %>
+    </article>
+  </div>
+</section>

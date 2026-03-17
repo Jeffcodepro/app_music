@@ -1,0 +1,29 @@
+<section class="platform-shell">
+  <div class="platform-container">
+    <h1 class="platform-title">Trilha <%= @area.capitalize %> - Nível <%= @level %></h1>
+
+    <article class="platform-card">
+      <h2>Visão geral da trilha</h2>
+      <p>Jornada por área e nível com módulos, aulas, práticas, checkpoints e desafio final.</p>
+      <div class="platform-columns">
+        <div>
+          <h3>Estrutura</h3>
+          <ul class="platform-list">
+            <li>Módulo 1 - Fundamentos</li>
+            <li>Módulo 2 - Aplicação</li>
+            <li>Módulo 3 - Integração</li>
+            <li>Checkpoint de validação</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Status</h3>
+          <p class="muted">Progresso por aula, prática sugerida e recompensa final da trilha.</p>
+        </div>
+      </div>
+      <div class="platform-actions">
+        <%= link_to "Abrir próxima aula", app_lesson_path("intro-#{@area}", mode: "guiado"), class: "app-btn app-btn--primary" %>
+        <%= link_to "Ir para playground", app_playground_path, class: "app-btn" %>
+      </div>
+    </article>
+  </div>
+</section>

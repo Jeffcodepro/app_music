@@ -1,0 +1,34 @@
+<section class="platform-shell">
+  <div class="platform-container platform-container--narrow">
+    <p class="muted">Trilhas de estudo</p>
+    <h1 class="platform-title"><%= @study_track_theme[:title] %></h1>
+
+    <article class="platform-card">
+      <h2>Visão geral</h2>
+      <p><%= @study_track_theme[:overview] %></p>
+    </article>
+
+    <article class="platform-card trilha-detail-card">
+      <h2>Assuntos abordados</h2>
+      <p class="muted">Progressão por níveis internos da plataforma.</p>
+
+      <div class="trilha-detail-levels">
+        <% @study_track_theme[:levels].each do |level| %>
+          <section class="trilha-detail-level">
+            <h3><%= level[:name] %></h3>
+            <ul class="platform-list">
+              <% level[:topics].each do |topic| %>
+                <li><%= topic %></li>
+              <% end %>
+            </ul>
+          </section>
+        <% end %>
+      </div>
+
+      <div class="platform-actions">
+        <%= link_to "Escolher por onde começar em Aulas", app_aulas_path, class: "app-btn app-btn--primary" %>
+        <%= link_to "Voltar para trilhas", app_trilhas_path, class: "app-btn" %>
+      </div>
+    </article>
+  </div>
+</section>

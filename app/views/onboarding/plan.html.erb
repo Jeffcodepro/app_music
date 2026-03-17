@@ -1,0 +1,28 @@
+<section class="min-h-screen bg-stone-100 py-16 px-6">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-10">
+      <h1 class="text-4xl md:text-5xl font-semibold tracking-tight text-stone-900">Escolha seu plano</h1>
+      <p class="mt-3 text-stone-500 text-lg">Antes de continuar, selecione o plano para seguir para o gateway de pagamento.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <% plans = [
+        { name: "Primeira Nota", monthly: "R$0/mês", annual: "Gratuito", description: "Entrada para validar produto e começar os estudos." },
+        { name: "Pulso", monthly: "R$ 34,90/mês", annual: "R$ 329,90/ano", description: "Constância e base sólida com mais prática." },
+        { name: "Harmonia", monthly: "R$ 49,90/mês", annual: "R$ 469,90/ano", description: "Aprofundamento e treino consistente." },
+        { name: "Maestro", monthly: "R$ 69,90/mês", annual: "R$ 649,90/ano", description: "Experiência total da plataforma." }
+      ] %>
+
+      <% plans.each do |plan| %>
+        <div class="bg-white rounded-[28px] border border-stone-200 p-7 shadow-[0_22px_45px_-40px_rgba(0,0,0,0.45)]">
+          <p class="text-[10px] uppercase tracking-[0.24em] text-stone-500 font-bold mb-3"><%= plan[:name] %></p>
+          <h2 class="text-3xl font-bold tracking-tight text-stone-900"><%= plan[:monthly] %></h2>
+          <p class="text-sm text-stone-500 mt-1"><%= plan[:annual] %></p>
+          <p class="text-sm text-stone-600 mt-4 mb-6"><%= plan[:description] %></p>
+
+          <%= button_to "Selecionar #{plan[:name]}", update_onboarding_plan_path, method: :patch, params: { plan: plan[:name] }, class: "w-full py-3 rounded-full bg-stone-900 text-white font-semibold hover:bg-stone-800 transition-colors" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>

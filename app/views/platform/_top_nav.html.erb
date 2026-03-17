@@ -1,0 +1,78 @@
+<% calendar_month = Date.current %>
+<% activity_days = platform_activity_day_map(current_user, calendar_month) %>
+<% streak_days = platform_streak_days(current_user) %>
+<% streak_dates = platform_streak_dates(current_user).index_with { true } %>
+
+<header class="app-topbar">
+  <div class="app-topbar__pill glass-static">
+    <div class="app-topbar__left">
+      <%= link_to app_dashboard_path, class: "app-logo" do %>
+        <span class="app-logo__icon">
+          <i data-lucide="play"></i>
+        </span>
+        <span>AppMusic</span>
+      <% end %>
+    </div>
+
+    <div class="app-topbar__center">
+      <form class="app-search" action="<%= app_dashboard_path %>" method="get">
+        <i data-lucide="search"></i>
+        <input type="search" name="q" placeholder="Buscar aulas, trilhas, exercícios..." aria-label="Buscar conteúdo">
+      </form>
+    </div>
+
+    <div class="app-topbar__right">
+      <details class="app-streak-menu">
+        <summary class="app-status-chip app-status-chip--clickable">
+          <i data-lucide="flame"></i>
+          <span><%= streak_days %> dias</span>
+          <i data-lucide="chevron-down"></i>
+        </summary>
+        <div class="app-streak-dropdown">
+          <p class="app-streak-title">Sequência atual: <strong><%= streak_days %> dia(s)</strong></p>
+          <p class="app-streak-subtitle">Dias com estudo ficam marcados no calendário.</p>
+          <div class="app-streak-weekdays">
+            <% PlatformHelper::WEEKDAY_LABELS.each do |label| %>
+              <span><%= label %></span>
+            <% end %>
+          </div>
+          <div class="app-streak-calendar">
+            <% platform_calendar_weeks(calendar_month).each do |week| %>
+              <% week.each do |day| %>
+                <% classes = ["app-streak-day"] %>
+                <% classes << "is-outside" if day.month != calendar_month.month %>
+                <% classes << "is-active" if activity_days[day] %>
+                <% classes << "is-current-streak" if streak_dates[day] %>
+                <span class="<%= classes.join(' ') %>"><%= day.day %></span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </details>
+
+      <div class="app-status-chip">
+        <i data-lucide="zap"></i>
+        <span><%= platform_xp_total(current_user) %> XP</span>
+      </div>
+
+      <button type="button" class="app-icon-btn" aria-label="Notificações">
+        <i data-lucide="bell"></i>
+        <span class="app-badge">3</span>
+      </button>
+
+      <details class="app-profile-menu">
+        <summary>
+          <%= user_avatar(current_user, css_class: "app-avatar") %>
+          <span class="app-profile-name"><%= current_user.full_name.presence || "Aluno" %></span>
+          <i data-lucide="chevron-down"></i>
+        </summary>
+        <div class="app-profile-dropdown">
+          <%= link_to "Conta", app_perfil_path %>
+          <%= link_to "Ranking", app_carreira_path %>
+          <%= link_to "FAQ", root_path(anchor: "faq") %>
+          <%= button_to "Deslogar", destroy_user_session_path, method: :delete %>
+        </div>
+      </details>
+    </div>
+  </div>
+</header>

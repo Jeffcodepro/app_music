@@ -1,6 +1,80 @@
-.alert {
+.flash-stack {
   position: fixed;
-  bottom: 16px;
-  right: 16px;
-  z-index: 1000;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  width: calc(100% - 2rem);
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.flash-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: space-between;
+  border-radius: 0.85rem;
+  border: 1px solid;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  box-shadow: 0 8px 22px rgba(28, 25, 23, 0.08);
+  animation: flash-enter 180ms ease;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.flash-item--notice {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.flash-item--alert {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.flash-item__text {
+  margin: 0;
+}
+
+.flash-item__close {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  opacity: 0.78;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.flash-item__close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.flash-item.is-leaving {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+@keyframes flash-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
