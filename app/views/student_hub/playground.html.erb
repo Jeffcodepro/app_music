@@ -1,33 +1,48 @@
 <section class="platform-shell">
   <div class="platform-container">
-    <h1 class="platform-title">Playground</h1>
+    <div class="playground-header">
+      <div>
+        <h1 class="platform-title">Playgrounds</h1>
+        <p class="playground-header__subtitle">Selecione a atividade que deseja praticar. O playground de percepção já gera intervalos novos a cada rodada, com quatro alternativas e uma única resposta correta.</p>
+      </div>
+    </div>
 
-    <article class="platform-card">
-      <h2>Gerador de treino por tema</h2>
-      <p>Escolha área, subtema, dificuldade, quantidade de questões e modo treino/desafio.</p>
-      <div class="platform-columns">
-        <div>
-          <h3>Áreas iniciais</h3>
-          <ul class="platform-list">
-            <li>Leitura</li>
-            <li>Ritmo</li>
-            <li>Percepção</li>
-            <li>Harmonia</li>
-            <li>Apreciação</li>
-          </ul>
-        </div>
-        <div>
-          <h3>Configuração</h3>
-          <ul class="platform-list">
-            <li>Dificuldade</li>
-            <li>Número de questões</li>
-            <li>Modo treino ou desafio</li>
-          </ul>
-        </div>
-      </div>
-      <div class="platform-actions">
-        <%= link_to "Iniciar treino", app_pratica_path(mode: "livre"), class: "app-btn app-btn--primary" %>
-      </div>
-    </article>
+    <div class="playground-activity-grid">
+      <% @playground_activities.each do |activity| %>
+        <% active = @selected_activity[:slug] == activity[:slug] %>
+        <%= link_to app_playground_path(activity: activity[:slug]), class: "playground-activity-card #{'is-active' if active} #{'is-available' if activity[:available]}" do %>
+          <div class="playground-activity-card__head">
+            <span class="playground-activity-card__icon">
+              <i data-lucide="<%= activity[:icon] %>"></i>
+            </span>
+            <span class="playground-status <%= activity[:available] ? 'is-available' : '' %>"><%= activity[:badge] %></span>
+          </div>
+          <h2><%= activity[:title] %></h2>
+          <p><%= activity[:description] %></p>
+        <% end %>
+      <% end %>
+    </div>
+
+    <% if @selected_activity[:slug] == "percepcao" %>
+      <%= render "perception_playground",
+                 perception_exercise: @perception_exercise,
+                 perception_preferences: @perception_preferences,
+                 perception_instruments: @perception_instruments,
+                 perception_direction_modes: @perception_direction_modes,
+                 playground_feedback: @playground_feedback,
+                 perception_scoreboard: @perception_scoreboard,
+                 perception_autoplay: @perception_autoplay %>
+    <% else %>
+      <article class="platform-card playground-placeholder">
+        <p class="playground-eyebrow">Selecionado</p>
+        <h2><%= @selected_activity[:title] %></h2>
+        <p>Essa atividade já pode ser escolhida no fluxo de prática, mas o gerador específico ainda será desenvolvido. O próximo passo é aplicar o mesmo padrão de geração automática usado na percepção para leitura, rítmica e harmonia.</p>
+        <ul class="platform-list">
+          <li>Leitura: identificação de notas, claves e leitura progressiva</li>
+          <li>Rítmica: padrões, subdivisão e resposta com pulso</li>
+          <li>Harmonia: tríades, graus e funções em contexto</li>
+        </ul>
+      </article>
+    <% end %>
   </div>
 </section>

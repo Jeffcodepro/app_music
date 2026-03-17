@@ -53,6 +53,7 @@ gem "devise"
 gem "omniauth-google-oauth2"
 gem "omniauth-apple"
 gem "omniauth-rails_csrf_protection"
+gem "head_music"
 
 group :development, :test do
   gem "dotenv-rails"

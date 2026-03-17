@@ -1,21 +1,27 @@
 <section class="platform-shell">
   <div class="platform-container">
-    <% mode = params[:mode].presence || "livre" %>
-    <% area = params[:area].presence || "geral" %>
     <h1 class="platform-title">Prática e playgrounds</h1>
 
     <article class="platform-card">
-      <h2>Laboratório de prática</h2>
-      <p>Exercícios gerados por tema, dificuldade e objetivo.</p>
-      <p class="muted">Modo: <strong><%= mode.capitalize %></strong> | Área: <strong><%= area.capitalize %></strong></p>
-      <ul class="platform-list">
-        <li>Playground de leitura</li>
-        <li>Playground de rítmica</li>
-        <li>Playground de percepção</li>
-        <li>Playground de harmonia</li>
-      </ul>
-      <div class="platform-actions">
-        <%= link_to "Concluir sessão e voltar ao dashboard", app_dashboard_path, class: "app-btn app-btn--primary" %>
+      <h2>Selecione o tipo de atividade</h2>
+      <p>Escolha qual laboratório você quer abrir agora. A percepção já está funcional com intervalos gerados automaticamente e os demais playgrounds ficam preparados para a próxima etapa.</p>
+
+      <div class="playground-activity-grid">
+        <% playground_activity_catalog.each do |activity| %>
+          <%= link_to app_playground_path(activity: activity[:slug]), class: "playground-activity-card #{'is-available' if activity[:available]}" do %>
+            <div class="playground-activity-card__head">
+              <span class="playground-activity-card__icon">
+                <i data-lucide="<%= activity[:icon] %>"></i>
+              </span>
+              <span class="playground-status <%= activity[:available] ? 'is-available' : '' %>"><%= activity[:badge] %></span>
+            </div>
+            <h3><%= activity[:title] %></h3>
+            <p><%= activity[:description] %></p>
+            <span class="playground-activity-card__cta">
+              <%= activity[:available] ? "Abrir agora" : "Escolher atividade" %>
+            </span>
+          <% end %>
+        <% end %>
       </div>
     </article>
   </div>

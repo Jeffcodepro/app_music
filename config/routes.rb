@@ -21,6 +21,7 @@ Rails.application.routes.draw do
     get "app/aulas/:id", to: "student_hub#lesson_show", as: :app_lesson
     get "app/pratica/resultado", to: "student_hub#practice_result", as: :app_practice_result
     get "app/playground", to: "student_hub#playground", as: :app_playground
+    post "app/playground/answer", to: "student_hub#submit_playground_answer", as: :submit_app_playground_answer
     get "app/desafios", to: "student_hub#challenges", as: :app_challenges
     get "app/ranking", to: "student_hub#ranking", as: :app_ranking
     get "app/conquistas", to: "student_hub#achievements", as: :app_achievements

@@ -157,6 +157,11 @@ GEM
       activesupport (>= 6.1)
     hashie (5.1.0)
       logger
+    head_music (12.3.0)
+      activesupport (>= 7.0, < 10)
+      humanize (~> 2.0)
+      i18n (~> 1.8)
+    humanize (2.5.1)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     importmap-rails (2.2.2)
@@ -406,6 +411,7 @@ DEPENDENCIES
   devise
   dotenv-rails
   font-awesome-sass (~> 6.1)
+  head_music
   importmap-rails
   jbuilder
   omniauth-apple

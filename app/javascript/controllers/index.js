@@ -16,6 +16,12 @@ application.register("flash", FlashController)
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
 
+import IntervalPlayerController from "./interval_player_controller"
+application.register("interval-player", IntervalPlayerController)
+
+import PreferencesController from "./preferences_controller"
+application.register("preferences", PreferencesController)
+
 import ScrollVideoController from "./scroll_video_controller"
 application.register("scroll-video", ScrollVideoController)
 
