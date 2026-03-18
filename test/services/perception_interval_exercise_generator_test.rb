@@ -65,4 +65,23 @@ class PerceptionIntervalExerciseGeneratorTest < ActiveSupport::TestCase
     assert_equal "Fá sustenido 4", PerceptionIntervalExerciseGenerator.localize_pitch_name("F#4")
     assert_equal "Si bemol 3", PerceptionIntervalExerciseGenerator.localize_pitch_name("Bb3")
   end
+
+  test "includes compound intervals in the exercise library" do
+    interval_ids = PerceptionIntervalExerciseGenerator::INTERVAL_LIBRARY.pluck(:id)
+
+    assert_includes interval_ids, "major_ninth"
+    assert_includes interval_ids, "perfect_twelfth"
+    assert_includes interval_ids, "perfect_fifteenth"
+  end
+
+  test "compound intervals have valid pitch ranges available" do
+    generator = PerceptionIntervalExerciseGenerator.new(random: Random.new(77))
+
+    %i[major_ninth perfect_twelfth perfect_fifteenth].each do |compound_interval|
+      interval = HeadMusic::Analysis::DiatonicInterval.get(compound_interval)
+
+      assert generator.send(:eligible_reference_pitches, interval:, direction: :ascending).any?
+      assert generator.send(:eligible_reference_pitches, interval:, direction: :descending).any?
+    end
+  end
 end

@@ -6,6 +6,7 @@
            data-interval-player-first-pitch-value="<%= perception_exercise[:reference_pitch] %>"
            data-interval-player-second-pitch-value="<%= perception_exercise[:target_pitch] %>"
            data-interval-player-auto-play-value="<%= perception_autoplay ? 'true' : 'false' %>"
+           data-interval-player-exercise-signature-value="<%= perception_exercise[:signature] %>"
            data-interval-player-instrument-value="<%= perception_exercise[:instrument] %>">
     <% answered = playground_feedback.present? %>
     <% answered_correctly = playground_feedback&.dig(:correct) %>
@@ -21,7 +22,10 @@
     <% if playground_feedback.present? %>
       <div class="playground-feedback <%= playground_feedback[:correct] ? 'is-correct' : 'is-incorrect' %>" data-interval-player-target="feedback">
         <p class="playground-eyebrow">Última resposta</p>
-        <% if playground_feedback[:correct] %>
+        <% if playground_feedback[:synchronization_error] %>
+          <h3>Reproduza o intervalo atual novamente</h3>
+          <p>O áudio mais recente não correspondia a esta rodada. Repita o intervalo atual antes de responder.</p>
+        <% elsif playground_feedback[:correct] %>
           <h3>Resposta correta</h3>
           <p>Você acertou com <strong><%= playground_feedback[:selected_label] %></strong>.</p>
           <p class="muted">Rodada: <strong><%= playground_feedback[:direction_label] %></strong> | Notas sorteadas: <strong><%= playground_feedback[:notes] %></strong></p>
@@ -126,11 +130,13 @@
                           params: {
                             activity: "percepcao",
                             selected_option_id: option[:id],
+                            exercise_signature: perception_exercise[:signature],
                             instrument: perception_preferences[:instrument],
                             direction_mode: perception_preferences[:direction_mode]
                           },
                           class: "perception-option",
                           disabled: answered_correctly,
+                          data: { action: "click->interval-player#guardAnswer" },
                           form: { data: { turbo_frame: "perception_playground" } } do %>
               <span class="perception-option__label"><%= option[:label] %></span>
               <span class="perception-option__meta">

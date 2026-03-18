@@ -39,11 +39,22 @@ class PerceptionIntervalExerciseGenerator
     { id: "major_sixth", label: "Sexta maior (M6)", head_music: :major_sixth },
     { id: "minor_seventh", label: "Sétima menor (m7)", head_music: :minor_seventh },
     { id: "major_seventh", label: "Sétima maior (M7)", head_music: :major_seventh },
-    { id: "perfect_octave", label: "Oitava justa (P8)", head_music: :perfect_octave }
+    { id: "perfect_octave", label: "Oitava justa (P8)", head_music: :perfect_octave },
+    { id: "minor_ninth", label: "Nona menor (m9)", head_music: :minor_ninth },
+    { id: "major_ninth", label: "Nona maior (M9)", head_music: :major_ninth },
+    { id: "minor_tenth", label: "Décima menor (m10)", head_music: :minor_tenth },
+    { id: "major_tenth", label: "Décima maior (M10)", head_music: :major_tenth },
+    { id: "perfect_eleventh", label: "Décima primeira justa (P11)", head_music: :perfect_eleventh },
+    { id: "perfect_twelfth", label: "Décima segunda justa (P12)", head_music: :perfect_twelfth },
+    { id: "minor_thirteenth", label: "Décima terceira menor (m13)", head_music: :minor_thirteenth },
+    { id: "major_thirteenth", label: "Décima terceira maior (M13)", head_music: :major_thirteenth },
+    { id: "minor_fourteenth", label: "Décima quarta menor (m14)", head_music: :minor_fourteenth },
+    { id: "major_fourteenth", label: "Décima quarta maior (M14)", head_music: :major_fourteenth },
+    { id: "perfect_fifteenth", label: "Décima quinta justa (P15)", head_music: :perfect_fifteenth }
   ].freeze
-  REFERENCE_PITCHES = %w[C3 D3 E3 F3 G3 A3 B3 C4 D4 E4 F4 G4 A4 B4 C5 D5].freeze
-  MINIMUM_TARGET = HeadMusic::Rudiment::Pitch.get("C3").midi
-  MAXIMUM_TARGET = HeadMusic::Rudiment::Pitch.get("A5").midi
+  REFERENCE_PITCHES = %w[A2 B2 C3 D3 E3 F3 G3 A3 B3 C4 D4 E4 F4 G4 A4 B4 C5 D5 E5].freeze
+  MINIMUM_TARGET = HeadMusic::Rudiment::Pitch.get("A2").midi
+  MAXIMUM_TARGET = HeadMusic::Rudiment::Pitch.get("C6").midi
 
   def self.direction_modes
     DIRECTION_MODES

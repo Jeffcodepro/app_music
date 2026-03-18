@@ -112,6 +112,24 @@ class StudentHubController < ApplicationController
     end
 
     preferences = perception_preferences
+    exercise_signature = params[:exercise_signature].to_s
+    if exercise_signature.present? && exercise_signature != exercise[:signature].to_s
+      @playground_feedback = {
+        correct: false,
+        synchronization_error: true
+      }
+      prepare_perception_playground!
+      @perception_exercise = exercise
+
+      if turbo_frame_request?
+        render_perception_playground_frame
+      else
+        flash[:playground_feedback] = @playground_feedback
+        redirect_to app_playground_path(activity: "percepcao", **preferences)
+      end
+      return
+    end
+
     selected_option_id = params[:selected_option_id].to_s
     selected_option = exercise[:options].find { |option| option[:id] == selected_option_id }
     correct = selected_option_id == exercise[:correct_option_id]

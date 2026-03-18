@@ -8,6 +8,7 @@ export default class extends Controller {
     firstPitch: String,
     secondPitch: String,
     autoPlay: Boolean,
+    exerciseSignature: String,
     instrument: String
   }
 
@@ -15,17 +16,26 @@ export default class extends Controller {
     this.audioState = window.__appMusicAudio ||= {
       soundfontPlayers: {},
       soundfontPromises: {},
-      synthContext: null
+      synthContext: null,
+      activePlaybackHandles: [],
+      playbackToken: 0,
+      lastPlayedSignature: null
     }
     this.isPlaying = false
+    this.autoPlayTimeout = null
     this.preloadCurrentInstrument()
     if (this.autoPlayValue) {
-      window.setTimeout(() => this.play(), 120)
+      this.autoPlayTimeout = window.setTimeout(() => this.play(), 120)
     }
   }
 
   disconnect() {
     this.isPlaying = false
+    this.invalidatePlayback()
+    if (this.autoPlayTimeout) {
+      window.clearTimeout(this.autoPlayTimeout)
+      this.autoPlayTimeout = null
+    }
   }
 
   instrumentValueChanged() {
@@ -35,21 +45,34 @@ export default class extends Controller {
   async play() {
     if (this.isPlaying) return
 
+    const requestId = this.startPlaybackRequest()
     this.isPlaying = true
     this.setTriggersDisabled(true)
 
     try {
-      const totalDuration = await this.playWithBestAvailable()
+      const totalDuration = await this.playWithBestAvailable(requestId)
+      if (!this.isPlaybackRequestCurrent(requestId)) return
 
       await this.sleep(totalDuration * 1000)
     } finally {
-      this.setTriggersDisabled(false)
-      this.isPlaying = false
+      if (this.isPlaybackRequestCurrent(requestId)) {
+        this.setTriggersDisabled(false)
+        this.isPlaying = false
+      }
     }
   }
 
   repeat() {
     return this.play()
+  }
+
+  guardAnswer(event) {
+    if (this.audioState.lastPlayedSignature === this.exerciseSignatureValue) return
+
+    event.preventDefault()
+    if (this.hasFeedbackTarget) {
+      this.feedbackTarget.hidden = false
+    }
   }
 
   async ensureAudioContext() {
@@ -65,19 +88,22 @@ export default class extends Controller {
     return this.audioState.synthContext
   }
 
-  async playWithBestAvailable() {
+  async playWithBestAvailable(requestId) {
     const player = await this.waitForSoundfontPlayer(2200)
-    if (player) return this.playWithSoundfont(player)
+    if (!this.isPlaybackRequestCurrent(requestId)) return 0
+    if (player) return this.playWithSoundfont(player, requestId)
 
-    return this.playWithSynth()
+    return this.playWithSynth(requestId)
   }
 
-  async playWithSynth() {
+  async playWithSynth(requestId) {
     this.audioContext = await this.ensureAudioContext()
+    if (!this.isPlaybackRequestCurrent(requestId)) return 0
     const preset = this.instrumentPreset()
     const noteDuration = preset.noteDuration || this.noteDuration()
     const gapInSeconds = preset.noteGap || 0.28
     const startAt = this.audioContext.currentTime + 0.04
+    if (!this.isPlaybackRequestCurrent(requestId)) return 0
 
     return this.playIntervalSequence({
       firstFrequency: this.firstFrequencyValue,
@@ -88,8 +114,9 @@ export default class extends Controller {
     })
   }
 
-  async playWithSoundfont(player) {
+  async playWithSoundfont(player, requestId) {
     const audioContext = await this.ensureToneAudioContext(true)
+    if (!this.isPlaybackRequestCurrent(requestId)) return 0
     const preset = this.instrumentPreset()
     const noteDuration = preset.noteDuration || this.noteDuration()
     const gapInSeconds = preset.noteGap || 0.28
@@ -97,16 +124,19 @@ export default class extends Controller {
     const secondStartAt = startAt + noteDuration + gapInSeconds
     const firstPitch = this.normalizePitchForSoundfont(this.firstPitchValue)
     const secondPitch = this.normalizePitchForSoundfont(this.secondPitchValue)
+    if (!this.isPlaybackRequestCurrent(requestId)) return 0
 
-    player.play(firstPitch, startAt, {
+    const firstHandle = player.play(firstPitch, startAt, {
       duration: noteDuration,
       gain: this.soundfontGain()
     })
+    this.trackPlaybackHandle(firstHandle)
 
-    player.play(secondPitch, secondStartAt, {
+    const secondHandle = player.play(secondPitch, secondStartAt, {
       duration: noteDuration,
       gain: this.soundfontGain()
     })
+    this.trackPlaybackHandle(secondHandle)
 
     return (secondStartAt - startAt) + noteDuration + 0.12
   }
@@ -267,7 +297,7 @@ export default class extends Controller {
     const output = this.createOutputChain(startAt, preset)
 
     preset.voices.forEach((voice) => {
-      this.startOscillatorVoice({
+      this.trackPlaybackHandle(this.startOscillatorVoice({
         frequency: frequency * voice.ratio,
         startAt,
         durationInSeconds,
@@ -275,23 +305,25 @@ export default class extends Controller {
         output,
         voice,
         vibrato: preset.vibrato
-      })
+      }))
     })
 
     if (preset.noise) {
-      this.startNoiseVoice({
+      this.trackPlaybackHandle(this.startNoiseVoice({
         startAt,
         durationInSeconds,
         stopAt,
         output,
         noise: preset.noise
-      })
+      }))
     }
 
     return stopAt - startAt
   }
 
   setTriggersDisabled(disabled) {
+    if (!this.element.isConnected) return
+
     this.triggerTargets.forEach((trigger) => {
       trigger.disabled = disabled
     })
@@ -299,6 +331,40 @@ export default class extends Controller {
 
   sleep(durationInMilliseconds) {
     return new Promise((resolve) => setTimeout(resolve, durationInMilliseconds))
+  }
+
+  isPlaybackRequestCurrent(requestId) {
+    return this.element.isConnected && this.audioState.playbackToken === requestId
+  }
+
+  startPlaybackRequest() {
+    this.stopActivePlayback()
+    this.audioState.playbackToken += 1
+    this.audioState.lastPlayedSignature = this.exerciseSignatureValue
+    return this.audioState.playbackToken
+  }
+
+  invalidatePlayback() {
+    this.audioState.playbackToken += 1
+    this.stopActivePlayback()
+  }
+
+  trackPlaybackHandle(handle) {
+    if (handle && typeof handle.stop === "function") {
+      this.audioState.activePlaybackHandles.push(handle)
+    }
+
+    return handle
+  }
+
+  stopActivePlayback() {
+    this.audioState.activePlaybackHandles.forEach((handle) => {
+      try {
+        handle.stop(0)
+      } catch (_error) {
+      }
+    })
+    this.audioState.activePlaybackHandles = []
   }
 
   instrumentPreset() {
@@ -421,6 +487,8 @@ export default class extends Controller {
     gain.connect(output)
     oscillator.start(startAt)
     oscillator.stop(stopAt)
+
+    return oscillator
   }
 
   startNoiseVoice({ startAt, durationInSeconds, stopAt, output, noise }) {
@@ -440,6 +508,8 @@ export default class extends Controller {
     gain.connect(output)
     source.start(startAt)
     source.stop(stopAt)
+
+    return source
   }
 
   noteDuration() {
