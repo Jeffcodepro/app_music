@@ -686,6 +686,26 @@
   border-color: rgba(255, 255, 255, 0.28);
 }
 
+.reading-notation-card {
+  margin-top: 1rem;
+  border-radius: 1.15rem;
+  background: linear-gradient(180deg, #fffefc 0%, #f7f3ee 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 0.85rem;
+}
+
+.reading-notation-card svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.playground-reader-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .playground-player-controls {
   display: grid;
   grid-template-columns: 1fr auto 1fr;

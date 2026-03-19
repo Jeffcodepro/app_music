@@ -4,10 +4,10 @@ module PlatformHelper
     {
       slug: "leitura",
       title: "Playground de leitura",
-      badge: "Em breve",
-      description: "Treinos de pauta, claves, leitura em compasso e identificação visual de símbolos.",
+      badge: "Disponível",
+      description: "Leia notas geradas automaticamente em diferentes claves, com pauta visual e quatro alternativas por rodada.",
       icon: "book-open-text",
-      available: false
+      available: true
     },
     {
       slug: "ritmica",
@@ -194,6 +194,10 @@ module PlatformHelper
                  end
 
     svg_markup.html_safe
+  end
+
+  def reading_note_staff_svg(exercise)
+    ReadingStaffSvgRenderer.new(exercise:).call.html_safe
   end
 
   def interface_symbol_icon(name)

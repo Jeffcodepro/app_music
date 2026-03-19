@@ -15,8 +15,8 @@ class PerceptionIntervalExerciseGenerator
     "bb" => "duplo bemol"
   }.freeze
   DIRECTION_MODES = [
-    { id: "ascending", label: "Crescente" },
-    { id: "descending", label: "Decrescente" },
+    { id: "ascending", label: "Ascendente" },
+    { id: "descending", label: "Descendente" },
     { id: "mixed", label: "Misto" }
   ].freeze
   INSTRUMENTS = [

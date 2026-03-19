@@ -3,7 +3,7 @@
     <div class="playground-header">
       <div>
         <h1 class="platform-title">Playgrounds</h1>
-        <p class="playground-header__subtitle">Selecione a atividade que deseja praticar. O playground de percepção já gera intervalos novos a cada rodada, com quatro alternativas e uma única resposta correta.</p>
+        <p class="playground-header__subtitle">Selecione a atividade que deseja praticar. Os playgrounds de percepção e leitura já geram novas rodadas automaticamente, sempre com quatro alternativas e uma única resposta correta.</p>
       </div>
     </div>
 
@@ -32,13 +32,20 @@
                  playground_feedback: @playground_feedback,
                  perception_scoreboard: @perception_scoreboard,
                  perception_autoplay: @perception_autoplay %>
+    <% elsif @selected_activity[:slug] == "leitura" %>
+      <%= render "reading_playground",
+                 reading_exercise: @reading_exercise,
+                 reading_preferences: @reading_preferences,
+                 reading_clef_modes: @reading_clef_modes,
+                 reading_question_modes: @reading_question_modes,
+                 playground_feedback: @playground_feedback,
+                 reading_scoreboard: @reading_scoreboard %>
     <% else %>
       <article class="platform-card playground-placeholder">
         <p class="playground-eyebrow">Selecionado</p>
         <h2><%= @selected_activity[:title] %></h2>
-        <p>Essa atividade já pode ser escolhida no fluxo de prática, mas o gerador específico ainda será desenvolvido. O próximo passo é aplicar o mesmo padrão de geração automática usado na percepção para leitura, rítmica e harmonia.</p>
+        <p>Essa atividade já pode ser escolhida no fluxo de prática, mas o gerador específico ainda será desenvolvido. O próximo passo é aplicar o mesmo padrão de geração automática usado na percepção e na leitura para rítmica e harmonia.</p>
         <ul class="platform-list">
-          <li>Leitura: identificação de notas, claves e leitura progressiva</li>
           <li>Rítmica: padrões, subdivisão e resposta com pulso</li>
           <li>Harmonia: tríades, graus e funções em contexto</li>
         </ul>

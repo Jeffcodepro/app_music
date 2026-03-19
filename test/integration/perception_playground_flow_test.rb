@@ -21,6 +21,6 @@ class PerceptionPlaygroundFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Playground de percep"
     assert_includes response.body, "Identifique o intervalo melódico"
-    assert_includes response.body, "Ouvir intervalo"
+    assert_includes response.body, "Tocar intervalo"
   end
 end

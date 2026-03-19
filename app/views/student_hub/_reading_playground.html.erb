@@ -1,0 +1,118 @@
+<%= turbo_frame_tag "reading_playground" do %>
+  <article class="platform-card playground-stage"
+           data-controller="preferences"
+           data-reading-signature="<%= reading_exercise[:signature] %>">
+    <% feedback_for_current_round = playground_feedback.present? && playground_feedback[:exercise_signature] == reading_exercise[:signature] %>
+    <% answered_correctly = feedback_for_current_round && playground_feedback[:correct] %>
+
+    <div class="playground-stage__header">
+      <div>
+        <p class="playground-eyebrow">Modo ativo</p>
+        <h2>Playground de leitura</h2>
+        <p>Treine leitura em pauta com notas, acidentes e armaduras, sempre respeitando a clave selecionada.</p>
+      </div>
+    </div>
+
+    <% if playground_feedback.present? %>
+      <div class="playground-feedback <%= playground_feedback[:correct] ? 'is-correct' : 'is-incorrect' %>">
+        <p class="playground-eyebrow">Última resposta</p>
+        <% if playground_feedback[:synchronization_error] %>
+          <h3>Atualize a rodada atual</h3>
+          <p>A resposta enviada não correspondia à pauta atual. Observe a nota exibida e responda novamente.</p>
+        <% elsif playground_feedback[:correct] %>
+          <h3>Resposta correta</h3>
+          <p>Você acertou com <strong><%= playground_feedback[:selected_label] %></strong>.</p>
+          <p class="muted">Rodada anterior: <strong><%= playground_feedback[:question_type_label] %></strong>.</p>
+        <% else %>
+          <h3>Resposta incorreta</h3>
+          <p>A correta era <strong><%= playground_feedback[:correct_label] %></strong>. Compare a pauta com a clave atual e tente a próxima.</p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="playground-scoreboard">
+      <div class="playground-scoreboard__item is-correct">
+        <span class="playground-scoreboard__label">Acertos</span>
+        <strong><%= reading_scoreboard[:correct_count] %></strong>
+      </div>
+      <div class="playground-scoreboard__item is-incorrect">
+        <span class="playground-scoreboard__label">Erros</span>
+        <strong><%= reading_scoreboard[:incorrect_count] %></strong>
+      </div>
+    </div>
+
+    <%= form_with url: app_playground_path, method: :get, class: "playground-controls playground-controls--stacked", data: { turbo_frame: "reading_playground", preferences_target: "form" } do %>
+      <%= hidden_field_tag :activity, "leitura" %>
+
+      <div class="playground-control">
+        <span class="playground-control__label">Claves do treino</span>
+        <div class="playground-direction-grid">
+          <% reading_clef_modes.each do |mode| %>
+            <% checked = reading_preferences[:clef_mode] == mode[:id] %>
+            <label class="playground-direction-card <%= 'is-selected' if checked %>">
+              <%= radio_button_tag :clef_mode, mode[:id], checked, class: "playground-direction-card__input", data: { action: "change->preferences#submit" } %>
+              <span class="playground-direction-card__title"><%= mode[:label] %></span>
+            </label>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="playground-control">
+        <span class="playground-control__label">Tipo de pergunta</span>
+        <div class="playground-direction-grid">
+          <% reading_question_modes.each do |mode| %>
+            <% checked = reading_preferences[:question_mode] == mode[:id] %>
+            <label class="playground-direction-card <%= 'is-selected' if checked %>">
+              <%= radio_button_tag :question_mode, mode[:id], checked, class: "playground-direction-card__input", data: { action: "change->preferences#submit" } %>
+              <span class="playground-direction-card__title"><%= mode[:label] %></span>
+            </label>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="playground-stage__grid">
+      <div class="playground-trainer">
+        <p class="playground-eyebrow">Rodada atual</p>
+        <h3>Observe a pauta</h3>
+        <p><%= reading_exercise[:question] %></p>
+
+        <div class="reading-notation-card">
+          <%= reading_note_staff_svg(reading_exercise) %>
+        </div>
+
+        <div class="playground-reader-actions">
+          <%= link_to app_playground_path(activity: "leitura", refresh: 1, **reading_preferences),
+                      class: "playground-player-button",
+                      data: { turbo_frame: "reading_playground" },
+                      aria: { label: "Próxima pergunta" } do %>
+            <span class="app-btn__icon"><%= interface_symbol_icon("next") %></span>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="playground-response-panel">
+        <p class="playground-eyebrow">Resposta</p>
+        <h3>Escolha a resposta correta</h3>
+        <div class="perception-options">
+          <% reading_exercise[:options].each do |option| %>
+            <%= button_to submit_app_playground_answer_path,
+                          method: :post,
+                          params: {
+                            activity: "leitura",
+                            selected_option_id: option[:id],
+                            exercise_signature: reading_exercise[:signature],
+                            clef_mode: reading_preferences[:clef_mode],
+                            question_mode: reading_preferences[:question_mode]
+                          },
+                          class: "perception-option",
+                          disabled: answered_correctly,
+                          form: { data: { turbo_frame: "reading_playground" } } do %>
+              <span class="perception-option__label"><%= option[:label] %></span>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </article>
+<% end %>
