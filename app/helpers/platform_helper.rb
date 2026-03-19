@@ -28,10 +28,10 @@ module PlatformHelper
     {
       slug: "harmonia",
       title: "Playground de harmonia",
-      badge: "Em breve",
-      description: "Triades, funções, graus e reconhecimento de progressões para consolidar linguagem tonal.",
+      badge: "Disponível",
+      description: "Ouça tríades, tétrades e progressões em bloco ou nota por nota, com perguntas geradas automaticamente.",
       icon: "music",
-      available: false
+      available: true
     }
   ].freeze
 

@@ -3,7 +3,7 @@
     <div class="playground-header">
       <div>
         <h1 class="platform-title">Playgrounds</h1>
-        <p class="playground-header__subtitle">Selecione a atividade que deseja praticar. Os playgrounds de percepção e leitura já geram novas rodadas automaticamente, sempre com quatro alternativas e uma única resposta correta.</p>
+        <p class="playground-header__subtitle">Selecione a atividade que deseja praticar. Percepção, leitura e harmonia já geram novas rodadas automaticamente, sempre com quatro alternativas e uma única resposta correta.</p>
       </div>
     </div>
 
@@ -40,14 +40,22 @@
                  reading_question_modes: @reading_question_modes,
                  playground_feedback: @playground_feedback,
                  reading_scoreboard: @reading_scoreboard %>
+    <% elsif @selected_activity[:slug] == "harmonia" %>
+      <%= render "harmony_playground",
+                 harmony_exercise: @harmony_exercise,
+                 harmony_preferences: @harmony_preferences,
+                 harmony_question_modes: @harmony_question_modes,
+                 harmony_chord_structures: @harmony_chord_structures,
+                 harmony_instruments: @harmony_instruments,
+                 playground_feedback: @playground_feedback,
+                 harmony_scoreboard: @harmony_scoreboard %>
     <% else %>
       <article class="platform-card playground-placeholder">
         <p class="playground-eyebrow">Selecionado</p>
         <h2><%= @selected_activity[:title] %></h2>
-        <p>Essa atividade já pode ser escolhida no fluxo de prática, mas o gerador específico ainda será desenvolvido. O próximo passo é aplicar o mesmo padrão de geração automática usado na percepção e na leitura para rítmica e harmonia.</p>
+        <p>Essa atividade já pode ser escolhida no fluxo de prática, mas o gerador específico ainda será desenvolvido. O próximo passo é aplicar o mesmo padrão de geração automática usado na percepção, leitura e harmonia para a parte de rítmica.</p>
         <ul class="platform-list">
           <li>Rítmica: padrões, subdivisão e resposta com pulso</li>
-          <li>Harmonia: tríades, graus e funções em contexto</li>
         </ul>
       </article>
     <% end %>

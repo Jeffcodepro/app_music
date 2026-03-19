@@ -16,6 +16,9 @@ application.register("flash", FlashController)
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
 
+import HarmonyPlayerController from "./harmony_player_controller"
+application.register("harmony-player", HarmonyPlayerController)
+
 import IntervalPlayerController from "./interval_player_controller"
 application.register("interval-player", IntervalPlayerController)
 

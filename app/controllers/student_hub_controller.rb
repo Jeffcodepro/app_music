@@ -1,5 +1,6 @@
 class StudentHubController < ApplicationController
   DEFAULT_PLAYGROUND_ACTIVITY = "percepcao".freeze
+  HARMONY_PLAYGROUND_STATE_FALLBACK_STORE = ActiveSupport::Cache::MemoryStore.new(expires_in: 12.hours)
   GUIDED_AREA_LABELS = {
     "leitura" => "Estruturação / Leitura",
     "ritmica" => "Rítmica",
@@ -101,6 +102,11 @@ class StudentHubController < ApplicationController
       clear_reading_feedback_if_starting_new_round!
       store_new_reading_exercise! if should_refresh_reading_exercise?
       @reading_exercise = current_reading_exercise
+    when "harmonia"
+      prepare_harmony_playground!
+      clear_harmony_feedback_if_starting_new_round!
+      store_new_harmony_exercise! if should_refresh_harmony_exercise?
+      @harmony_exercise = current_harmony_exercise
     end
   end
 
@@ -112,6 +118,8 @@ class StudentHubController < ApplicationController
       submit_perception_playground_answer
     when "leitura"
       submit_reading_playground_answer
+    when "harmonia"
+      submit_harmony_playground_answer
     else
       redirect_to app_playground_path(activity: params[:activity].presence || DEFAULT_PLAYGROUND_ACTIVITY),
                   alert: "Esse playground ainda está em construção."
@@ -130,6 +138,7 @@ class StudentHubController < ApplicationController
     exercise_signature = params[:exercise_signature].to_s
     if exercise_signature.present? && exercise_signature != exercise[:signature].to_s
       @playground_feedback = {
+        activity: "percepcao",
         correct: false,
         synchronization_error: true
       }
@@ -227,6 +236,17 @@ class StudentHubController < ApplicationController
     hydrate_reading_exercise(compact_exercise)
   end
 
+  def current_harmony_exercise
+    stored_exercise = harmony_playground_state[:exercise]&.to_h&.stringify_keys
+    return if stored_exercise.blank?
+
+    compact_exercise = normalize_harmony_exercise_storage(stored_exercise)
+    return if compact_exercise.blank?
+
+    write_harmony_playground_state(exercise: compact_exercise) if stored_exercise != compact_exercise
+    hydrate_harmony_exercise(compact_exercise)
+  end
+
   def prepare_perception_playground!
     @perception_instruments = PerceptionIntervalExerciseGenerator.instruments
     @perception_direction_modes = PerceptionIntervalExerciseGenerator.direction_modes
@@ -239,6 +259,14 @@ class StudentHubController < ApplicationController
     @reading_question_modes = ReadingNoteExerciseGenerator.question_modes
     @reading_preferences = reading_preferences
     @reading_scoreboard = reading_scoreboard
+  end
+
+  def prepare_harmony_playground!
+    @harmony_question_modes = HarmonyExerciseGenerator.question_modes
+    @harmony_chord_structures = HarmonyExerciseGenerator.chord_structures
+    @harmony_instruments = PerceptionIntervalExerciseGenerator.instruments
+    @harmony_preferences = harmony_preferences
+    @harmony_scoreboard = harmony_scoreboard
   end
 
   def should_refresh_perception_exercise?
@@ -255,6 +283,14 @@ class StudentHubController < ApplicationController
 
     current_reading_exercise[:clef_mode] != @reading_preferences[:clef_mode] ||
       current_reading_exercise[:question_mode] != @reading_preferences[:question_mode]
+  end
+
+  def should_refresh_harmony_exercise?
+    return true if params[:refresh].present?
+    return true if current_harmony_exercise.blank?
+
+    current_harmony_exercise[:question_mode] != @harmony_preferences[:question_mode] ||
+      current_harmony_exercise[:chord_structure] != @harmony_preferences[:chord_structure]
   end
 
   def store_new_perception_exercise!(preferences = perception_preferences)
@@ -279,6 +315,19 @@ class StudentHubController < ApplicationController
     store_recent_reading_exercise!(exercise)
   end
 
+  def store_new_harmony_exercise!(preferences = harmony_preferences)
+    exercise = HarmonyExerciseGenerator.new(
+      question_mode: preferences[:question_mode],
+      chord_structure: preferences[:chord_structure],
+      recent_exercises: harmony_recent_exercises
+    ).call
+
+    write_harmony_playground_state(
+      exercise: compact_harmony_exercise_storage(exercise),
+      recent_exercises: next_harmony_recent_exercises(exercise)
+    )
+  end
+
   def build_perception_playground_feedback(exercise:, selected_option:, correct:)
     {
       activity: "percepcao",
@@ -300,6 +349,21 @@ class StudentHubController < ApplicationController
       question_type_label: exercise[:question_type_label],
       clef_label: exercise[:clef_label],
       note_label: exercise[:pitch_label],
+      exercise_signature: exercise[:signature],
+      synchronization_error: false,
+      answered: true
+    }
+  end
+
+  def build_harmony_playground_feedback(exercise:, selected_option:, correct:)
+    {
+      activity: "harmonia",
+      correct:,
+      selected_label: selected_option&.dig(:label) || "Resposta inválida",
+      correct_label: exercise[:correct_option_label],
+      question_type_label: exercise[:question_type_label],
+      key_label: exercise[:key_label],
+      chord_label: exercise[:chord_notes_label],
       exercise_signature: exercise[:signature],
       synchronization_error: false,
       answered: true
@@ -331,6 +395,19 @@ class StudentHubController < ApplicationController
            }
   end
 
+  def render_harmony_playground_frame
+    render partial: "student_hub/harmony_playground",
+           locals: {
+             harmony_exercise: @harmony_exercise,
+             harmony_preferences: @harmony_preferences,
+             harmony_question_modes: @harmony_question_modes,
+             harmony_chord_structures: @harmony_chord_structures,
+             harmony_instruments: @harmony_instruments,
+             playground_feedback: @playground_feedback,
+             harmony_scoreboard: harmony_scoreboard
+           }
+  end
+
   def record_perception_playground_attempt!(correct:)
     current_user.study_activities.create!(
       area: "percepcao",
@@ -359,6 +436,20 @@ class StudentHubController < ApplicationController
     session[:reading_scoreboard] = scoreboard.stringify_keys
   end
 
+  def record_harmony_playground_attempt!(correct:)
+    current_user.study_activities.create!(
+      area: "harmonia",
+      xp_earned: correct ? 20 : 6,
+      minutes_practiced: 3,
+      occurred_on: Date.current
+    )
+
+    scoreboard = harmony_scoreboard
+    key = correct ? :correct_count : :incorrect_count
+    scoreboard[key] += 1
+    write_harmony_playground_state(scoreboard: scoreboard.stringify_keys)
+  end
+
   def perception_preferences
     {
       instrument: sanitize_perception_instrument(params[:instrument]),
@@ -370,6 +461,14 @@ class StudentHubController < ApplicationController
     {
       clef_mode: sanitize_reading_clef_mode(params[:clef_mode]),
       question_mode: sanitize_reading_question_mode(params[:question_mode])
+    }
+  end
+
+  def harmony_preferences
+    {
+      question_mode: sanitize_harmony_question_mode(params[:question_mode]),
+      chord_structure: sanitize_harmony_chord_structure(params[:chord_structure]),
+      instrument: sanitize_harmony_instrument(params[:instrument])
     }
   end
 
@@ -401,6 +500,27 @@ class StudentHubController < ApplicationController
     ReadingNoteExerciseGenerator::DEFAULT_QUESTION_MODE
   end
 
+  def sanitize_harmony_question_mode(question_mode)
+    question_mode = question_mode.to_s
+    return question_mode if HarmonyExerciseGenerator.question_mode_ids.include?(question_mode)
+
+    HarmonyExerciseGenerator::DEFAULT_QUESTION_MODE
+  end
+
+  def sanitize_harmony_chord_structure(chord_structure)
+    chord_structure = chord_structure.to_s
+    return chord_structure if HarmonyExerciseGenerator.chord_structure_ids.include?(chord_structure)
+
+    HarmonyExerciseGenerator::DEFAULT_CHORD_STRUCTURE
+  end
+
+  def sanitize_harmony_instrument(instrument)
+    instrument = instrument.to_s
+    return instrument if PerceptionIntervalExerciseGenerator.instrument_ids.include?(instrument)
+
+    PerceptionIntervalExerciseGenerator::DEFAULT_INSTRUMENT
+  end
+
   def localized_pitch_pair(reference_pitch, target_pitch)
     [
       PerceptionIntervalExerciseGenerator.localize_pitch_name(reference_pitch),
@@ -424,6 +544,14 @@ class StudentHubController < ApplicationController
     }
   end
 
+  def harmony_scoreboard
+    stored = harmony_playground_state[:scoreboard].to_h
+    {
+      correct_count: (stored[:correct_count] || stored["correct_count"]).to_i,
+      incorrect_count: (stored[:incorrect_count] || stored["incorrect_count"]).to_i
+    }
+  end
+
   def perception_recent_exercises
     Array(session[:perception_recent_exercises]).map { |entry| entry.to_h.symbolize_keys }
   end
@@ -443,6 +571,22 @@ class StudentHubController < ApplicationController
         signature:,
         question_type:,
         staff_position_index: staff_position_index.presence&.to_i
+      }
+    end
+  end
+
+  def harmony_recent_exercises
+    Array(harmony_playground_state[:recent_exercises]).filter_map do |entry|
+      payload = entry.to_h.symbolize_keys
+      next if payload[:question_type].blank? || payload[:key_id].blank? || payload[:chord_structure].blank?
+
+      {
+        question_type: payload[:question_type],
+        key_id: payload[:key_id],
+        chord_structure: payload[:chord_structure],
+        degree: payload[:degree].presence&.to_i,
+        progression_template_id: payload[:progression_template_id],
+        progression_focus_index: payload[:progression_focus_index].presence&.to_i
       }
     end
   end
@@ -474,6 +618,10 @@ class StudentHubController < ApplicationController
     end
   end
 
+  def store_recent_harmony_exercise!(exercise)
+    write_harmony_playground_state(recent_exercises: next_harmony_recent_exercises(exercise))
+  end
+
   def clear_perception_feedback_if_starting_new_round!
     return if @playground_feedback.present?
 
@@ -487,6 +635,12 @@ class StudentHubController < ApplicationController
     return if @playground_feedback.present?
 
     @playground_feedback = nil if params[:refresh].present? || params[:clef_mode].present? || params[:question_mode].present?
+  end
+
+  def clear_harmony_feedback_if_starting_new_round!
+    return if @playground_feedback.present?
+
+    @playground_feedback = nil if params[:refresh].present? || params[:question_mode].present? || params[:chord_structure].present? || params[:instrument].present?
   end
 
   def submit_reading_playground_answer
@@ -540,6 +694,57 @@ class StudentHubController < ApplicationController
     end
   end
 
+  def submit_harmony_playground_answer
+    exercise = current_harmony_exercise
+    if exercise.blank?
+      redirect_to app_playground_path(activity: "harmonia", refresh: 1, **harmony_preferences),
+                  alert: "Gere um novo exercício de harmonia antes de responder."
+      return
+    end
+
+    preferences = harmony_preferences
+    exercise_signature = params[:exercise_signature].to_s
+    if exercise_signature.present? && exercise_signature != exercise[:signature].to_s
+      @playground_feedback = {
+        activity: "harmonia",
+        correct: false,
+        synchronization_error: true
+      }
+      prepare_harmony_playground!
+      @harmony_exercise = exercise
+
+      if turbo_frame_request?
+        render_harmony_playground_frame
+      else
+        flash[:playground_feedback] = @playground_feedback
+        redirect_to app_playground_path(activity: "harmonia", **preferences)
+      end
+      return
+    end
+
+    selected_option_id = params[:selected_option_id].to_s
+    selected_option = exercise[:options].find { |option| option[:id] == selected_option_id }
+    correct = selected_option_id == exercise[:correct_option_id]
+
+    record_harmony_playground_attempt!(correct:)
+    @playground_feedback = build_harmony_playground_feedback(exercise:, selected_option:, correct:)
+    prepare_harmony_playground!
+
+    if correct
+      store_new_harmony_exercise!(preferences)
+      @harmony_exercise = current_harmony_exercise
+    else
+      @harmony_exercise = exercise
+    end
+
+    if turbo_frame_request?
+      render_harmony_playground_frame
+    else
+      flash[:playground_feedback] = @playground_feedback
+      redirect_to app_playground_path(activity: "harmonia", **preferences)
+    end
+  end
+
   def compact_reading_exercise_storage(exercise)
     payload = exercise.to_h.deep_symbolize_keys
     option_ids = Array(payload[:options]).filter_map do |option|
@@ -558,6 +763,109 @@ class StudentHubController < ApplicationController
       "n" => payload[:note_accidental_id],
       "k" => payload[:key_signature_id]
     }.compact
+  end
+
+  def compact_harmony_exercise_storage(exercise)
+    payload = exercise.to_h.deep_symbolize_keys
+    option_ids = Array(payload[:options]).filter_map do |option|
+      option.is_a?(Hash) ? option[:id] || option["id"] : option.to_s.presence
+    end
+
+    {
+      "m" => payload[:question_mode],
+      "s" => payload[:chord_structure],
+      "t" => payload[:question_type],
+      "k" => payload[:key_id],
+      "d" => payload[:chord_degree],
+      "i" => payload[:progression_focus_index],
+      "a" => payload[:correct_option_id],
+      "o" => option_ids,
+      "p" => payload[:progression_template_id]
+    }.compact
+  end
+
+  def harmony_playground_state
+    @harmony_playground_state ||= begin
+      state = read_harmony_playground_state
+      migrate_legacy_harmony_playground_state!(state)
+    end
+  end
+
+  def read_harmony_playground_state
+    stored = harmony_playground_store.read(harmony_playground_state_cache_key)
+    stored.is_a?(Hash) ? stored.deep_symbolize_keys : {}
+  end
+
+  def write_harmony_playground_state(updates)
+    state = harmony_playground_state.merge(updates.deep_symbolize_keys)
+    harmony_playground_store.write(
+      harmony_playground_state_cache_key,
+      state.deep_stringify_keys,
+      expires_in: 12.hours
+    )
+    @harmony_playground_state = state
+  end
+
+  def migrate_legacy_harmony_playground_state!(state)
+    migrated_state = state.deep_dup
+    legacy_exercise = session.delete(:harmony_exercise)&.to_h
+    legacy_recent_exercises = Array(session.delete(:harmony_recent_exercises)).map { |entry| entry.to_h }
+    legacy_scoreboard = session.delete(:harmony_scoreboard)&.to_h
+    changed = false
+
+    if migrated_state[:exercise].blank? && legacy_exercise.present?
+      compact_exercise = normalize_harmony_exercise_storage(legacy_exercise)
+      if compact_exercise.present?
+        migrated_state[:exercise] = compact_exercise
+        changed = true
+      end
+    end
+
+    if migrated_state[:recent_exercises].blank? && legacy_recent_exercises.present?
+      migrated_state[:recent_exercises] = legacy_recent_exercises
+      changed = true
+    end
+
+    if migrated_state[:scoreboard].blank? && legacy_scoreboard.present?
+      migrated_state[:scoreboard] = legacy_scoreboard
+      changed = true
+    end
+
+    if changed
+      harmony_playground_store.write(
+        harmony_playground_state_cache_key,
+        migrated_state.deep_stringify_keys,
+        expires_in: 12.hours
+      )
+    end
+
+    migrated_state
+  end
+
+  def harmony_playground_store
+    return Rails.cache unless Rails.cache.is_a?(ActiveSupport::Cache::NullStore)
+
+    HARMONY_PLAYGROUND_STATE_FALLBACK_STORE
+  end
+
+  def harmony_playground_state_cache_key
+    token = session[:harmony_playground_state_token]
+    token = SecureRandom.hex(16) if token.blank?
+    session[:harmony_playground_state_token] = token
+    "playground:harmonia:#{current_user.id}:#{token}"
+  end
+
+  def next_harmony_recent_exercises(exercise)
+    recent = harmony_recent_exercises
+    recent << {
+      question_type: exercise[:question_type],
+      key_id: exercise[:key_id],
+      chord_structure: exercise[:chord_structure],
+      degree: exercise[:chord_degree],
+      progression_template_id: exercise[:progression_template_id],
+      progression_focus_index: exercise[:progression_focus_index]
+    }
+    recent.last(6).map(&:stringify_keys)
   end
 
   def normalize_reading_exercise_storage(payload)
@@ -583,6 +891,32 @@ class StudentHubController < ApplicationController
     return if required_keys.any? { |key| compact_payload[key].blank? }
     return if %w[note_name accidental].include?(compact_payload["t"]) && %w[p i].any? { |key| compact_payload[key].blank? }
     return if compact_payload["t"] == "key_signature" && compact_payload["k"].blank?
+
+    compact_payload
+  end
+
+  def normalize_harmony_exercise_storage(payload)
+    payload = payload.to_h.stringify_keys
+    option_ids = Array(payload["o"] || payload["options"]).filter_map do |option|
+      option.is_a?(Hash) ? option["id"] || option[:id] : option.to_s.presence
+    end
+
+    compact_payload = {
+      "m" => payload["m"] || payload["question_mode"],
+      "s" => payload["s"] || payload["chord_structure"],
+      "t" => payload["t"] || payload["question_type"],
+      "k" => payload["k"] || payload["key_id"],
+      "d" => payload["d"] || payload["chord_degree"],
+      "i" => payload["i"] || payload["progression_focus_index"],
+      "a" => payload["a"] || payload["correct_option_id"],
+      "o" => option_ids,
+      "p" => payload["p"] || payload["progression_template_id"]
+    }.compact
+
+    required_keys = %w[m s t k a o]
+    return if required_keys.any? { |key| compact_payload[key].blank? }
+    return if %w[quality scale_degree harmonic_function].include?(compact_payload["t"]) && compact_payload["d"].blank?
+    return if compact_payload["t"] == "progression" && %w[d i p].any? { |key| compact_payload[key].blank? }
 
     compact_payload
   end
@@ -671,6 +1005,112 @@ class StudentHubController < ApplicationController
     end
   end
 
+  def hydrate_harmony_exercise(payload)
+    question_mode = payload.fetch("m")
+    chord_structure = payload.fetch("s")
+    question_type = payload.fetch("t")
+    key_id = payload.fetch("k")
+    correct_option_id = payload.fetch("a")
+    option_ids = payload.fetch("o")
+    chord_degree = payload["d"]&.to_i
+    progression_focus_index = payload["i"]&.to_i
+    progression_template_id = payload["p"]
+
+    question_mode_definition = HarmonyExerciseGenerator.question_mode_definition(question_mode)
+    chord_structure_definition = HarmonyExerciseGenerator.chord_structure_definition(chord_structure)
+    key_definition = HarmonyExerciseGenerator.key_definition(key_id)
+    return if question_mode_definition.blank? || chord_structure_definition.blank? || key_definition.blank?
+
+    generator = HarmonyExerciseGenerator.new(question_mode:, chord_structure:)
+    chord = generator.send(:chord_for_degree, key_definition:, degree: chord_degree) if chord_degree.present?
+    options = build_harmony_options(question_type:, key_definition:, chord_structure:, option_ids:, generator:)
+    return if options.size != 4 || options.none? { |option| option[:id] == correct_option_id }
+
+    base_exercise = {
+      question_mode:,
+      question_mode_label: question_mode_definition[:label],
+      chord_structure:,
+      chord_structure_label: chord_structure_definition[:label],
+      question_type:,
+      question_type_label: HarmonyExerciseGenerator.question_type_label(question_type, chord_structure),
+      key_id:,
+      key_label: key_definition[:label],
+      correct_option_id:,
+      options:
+    }
+
+    case question_type
+    when "quality", "scale_degree", "harmonic_function"
+      return if chord.blank?
+      reference_chord = %w[scale_degree harmonic_function].include?(question_type) ? generator.send(:chord_for_degree, key_definition:, degree: 1) : nil
+
+      base_exercise.merge(
+        question: HarmonyExerciseGenerator.question_prompt(question_type, chord_structure),
+        chord_degree: chord[:degree],
+        chord_degree_label: chord[:degree_card_label],
+        chord_roman: chord[:roman],
+        chord_quality_id: chord[:quality_id],
+        chord_quality_label: chord[:quality_label],
+        chord_notes_label: chord[:notes_label],
+        chord_root_label: chord[:root_label],
+        chord_function_id: chord[:function_id],
+        chord_function_label: chord[:function_label],
+        prompt_label: "Escuta",
+        prompt_value: harmony_prompt_value(reference_chord:),
+        context_items: harmony_context_items(question_type:, key_definition:, chord_structure_definition:, reference_chord:),
+        audio_sequence: harmony_audio_sequence(question_type:, chord:, reference_chord:),
+        correct_option_label: harmony_correct_label(question_type:, chord:),
+        signature: harmony_signature(question_type:, key_id:, chord_structure:, chord:, progression_template_id: nil)
+      )
+    when "progression"
+      template = HarmonyExerciseGenerator.progression_template(progression_template_id)
+      return if template.blank? || chord.blank? || progression_focus_index.blank?
+
+      progression_chords = template[:sequence].map do |degree|
+        generator.send(:chord_for_degree, key_definition:, degree:)
+      end
+
+      base_exercise.merge(
+        question: HarmonyExerciseGenerator.progression_question(progression_focus_index),
+        progression_template_id:,
+        progression_focus_index:,
+        chord_degree: chord[:degree],
+        chord_degree_label: chord[:degree_card_label],
+        chord_roman: chord[:roman],
+        chord_quality_id: chord[:quality_id],
+        chord_quality_label: chord[:quality_label],
+        chord_notes_label: chord[:notes_label],
+        chord_root_label: chord[:root_label],
+        chord_function_id: chord[:function_id],
+        chord_function_label: chord[:function_label],
+        prompt_label: "Ponto de escuta",
+        prompt_value: "Qual grau apareceu na #{HarmonyExerciseGenerator.ordinal_label(progression_focus_index)}?",
+        context_items: [
+          { label: "Tonalidade", value: key_definition[:label] },
+          { label: "Estrutura", value: chord_structure_definition[:label] },
+          { label: "Alvo", value: HarmonyExerciseGenerator.ordinal_label(progression_focus_index) }
+        ],
+        progression_steps: progression_chords.map.with_index(1) do |_entry, position|
+          {
+            roman: HarmonyExerciseGenerator.ordinal_label(position),
+            notes: position == progression_focus_index ? "Responda esta posição" : "Memorize o acorde ouvido",
+            focus: position == progression_focus_index
+          }
+        end,
+        audio_sequence: progression_chords.map { |entry| harmony_audio_payload(entry) },
+        correct_option_label: harmony_degree_option_label(chord),
+        signature: harmony_signature(
+          question_type:,
+          key_id:,
+          chord_structure:,
+          chord:,
+          progression_template_id:,
+          progression_focus_index:
+        )
+      )
+    end
+  end
+
   def build_reading_options(option_ids:, question_type:)
     option_ids.filter_map do |option_id|
       option = case question_type
@@ -685,5 +1125,102 @@ class StudentHubController < ApplicationController
 
       { id: option[:id], label: option[:label] }
     end
+  end
+
+  def build_harmony_options(question_type:, key_definition:, chord_structure:, option_ids:, generator:)
+    option_ids.filter_map do |option_id|
+      label = case question_type
+              when "quality"
+                HarmonyExerciseGenerator.quality_definition(chord_structure, option_id)&.dig(:label)
+              when "harmonic_function"
+                HarmonyExerciseGenerator.function_definition(option_id)&.dig(:label)
+              when "scale_degree"
+                degree = option_id.to_i
+                generated_chord = generator.send(:chord_for_degree, key_definition:, degree:)
+                next if generated_chord.blank?
+
+                harmony_degree_option_label(generated_chord)
+              when "progression"
+                degree = option_id.to_i
+                generated_chord = generator.send(:chord_for_degree, key_definition:, degree:)
+                next if generated_chord.blank?
+
+                harmony_degree_option_label(generated_chord)
+              end
+
+      next if label.blank?
+
+      { id: option_id.to_s, label: }
+    end
+  end
+
+  def harmony_context_items(question_type:, key_definition:, chord_structure_definition:, reference_chord: nil)
+    focus_value = case question_type
+                  when "scale_degree"
+                    "Grau do campo harmônico"
+                  when "harmonic_function"
+                    "Função dentro da tonalidade"
+                  else
+                    chord_structure_definition[:id] == "tetrad" ? "Qualidade da tétrade" : "Qualidade da tríade"
+                  end
+
+    items = [
+      { label: "Tonalidade", value: key_definition[:label] },
+      { label: "Estrutura", value: chord_structure_definition[:label] },
+      { label: "Foco", value: focus_value }
+    ]
+
+    items << { label: "Referência", value: "#{reference_chord[:roman]} da tonalidade antes do alvo" } if %w[scale_degree harmonic_function].include?(question_type) && reference_chord.present?
+
+    items
+  end
+
+  def harmony_audio_payload(chord)
+    {
+      label: chord[:roman],
+      pitches: chord[:pitches],
+      frequencies: chord[:frequencies]
+    }
+  end
+
+  def harmony_correct_label(question_type:, chord:)
+    case question_type
+    when "quality"
+      chord[:quality_label]
+    when "scale_degree"
+      "#{chord[:roman]} (#{chord[:degree]}º grau)"
+    else
+      chord[:function_label]
+    end
+  end
+
+  def harmony_progression_option_label(chord)
+    "#{chord[:roman]} · #{chord[:root_label]} #{chord[:quality_short_label]}"
+  end
+
+  def harmony_degree_option_label(chord)
+    "#{chord[:roman]} (#{chord[:degree]}º grau)"
+  end
+
+  def harmony_audio_sequence(question_type:, chord:, reference_chord:)
+    return [harmony_audio_payload(reference_chord), harmony_audio_payload(chord)] if %w[scale_degree harmonic_function].include?(question_type) && reference_chord.present?
+
+    [harmony_audio_payload(chord)]
+  end
+
+  def harmony_prompt_value(reference_chord:)
+    return "Primeiro #{reference_chord[:roman]}, depois o acorde alvo" if reference_chord.present?
+
+    "Acorde isolado"
+  end
+
+  def harmony_signature(question_type:, key_id:, chord_structure:, chord:, progression_template_id:, progression_focus_index: nil)
+    parts = [question_type, key_id, chord_structure]
+    parts << progression_template_id if progression_template_id.present?
+    parts << progression_focus_index if progression_focus_index.present?
+    parts << chord[:degree]
+    parts << chord[:quality_id] if question_type == "quality"
+    parts << chord[:function_id] if question_type == "harmonic_function"
+    parts.join("|")
   end
 end

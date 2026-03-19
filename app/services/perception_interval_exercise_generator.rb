@@ -26,6 +26,7 @@ class PerceptionIntervalExerciseGenerator
     { id: "guitar", label: "Violão" },
     { id: "organ", label: "Órgão" }
   ].freeze
+  HARMONIC_INSTRUMENT_IDS = %w[piano guitar organ].freeze
   DEFAULT_DIRECTION_MODE = "mixed".freeze
   DEFAULT_INSTRUMENT = "piano".freeze
   INTERVAL_LIBRARY = [
@@ -70,6 +71,14 @@ class PerceptionIntervalExerciseGenerator
 
   def self.instrument_ids
     INSTRUMENTS.map { |instrument| instrument[:id] }
+  end
+
+  def self.instrument_definition(id)
+    INSTRUMENTS.find { |instrument| instrument[:id] == id.to_s }
+  end
+
+  def self.harmonic_instrument?(instrument_id)
+    HARMONIC_INSTRUMENT_IDS.include?(instrument_id.to_s)
   end
 
   def self.localize_pitch_name(pitch_name)
