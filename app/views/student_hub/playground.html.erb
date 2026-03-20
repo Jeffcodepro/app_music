@@ -3,7 +3,7 @@
     <div class="playground-header">
       <div>
         <h1 class="platform-title">Playgrounds</h1>
-        <p class="playground-header__subtitle">Selecione a atividade que deseja praticar. Percepção, leitura e harmonia já geram novas rodadas automaticamente, sempre com quatro alternativas e uma única resposta correta.</p>
+        <p class="playground-header__subtitle">Selecione a atividade que deseja praticar. Leitura, rítmica, percepção e harmonia já geram novas rodadas automaticamente, sempre com quatro alternativas e uma única resposta correta.</p>
       </div>
     </div>
 
@@ -40,6 +40,13 @@
                  reading_question_modes: @reading_question_modes,
                  playground_feedback: @playground_feedback,
                  reading_scoreboard: @reading_scoreboard %>
+    <% elsif @selected_activity[:slug] == "ritmica" %>
+      <%= render "rhythm_playground",
+                 rhythm_exercise: @rhythm_exercise,
+                 rhythm_preferences: @rhythm_preferences,
+                 rhythm_activity_modes: @rhythm_activity_modes,
+                 playground_feedback: @playground_feedback,
+                 rhythm_scoreboard: @rhythm_scoreboard %>
     <% elsif @selected_activity[:slug] == "harmonia" %>
       <%= render "harmony_playground",
                  harmony_exercise: @harmony_exercise,

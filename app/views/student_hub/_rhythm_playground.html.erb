@@ -1,0 +1,159 @@
+<%= turbo_frame_tag "rhythm_playground" do %>
+  <article class="platform-card playground-stage"
+           data-controller="rhythm-player preferences"
+           data-rhythm-player-events-value="<%= rhythm_exercise[:audio_events].to_json %>"
+           data-rhythm-player-tempo-bpm-value="<%= rhythm_exercise[:tempo_bpm] %>"
+           data-rhythm-player-count-in-beats-value="<%= rhythm_exercise[:count_in_beats] %>"
+           data-rhythm-player-exercise-signature-value="<%= rhythm_exercise[:signature] %>"
+           data-rhythm-player-metronome-during-pattern-value="<%= rhythm_exercise[:metronome_during_pattern] %>"
+           data-rhythm-player-playback-cycles-value="<%= rhythm_exercise[:playback_cycles] %>">
+    <% feedback_for_current_round = playground_feedback.present? && playground_feedback[:exercise_signature] == rhythm_exercise[:signature] %>
+    <% answered_correctly = feedback_for_current_round && playground_feedback[:correct] %>
+
+    <div class="playground-stage__header">
+      <div>
+        <p class="playground-eyebrow">Modo ativo</p>
+        <h2>Playground de rítmica</h2>
+        <p>Treino auditivo com padrões gerados automaticamente para pulso, subdivisão, síncopa e precisão temporal.</p>
+      </div>
+    </div>
+
+    <% if playground_feedback.present? %>
+      <div class="playground-feedback <%= playground_feedback[:correct] ? 'is-correct' : 'is-incorrect' %>" data-rhythm-player-target="feedback">
+        <p class="playground-eyebrow">Última resposta</p>
+        <% if playground_feedback[:synchronization_error] %>
+          <h3>Ouça novamente a rodada atual</h3>
+          <p>A escuta mais recente não correspondia a este exercício. Reproduza o padrão atual antes de responder.</p>
+        <% elsif playground_feedback[:correct] %>
+          <h3>Resposta correta</h3>
+          <p>Você reconheceu corretamente o padrão de <strong><%= playground_feedback[:activity_mode_label] %></strong>.</p>
+          <p class="muted">Rodada anterior: <strong><%= playground_feedback[:tempo_label] %></strong>.</p>
+        <% else %>
+          <h3>Resposta incorreta</h3>
+          <p>Reproduza novamente o trecho para comparar o pulso, a subdivisão e a posição exata dos ataques.</p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="playground-scoreboard">
+      <div class="playground-scoreboard__item is-correct">
+        <span class="playground-scoreboard__label">Acertos</span>
+        <strong><%= rhythm_scoreboard[:correct_count] %></strong>
+      </div>
+      <div class="playground-scoreboard__item is-incorrect">
+        <span class="playground-scoreboard__label">Erros</span>
+        <strong><%= rhythm_scoreboard[:incorrect_count] %></strong>
+      </div>
+    </div>
+
+    <%= form_with url: app_playground_path, method: :get, class: "playground-controls playground-controls--stacked", data: { turbo_frame: "rhythm_playground", preferences_target: "form" } do %>
+      <%= hidden_field_tag :activity, "ritmica" %>
+
+      <div class="playground-control">
+        <span class="playground-control__label">Tipo de atividade</span>
+        <div class="playground-direction-grid">
+          <% rhythm_activity_modes.each do |mode| %>
+            <% checked = rhythm_preferences[:activity_mode] == mode[:id] %>
+            <label class="playground-direction-card <%= 'is-selected' if checked %>">
+              <%= radio_button_tag :activity_mode, mode[:id], checked, class: "playground-direction-card__input", data: { action: "change->preferences#submit" } %>
+              <span class="playground-direction-card__title"><%= mode[:label] %></span>
+            </label>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="playground-stage__grid">
+      <div class="playground-trainer">
+        <p class="playground-eyebrow">Rodada atual</p>
+        <h3><%= rhythm_exercise[:activity_mode_label] %></h3>
+        <p><%= rhythm_exercise[:question] %></p>
+
+        <div class="harmony-context-grid">
+          <div class="harmony-context-card">
+            <span class="harmony-context-card__label">Compasso</span>
+            <strong><%= rhythm_exercise[:time_signature_label] %></strong>
+          </div>
+          <div class="harmony-context-card">
+            <span class="harmony-context-card__label">Tempo</span>
+            <strong><%= rhythm_exercise[:tempo_bpm] %> BPM</strong>
+          </div>
+          <div class="harmony-context-card">
+            <span class="harmony-context-card__label">Foco</span>
+            <strong><%= rhythm_exercise[:focus_label] %></strong>
+          </div>
+        </div>
+
+        <div class="harmony-prompt-card">
+          <span class="harmony-prompt-card__label"><%= rhythm_exercise[:prompt_label] %></span>
+          <strong><%= rhythm_exercise[:prompt_value] %></strong>
+        </div>
+
+        <section class="harmony-player-panel">
+          <div class="harmony-player-panel__header">
+            <div>
+              <p class="playground-eyebrow">Escuta guiada</p>
+              <h4>Ouça o trecho e escolha a partitura rítmica correta</h4>
+            </div>
+
+            <p class="harmony-player-panel__hint">
+              O player começa com contagem de entrada e <%= rhythm_exercise[:metronome_during_pattern] ? "mantém a referência métrica durante o trecho." : "repete o padrão para facilitar a comparação." %>
+            </p>
+          </div>
+
+          <div class="harmony-player-grid">
+            <button type="button"
+                    class="harmony-transport-button"
+                    data-action="rhythm-player#repeat"
+                    data-rhythm-player-target="trigger"
+                    aria-label="Repetir a última escuta">
+              <span class="app-btn__icon"><%= interface_symbol_icon("restart") %></span>
+              <span class="harmony-transport-button__label">Repetir</span>
+            </button>
+
+            <button type="button"
+                    class="harmony-listen-button harmony-listen-button--linear"
+                    data-action="rhythm-player#play"
+                    data-rhythm-player-target="trigger">
+              <span class="harmony-listen-button__eyebrow">Ditado rítmico</span>
+              <span class="harmony-listen-button__title">Ouvir o padrão atual</span>
+              <span class="harmony-listen-button__meta">Escute o compasso completo e compare a distribuição dos ataques antes de responder.</span>
+            </button>
+
+            <%= link_to app_playground_path(activity: "ritmica", refresh: 1, **rhythm_preferences),
+                        class: "harmony-transport-button harmony-transport-button--next",
+                        data: { turbo_frame: "rhythm_playground" },
+                        aria: { label: "Próximo exercício" } do %>
+              <span class="app-btn__icon"><%= interface_symbol_icon("next") %></span>
+              <span class="harmony-transport-button__label">Próximo</span>
+            <% end %>
+          </div>
+        </section>
+      </div>
+
+      <div class="playground-response-panel">
+        <p class="playground-eyebrow">Resposta</p>
+        <h3>Escolha a partitura correspondente</h3>
+        <div class="perception-options rhythm-options">
+          <% rhythm_exercise[:options].each_with_index do |option, index| %>
+            <%= button_to submit_app_playground_answer_path,
+                          method: :post,
+                          params: {
+                            activity: "ritmica",
+                            selected_option_id: option[:id],
+                            exercise_signature: rhythm_exercise[:signature],
+                            activity_mode: rhythm_preferences[:activity_mode]
+                          },
+                          class: "perception-option rhythm-option",
+                          disabled: answered_correctly,
+                          data: { action: "click->rhythm-player#guardAnswer" },
+                          form: { data: { turbo_frame: "rhythm_playground" } } do %>
+              <span class="rhythm-option__header">Opção <%= ("A".ord + index).chr %></span>
+              <span class="rhythm-notation-card"><%= rhythm_staff_svg(option[:pattern_signature]) %></span>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </article>
+<% end %>

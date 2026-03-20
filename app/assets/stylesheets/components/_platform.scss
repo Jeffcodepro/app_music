@@ -1070,6 +1070,39 @@
   margin-top: 0.15rem;
 }
 
+.rhythm-options {
+  margin-top: 0.95rem;
+}
+
+.rhythm-option {
+  padding: 0.9rem;
+  min-height: 0;
+  gap: 0.7rem;
+}
+
+.rhythm-option__header {
+  color: #1c1917;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.rhythm-notation-card {
+  width: 100%;
+  display: block;
+  border-radius: 1rem;
+  border: 1px solid #e7e5e4;
+  background: linear-gradient(180deg, #fffefc 0%, #f5f5f4 100%);
+  padding: 0.55rem;
+}
+
+.rhythm-notation-card svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 @media (min-width: 768px) {
   .playground-activity-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

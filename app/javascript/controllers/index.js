@@ -25,6 +25,9 @@ application.register("interval-player", IntervalPlayerController)
 import PreferencesController from "./preferences_controller"
 application.register("preferences", PreferencesController)
 
+import RhythmPlayerController from "./rhythm_player_controller"
+application.register("rhythm-player", RhythmPlayerController)
+
 import ScrollVideoController from "./scroll_video_controller"
 application.register("scroll-video", ScrollVideoController)
 

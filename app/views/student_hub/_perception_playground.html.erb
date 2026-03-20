@@ -56,7 +56,7 @@
           <% perception_instruments.each do |instrument| %>
             <% checked = perception_preferences[:instrument] == instrument[:id] %>
             <label class="playground-select-card <%= 'is-selected' if checked %>">
-              <%= radio_button_tag :instrument, instrument[:id], checked, class: "playground-select-card__input", data: { action: "change->preferences#submit" } %>
+              <%= radio_button_tag :instrument, instrument[:id], checked, class: "playground-select-card__input", data: { action: "change->interval-player#stop change->preferences#submit" } %>
               <span class="playground-select-card__icon"><%= instrument_option_icon(instrument[:id]) %></span>
               <span class="playground-select-card__body">
                 <span class="playground-select-card__title"><%= instrument[:label] %></span>
@@ -72,7 +72,7 @@
           <% perception_direction_modes.each do |mode| %>
             <% checked = perception_preferences[:direction_mode] == mode[:id] %>
             <label class="playground-direction-card <%= 'is-selected' if checked %>">
-              <%= radio_button_tag :direction_mode, mode[:id], checked, class: "playground-direction-card__input", data: { action: "change->preferences#submit" } %>
+              <%= radio_button_tag :direction_mode, mode[:id], checked, class: "playground-direction-card__input", data: { action: "change->interval-player#stop change->preferences#submit" } %>
               <span class="playground-direction-card__title"><%= mode[:label] %></span>
             </label>
           <% end %>
@@ -96,7 +96,7 @@
           <% if answered_correctly %>
             <%= link_to app_playground_path(activity: "percepcao", refresh: 1, autoplay: 1, **perception_preferences),
                         class: "playground-player-button playground-player-button--primary",
-                        data: { turbo_frame: "perception_playground" },
+                        data: { turbo_frame: "perception_playground", action: "click->interval-player#stop" },
                         aria: { label: "Próximo intervalo e tocar" } do %>
               <span class="app-btn__icon"><%= interface_symbol_icon("play") %></span>
             <% end %>
@@ -113,7 +113,7 @@
 
           <%= link_to app_playground_path(activity: "percepcao", refresh: 1, **perception_preferences),
                       class: "playground-player-button",
-                      data: { turbo_frame: "perception_playground" },
+                      data: { turbo_frame: "perception_playground", action: "click->interval-player#stop" },
                       aria: { label: "Próximo intervalo" } do %>
             <span class="app-btn__icon"><%= interface_symbol_icon("next") %></span>
           <% end %>

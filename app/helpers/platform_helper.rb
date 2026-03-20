@@ -12,10 +12,10 @@ module PlatformHelper
     {
       slug: "ritmica",
       title: "Playground de rítmica",
-      badge: "Em breve",
+      badge: "Disponível",
       description: "Pulso, subdivisão, síncopa e precisão de tempo com padrões gerados automaticamente.",
       icon: "drum",
-      available: false
+      available: true
     },
     {
       slug: "percepcao",
@@ -198,6 +198,10 @@ module PlatformHelper
 
   def reading_note_staff_svg(exercise)
     ReadingStaffSvgRenderer.new(exercise:).call.html_safe
+  end
+
+  def rhythm_staff_svg(pattern_signature)
+    RhythmStaffSvgRenderer.new(pattern_signature:).call.html_safe
   end
 
   def interface_symbol_icon(name)

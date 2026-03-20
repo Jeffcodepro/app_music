@@ -1,6 +1,7 @@
 class StudentHubController < ApplicationController
   DEFAULT_PLAYGROUND_ACTIVITY = "percepcao".freeze
   HARMONY_PLAYGROUND_STATE_FALLBACK_STORE = ActiveSupport::Cache::MemoryStore.new(expires_in: 12.hours)
+  RHYTHM_PLAYGROUND_STATE_FALLBACK_STORE = ActiveSupport::Cache::MemoryStore.new(expires_in: 12.hours)
   GUIDED_AREA_LABELS = {
     "leitura" => "Estruturação / Leitura",
     "ritmica" => "Rítmica",
@@ -102,6 +103,11 @@ class StudentHubController < ApplicationController
       clear_reading_feedback_if_starting_new_round!
       store_new_reading_exercise! if should_refresh_reading_exercise?
       @reading_exercise = current_reading_exercise
+    when "ritmica"
+      prepare_rhythm_playground!
+      clear_rhythm_feedback_if_starting_new_round!
+      store_new_rhythm_exercise! if should_refresh_rhythm_exercise?
+      @rhythm_exercise = current_rhythm_exercise
     when "harmonia"
       prepare_harmony_playground!
       clear_harmony_feedback_if_starting_new_round!
@@ -118,6 +124,8 @@ class StudentHubController < ApplicationController
       submit_perception_playground_answer
     when "leitura"
       submit_reading_playground_answer
+    when "ritmica"
+      submit_rhythm_playground_answer
     when "harmonia"
       submit_harmony_playground_answer
     else
@@ -247,6 +255,17 @@ class StudentHubController < ApplicationController
     hydrate_harmony_exercise(compact_exercise)
   end
 
+  def current_rhythm_exercise
+    stored_exercise = rhythm_playground_state[:exercise]&.to_h&.stringify_keys
+    return if stored_exercise.blank?
+
+    compact_exercise = normalize_rhythm_exercise_storage(stored_exercise)
+    return if compact_exercise.blank?
+
+    write_rhythm_playground_state(exercise: compact_exercise) if stored_exercise != compact_exercise
+    hydrate_rhythm_exercise(compact_exercise)
+  end
+
   def prepare_perception_playground!
     @perception_instruments = PerceptionIntervalExerciseGenerator.instruments
     @perception_direction_modes = PerceptionIntervalExerciseGenerator.direction_modes
@@ -267,6 +286,12 @@ class StudentHubController < ApplicationController
     @harmony_instruments = PerceptionIntervalExerciseGenerator.instruments
     @harmony_preferences = harmony_preferences
     @harmony_scoreboard = harmony_scoreboard
+  end
+
+  def prepare_rhythm_playground!
+    @rhythm_activity_modes = RhythmExerciseGenerator.activity_modes
+    @rhythm_preferences = rhythm_preferences
+    @rhythm_scoreboard = rhythm_scoreboard
   end
 
   def should_refresh_perception_exercise?
@@ -291,6 +316,14 @@ class StudentHubController < ApplicationController
 
     current_harmony_exercise[:question_mode] != @harmony_preferences[:question_mode] ||
       current_harmony_exercise[:chord_structure] != @harmony_preferences[:chord_structure]
+  end
+
+  def should_refresh_rhythm_exercise?
+    return true if params[:refresh].present?
+    return true if current_rhythm_exercise.blank?
+    return false if @rhythm_preferences[:activity_mode] == RhythmExerciseGenerator::DEFAULT_ACTIVITY_MODE
+
+    current_rhythm_exercise[:activity_mode] != @rhythm_preferences[:activity_mode]
   end
 
   def store_new_perception_exercise!(preferences = perception_preferences)
@@ -325,6 +358,18 @@ class StudentHubController < ApplicationController
     write_harmony_playground_state(
       exercise: compact_harmony_exercise_storage(exercise),
       recent_exercises: next_harmony_recent_exercises(exercise)
+    )
+  end
+
+  def store_new_rhythm_exercise!(preferences = rhythm_preferences)
+    exercise = RhythmExerciseGenerator.new(
+      activity_mode: preferences[:activity_mode],
+      recent_exercises: rhythm_recent_exercises
+    ).call
+
+    write_rhythm_playground_state(
+      exercise: compact_rhythm_exercise_storage(exercise),
+      recent_exercises: next_rhythm_recent_exercises(exercise)
     )
   end
 
@@ -370,6 +415,20 @@ class StudentHubController < ApplicationController
     }
   end
 
+  def build_rhythm_playground_feedback(exercise:, selected_option:, correct:)
+    {
+      activity: "ritmica",
+      correct:,
+      selected_label: selected_option&.dig(:aria_label) || "Resposta inválida",
+      correct_label: exercise[:correct_option_label],
+      activity_mode_label: exercise[:activity_mode_label],
+      tempo_label: "#{exercise[:tempo_bpm]} BPM",
+      exercise_signature: exercise[:signature],
+      synchronization_error: false,
+      answered: true
+    }
+  end
+
   def render_perception_playground_frame
     render partial: "student_hub/perception_playground",
            locals: {
@@ -405,6 +464,17 @@ class StudentHubController < ApplicationController
              harmony_instruments: @harmony_instruments,
              playground_feedback: @playground_feedback,
              harmony_scoreboard: harmony_scoreboard
+           }
+  end
+
+  def render_rhythm_playground_frame
+    render partial: "student_hub/rhythm_playground",
+           locals: {
+             rhythm_exercise: @rhythm_exercise,
+             rhythm_preferences: @rhythm_preferences,
+             rhythm_activity_modes: @rhythm_activity_modes,
+             playground_feedback: @playground_feedback,
+             rhythm_scoreboard: rhythm_scoreboard
            }
   end
 
@@ -450,6 +520,20 @@ class StudentHubController < ApplicationController
     write_harmony_playground_state(scoreboard: scoreboard.stringify_keys)
   end
 
+  def record_rhythm_playground_attempt!(correct:)
+    current_user.study_activities.create!(
+      area: "ritmica",
+      xp_earned: correct ? 20 : 6,
+      minutes_practiced: 3,
+      occurred_on: Date.current
+    )
+
+    scoreboard = rhythm_scoreboard
+    key = correct ? :correct_count : :incorrect_count
+    scoreboard[key] += 1
+    write_rhythm_playground_state(scoreboard: scoreboard.stringify_keys)
+  end
+
   def perception_preferences
     {
       instrument: sanitize_perception_instrument(params[:instrument]),
@@ -469,6 +553,12 @@ class StudentHubController < ApplicationController
       question_mode: sanitize_harmony_question_mode(params[:question_mode]),
       chord_structure: sanitize_harmony_chord_structure(params[:chord_structure]),
       instrument: sanitize_harmony_instrument(params[:instrument])
+    }
+  end
+
+  def rhythm_preferences
+    {
+      activity_mode: sanitize_rhythm_activity_mode(params[:activity_mode])
     }
   end
 
@@ -521,6 +611,13 @@ class StudentHubController < ApplicationController
     PerceptionIntervalExerciseGenerator::DEFAULT_INSTRUMENT
   end
 
+  def sanitize_rhythm_activity_mode(activity_mode)
+    activity_mode = activity_mode.to_s
+    return activity_mode if RhythmExerciseGenerator.activity_mode_ids.include?(activity_mode)
+
+    RhythmExerciseGenerator::DEFAULT_ACTIVITY_MODE
+  end
+
   def localized_pitch_pair(reference_pitch, target_pitch)
     [
       PerceptionIntervalExerciseGenerator.localize_pitch_name(reference_pitch),
@@ -546,6 +643,14 @@ class StudentHubController < ApplicationController
 
   def harmony_scoreboard
     stored = harmony_playground_state[:scoreboard].to_h
+    {
+      correct_count: (stored[:correct_count] || stored["correct_count"]).to_i,
+      incorrect_count: (stored[:incorrect_count] || stored["incorrect_count"]).to_i
+    }
+  end
+
+  def rhythm_scoreboard
+    stored = rhythm_playground_state[:scoreboard].to_h
     {
       correct_count: (stored[:correct_count] || stored["correct_count"]).to_i,
       incorrect_count: (stored[:incorrect_count] || stored["incorrect_count"]).to_i
@@ -587,6 +692,18 @@ class StudentHubController < ApplicationController
         degree: payload[:degree].presence&.to_i,
         progression_template_id: payload[:progression_template_id],
         progression_focus_index: payload[:progression_focus_index].presence&.to_i
+      }
+    end
+  end
+
+  def rhythm_recent_exercises
+    Array(rhythm_playground_state[:recent_exercises]).filter_map do |entry|
+      payload = entry.to_h.symbolize_keys
+      next if payload[:activity_mode].blank? || payload[:signature].blank?
+
+      {
+        activity_mode: payload[:activity_mode],
+        signature: payload[:signature]
       }
     end
   end
@@ -641,6 +758,12 @@ class StudentHubController < ApplicationController
     return if @playground_feedback.present?
 
     @playground_feedback = nil if params[:refresh].present? || params[:question_mode].present? || params[:chord_structure].present? || params[:instrument].present?
+  end
+
+  def clear_rhythm_feedback_if_starting_new_round!
+    return if @playground_feedback.present?
+
+    @playground_feedback = nil if params[:refresh].present? || params[:activity_mode].present?
   end
 
   def submit_reading_playground_answer
@@ -745,6 +868,57 @@ class StudentHubController < ApplicationController
     end
   end
 
+  def submit_rhythm_playground_answer
+    exercise = current_rhythm_exercise
+    if exercise.blank?
+      redirect_to app_playground_path(activity: "ritmica", refresh: 1, **rhythm_preferences),
+                  alert: "Gere um novo exercício de rítmica antes de responder."
+      return
+    end
+
+    preferences = rhythm_preferences
+    exercise_signature = params[:exercise_signature].to_s
+    if exercise_signature.present? && exercise_signature != exercise[:signature].to_s
+      @playground_feedback = {
+        activity: "ritmica",
+        correct: false,
+        synchronization_error: true
+      }
+      prepare_rhythm_playground!
+      @rhythm_exercise = exercise
+
+      if turbo_frame_request?
+        render_rhythm_playground_frame
+      else
+        flash[:playground_feedback] = @playground_feedback
+        redirect_to app_playground_path(activity: "ritmica", **preferences)
+      end
+      return
+    end
+
+    selected_option_id = params[:selected_option_id].to_s
+    selected_option = exercise[:options].find { |option| option[:id] == selected_option_id }
+    correct = selected_option_id == exercise[:correct_option_id]
+
+    record_rhythm_playground_attempt!(correct:)
+    @playground_feedback = build_rhythm_playground_feedback(exercise:, selected_option:, correct:)
+    prepare_rhythm_playground!
+
+    if correct
+      store_new_rhythm_exercise!(preferences)
+      @rhythm_exercise = current_rhythm_exercise
+    else
+      @rhythm_exercise = exercise
+    end
+
+    if turbo_frame_request?
+      render_rhythm_playground_frame
+    else
+      flash[:playground_feedback] = @playground_feedback
+      redirect_to app_playground_path(activity: "ritmica", **preferences)
+    end
+  end
+
   def compact_reading_exercise_storage(exercise)
     payload = exercise.to_h.deep_symbolize_keys
     option_ids = Array(payload[:options]).filter_map do |option|
@@ -781,6 +955,20 @@ class StudentHubController < ApplicationController
       "a" => payload[:correct_option_id],
       "o" => option_ids,
       "p" => payload[:progression_template_id]
+    }.compact
+  end
+
+  def compact_rhythm_exercise_storage(exercise)
+    payload = exercise.to_h.deep_symbolize_keys
+    option_ids = Array(payload[:options]).filter_map do |option|
+      option.is_a?(Hash) ? option[:id] || option["id"] : option.to_s.presence
+    end
+
+    {
+      "m" => payload[:activity_mode],
+      "b" => payload[:tempo_bpm],
+      "a" => payload[:correct_option_id],
+      "o" => option_ids
     }.compact
   end
 
@@ -868,6 +1056,47 @@ class StudentHubController < ApplicationController
     recent.last(6).map(&:stringify_keys)
   end
 
+  def rhythm_playground_state
+    @rhythm_playground_state ||= read_rhythm_playground_state
+  end
+
+  def read_rhythm_playground_state
+    stored = rhythm_playground_store.read(rhythm_playground_state_cache_key)
+    stored.is_a?(Hash) ? stored.deep_symbolize_keys : {}
+  end
+
+  def write_rhythm_playground_state(updates)
+    state = rhythm_playground_state.merge(updates.deep_symbolize_keys)
+    rhythm_playground_store.write(
+      rhythm_playground_state_cache_key,
+      state.deep_stringify_keys,
+      expires_in: 12.hours
+    )
+    @rhythm_playground_state = state
+  end
+
+  def rhythm_playground_store
+    return Rails.cache unless Rails.cache.is_a?(ActiveSupport::Cache::NullStore)
+
+    RHYTHM_PLAYGROUND_STATE_FALLBACK_STORE
+  end
+
+  def rhythm_playground_state_cache_key
+    token = session[:rhythm_playground_state_token]
+    token = SecureRandom.hex(16) if token.blank?
+    session[:rhythm_playground_state_token] = token
+    "playground:ritmica:#{current_user.id}:#{token}"
+  end
+
+  def next_rhythm_recent_exercises(exercise)
+    recent = rhythm_recent_exercises
+    recent << {
+      activity_mode: exercise[:activity_mode],
+      signature: exercise[:correct_option_id]
+    }
+    recent.last(6).map(&:stringify_keys)
+  end
+
   def normalize_reading_exercise_storage(payload)
     payload = payload.to_h.stringify_keys
     option_ids = Array(payload["o"] || payload["options"]).filter_map do |option|
@@ -917,6 +1146,25 @@ class StudentHubController < ApplicationController
     return if required_keys.any? { |key| compact_payload[key].blank? }
     return if %w[quality scale_degree harmonic_function].include?(compact_payload["t"]) && compact_payload["d"].blank?
     return if compact_payload["t"] == "progression" && %w[d i p].any? { |key| compact_payload[key].blank? }
+
+    compact_payload
+  end
+
+  def normalize_rhythm_exercise_storage(payload)
+    payload = payload.to_h.stringify_keys
+    option_ids = Array(payload["o"] || payload["options"]).filter_map do |option|
+      option.is_a?(Hash) ? option["id"] || option[:id] : option.to_s.presence
+    end
+
+    compact_payload = {
+      "m" => payload["m"] || payload["activity_mode"],
+      "b" => payload["b"] || payload["tempo_bpm"],
+      "a" => payload["a"] || payload["correct_option_id"],
+      "o" => option_ids
+    }.compact
+
+    required_keys = %w[m b a o]
+    return if required_keys.any? { |key| compact_payload[key].blank? }
 
     compact_payload
   end
@@ -1109,6 +1357,41 @@ class StudentHubController < ApplicationController
         )
       )
     end
+  end
+
+  def hydrate_rhythm_exercise(payload)
+    activity_mode = payload.fetch("m")
+    tempo_bpm = payload.fetch("b").to_i
+    correct_option_id = payload.fetch("a")
+    option_ids = payload.fetch("o")
+
+    activity_mode_definition = RhythmExerciseGenerator.activity_mode_definition(activity_mode)
+    options = option_ids.filter_map { |option_id| RhythmExerciseGenerator.option_from_signature(option_id) }
+    correct_option = options.find { |option| option[:id] == correct_option_id }
+    return if activity_mode_definition.blank? || tempo_bpm <= 0 || options.size != 4 || correct_option.blank?
+
+    {
+      activity_mode:,
+      activity_mode_label: activity_mode_definition[:label],
+      question: RhythmExerciseGenerator.description_for(activity_mode),
+      prompt_label: "Escuta",
+      prompt_value: RhythmExerciseGenerator.prompt_value_for(activity_mode),
+      focus_label: RhythmExerciseGenerator.focus_label_for(activity_mode),
+      tempo_bpm:,
+      time_signature_label: "4/4",
+      count_in_beats: RhythmExerciseGenerator::BEATS_PER_MEASURE,
+      metronome_during_pattern: RhythmExerciseGenerator.metronome_during_pattern?(activity_mode),
+      playback_cycles: RhythmExerciseGenerator.playback_cycles_for(activity_mode),
+      audio_events: RhythmExerciseGenerator.audio_events_for_signature(correct_option_id),
+      correct_option_id:,
+      correct_option_label: correct_option[:aria_label],
+      options:,
+      signature: RhythmExerciseGenerator.exercise_signature(
+        activity_mode:,
+        pattern_signature: correct_option_id,
+        tempo_bpm:
+      )
+    }
   end
 
   def build_reading_options(option_ids:, question_type:)
