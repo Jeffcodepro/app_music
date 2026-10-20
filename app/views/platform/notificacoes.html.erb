@@ -1,0 +1,5 @@
+<%= render "platform/page_header", title: "Minha conta", description: "Notificações" %>
+<div class="account-layout"><%= render "platform/account_navigation" %><div class="account-content">
+  <section class="ui-card account-panel"><h2>Avisos de estudo</h2><p>Os resultados dos exercícios aparecem durante a prática e no seu histórico.</p><p class="ui-support">Lembretes de estudo e notificações por e-mail ainda não estão disponíveis.</p><div class="platform-actions"><%= link_to "Ver meu histórico", app_practice_result_path, class: "app-btn" %></div></section>
+  <section class="ui-card account-panel"><h2>Recuperação de acesso</h2><p>O e-mail cadastrado é usado para recuperar sua senha quando você solicitar.</p><div class="platform-actions"><%= link_to "Revisar dados de acesso", edit_user_registration_path, class: "ui-text-link" %></div></section>
+</div></div>

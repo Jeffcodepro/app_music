@@ -3,14 +3,16 @@
   <div class="grain"></div>
 
   <!-- Background Orbs -->
+  <div class="landing-orbs" aria-hidden="true">
   <div class="orb w-[600px] h-[600px] bg-accent-blue top-[-10%] left-[-5%]" id="orb-1"></div>
   <div class="orb w-[500px] h-[500px] bg-accent-glow bottom-[10%] right-[-5%]" id="orb-2"></div>
+  </div>
 
   <!-- Navigation (Floating Pill style) -->
   <% login_path = respond_to?(:new_user_session_path) ? new_user_session_path : "#cta" %>
   <% cadastro_path = respond_to?(:new_user_registration_path) ? new_user_registration_path : "#planos" %>
-  <nav class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] w-[94%] lg:w-auto">
-      <div class="glass-static px-5 lg:px-6 py-3.5 lg:py-4 rounded-full flex items-center justify-between gap-4 lg:gap-8 border border-white/40">
+  <nav aria-label="Navegação principal" class="landing-nav fixed top-8 left-1/2 -translate-x-1/2 z-[100] w-[94%] lg:w-auto">
+      <div class="landing-nav__pill glass-static px-5 lg:px-6 py-3.5 lg:py-4 rounded-full flex items-center justify-between gap-4 lg:gap-8 border border-white/40">
           <a href="#hero" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <div class="w-8 h-8 rounded-full bg-stone-900 flex items-center justify-center text-white">
                   <i data-lucide="play" class="w-4 h-4 ml-0.5"></i>
@@ -18,7 +20,7 @@
               <span class="font-bold tracking-tighter text-lg">AppMusic</span>
           </a>
 
-          <div class="hidden lg:flex items-center gap-6 text-[10px] uppercase tracking-[0.2em] font-bold text-stone-600">
+          <div class="landing-nav__links hidden lg:flex items-center gap-6 text-[10px] uppercase tracking-[0.2em] font-bold text-stone-600">
               <a href="#vantagens" class="hover:text-stone-900 transition-colors">Vantagens</a>
               <a href="#conteudo" class="hover:text-stone-900 transition-colors">Conteúdo</a>
               <a href="#planos" class="hover:text-stone-900 transition-colors">Planos</a>
@@ -26,6 +28,7 @@
           </div>
 
           <div class="flex items-center gap-2">
+              <button type="button" class="landing-menu-toggle" aria-label="Abrir menu" aria-controls="public-menu" aria-expanded="false" data-app-shell-target="toggle" data-action="app-shell#toggle"><%= ui_icon("menu") %></button>
               <a href="<%= login_path %>" class="px-4 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold text-stone-700 border border-stone-300/80 hover:text-stone-900 hover:border-stone-400 transition-colors">
                   Login
               </a>
@@ -36,7 +39,7 @@
       </div>
   </nav>
 
-  <section id="hero" class="relative h-screen w-full flex items-center justify-center overflow-hidden bg-[#0A0A0A]" data-controller="seamless-loop">
+  <section id="hero" class="relative h-screen w-full flex items-center justify-center overflow-hidden bg-[#0A0A0A]" data-controller="seamless-loop" data-landing-surface="dark">
 
     <!-- Vídeo Primário -->
     <%= video_tag "Sheet_music_looping_motion_graphic_delpmaspu.mp4",
@@ -81,10 +84,10 @@
 
       <div class="reveal mt-12 flex flex-col sm:flex-row gap-6 items-center" style="transition-delay: 0.6s;">
         <a href="#planos" class="btn-beam inline-block">
-            <button class="btn-beam-content bg-stone-900 border border-white/20 hover:bg-stone-800">
+            <span class="btn-beam-content bg-stone-900 border border-white/20 hover:bg-stone-800">
                 <span class="font-bold">Começar grátis</span>
                 <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-            </button>
+            </span>
         </a>
         <a href="#como-funciona" class="text-white/70 hover:text-white transition-colors flex items-center gap-2 text-sm uppercase tracking-widest font-bold">
             Ver como funciona
@@ -96,7 +99,7 @@
   </section>
 
   <!-- 2. DIFERENCIAIS (Bento Grid) -->
-  <section id="vantagens" class="relative z-30 py-32 px-8 max-w-[1400px] mx-auto bg-grid bg-white border-t border-stone-100 mt-0">
+  <section id="vantagens" class="relative z-30 py-32 px-8 max-w-[1400px] mx-auto bg-grid bg-white border-t border-stone-100 mt-0" data-landing-surface="light">
       <div class="mb-24 reveal text-center max-w-4xl mx-auto flex flex-col items-center">
           <div class="w-12 h-12 rounded-full border border-stone-200 flex items-center justify-center mb-6 shadow-sm"><i data-lucide="sparkles" class="w-5 h-5 text-stone-900"></i></div>
           <h2 class="text-5xl md:text-6xl font-medium tracking-tighter mb-8 tabular-nums">Muito além de assistir aulas</h2>
@@ -190,7 +193,7 @@
              <div class="relative z-10 w-16 h-16 rounded-full bg-white border border-stone-100 shadow-sm flex items-center justify-center mb-6 text-stone-900">
                   <i data-lucide="bar-chart-2" class="w-8 h-8"></i>
               </div>
-             <div class="relative z-10 max-w-[200px] bg-[#F9F9F8]/60 backdrop-blur-sm p-2 -ml-2 rounded-xl">
+             <div class="landing-evolution-copy relative z-10 max-w-[200px] p-2 -ml-2">
                   <h4 class="text-2xl font-bold mb-3">Evolução visível</h4>
                   <p class="text-stone-500 font-light text-sm leading-relaxed">Acompanhe seu progresso, suba de nível e avance com segurança.</p>
               </div>
@@ -208,7 +211,7 @@
   </section>
 
   <!-- 3. PROBLEMA + SOLUÇÃO -->
-  <section id="problema" class="py-32 bg-stone-900 text-white relative border-t border-white/10">
+  <section id="problema" class="py-32 bg-stone-900 text-white relative border-t border-white/10" data-landing-surface="dark">
       <div class="absolute inset-0 bg-grid opacity-5"></div>
 
       <div class="max-w-[1200px] mx-auto px-8 relative z-10">
@@ -242,7 +245,7 @@
   </section>
 
   <!-- 4. COMO FUNCIONA (5 Steps) -->
-  <section id="como-funciona" class="py-32 bg-stone-900 text-white relative overflow-hidden">
+  <section id="como-funciona" class="py-32 bg-stone-900 text-white relative overflow-hidden" data-landing-surface="dark">
       <div class="absolute inset-0 bg-grid opacity-10"></div>
 
       <div class="max-w-[1400px] mx-auto px-8 relative z-10">
@@ -296,7 +299,7 @@
   </section>
 
   <!-- 5. MODOS DE ESTUDO -->
-  <section id="modos-estudo" class="py-32 bg-stone-50 border-t border-stone-200">
+  <section id="modos-estudo" class="py-32 bg-stone-50 border-t border-stone-200" data-landing-surface="light">
       <div class="max-w-[1400px] mx-auto px-8">
           <div class="mb-20 reveal text-center max-w-4xl mx-auto">
               <h2 class="text-5xl md:text-6xl font-medium tracking-tighter mb-8 tabular-nums">Dois modos de aprender, um só objetivo: fazer você evoluir</h2>
@@ -334,7 +337,7 @@
   </section>
 
   <!-- 6. PLAYGROUNDS -->
-  <section id="playgrounds" class="py-32 relative bg-[linear-gradient(180deg,#ffffff_0%,#fafaf9_100%)]">
+  <section id="playgrounds" class="py-32 relative bg-[linear-gradient(180deg,#ffffff_0%,#fafaf9_100%)]" data-landing-surface="light">
       <div class="max-w-[1400px] mx-auto px-8">
           <div class="mb-20 reveal grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
               <div>
@@ -419,7 +422,7 @@
   </section>
 
   <!-- 7. MODO CARREIRA & BOLSA DE EVOLUÇÃO -->
-  <section id="gamificacao" class="py-32 bg-stone-900 border-t border-white/10 text-white relative">
+  <section id="gamificacao" class="py-32 bg-stone-900 border-t border-white/10 text-white relative" data-landing-surface="dark">
       <div class="absolute inset-0 bg-grid opacity-5"></div>
 
       <div class="max-w-[1200px] mx-auto px-8 relative z-10">
@@ -466,7 +469,7 @@
   </section>
 
   <!-- 8. DIVERSÃO EM GRUPO -->
-  <section id="diversao" class="py-32 bg-stone-50 border-t border-stone-200">
+  <section id="diversao" class="py-32 bg-stone-50 border-t border-stone-200" data-landing-surface="light">
       <div class="max-w-[1400px] mx-auto px-8">
           <div class="flex flex-col md:flex-row items-center gap-20">
               <div class="w-full md:w-1/2 reveal">
@@ -495,7 +498,7 @@
   </section>
 
   <!-- 9. CONTEÚDO (5 Areas) -->
-  <section id="conteudo" data-reveal-bidirectional-section class="py-32 bg-[#0A0A0A] text-white relative border-t border-white/5">
+  <section id="conteudo" data-reveal-bidirectional-section class="py-32 bg-[#0A0A0A] text-white relative border-t border-white/5" data-landing-surface="dark">
       <div class="max-w-[1000px] mx-auto px-8 relative z-10">
           <div class="flex flex-col mb-20 reveal text-center items-center">
               <h2 class="text-5xl font-medium tracking-tighter mb-6">Conteúdo estruturado para evoluir com consistência</h2>
@@ -563,7 +566,7 @@
       </div>
   </section>
   <!-- 6. DIFERENCIAIS -->
-  <section id="diferenciais" class="py-32 bg-stone-50 border-t border-stone-200 relative overflow-hidden">
+  <section id="diferenciais" class="py-32 bg-stone-50 border-t border-stone-200 relative overflow-hidden" data-landing-surface="light">
       <div class="absolute inset-0 pointer-events-none">
           <div class="absolute -top-20 -right-24 w-80 h-80 rounded-full bg-white/70 blur-3xl"></div>
           <div class="absolute -bottom-20 -left-24 w-80 h-80 rounded-full bg-stone-200/60 blur-3xl"></div>
@@ -634,7 +637,7 @@
   </section>
 
   <!-- 10. PLANOS -->
-  <section id="planos" class="py-32 bg-stone-50 border-t border-stone-200">
+  <section id="planos" class="py-32 bg-stone-50 border-t border-stone-200" data-landing-surface="light">
       <div class="max-w-[1200px] mx-auto px-8">
           <div class="mb-20 reveal text-center max-w-3xl mx-auto">
               <h2 class="text-5xl font-medium tracking-tighter mb-6">Comece de graça ou mergulhe fundo</h2>
@@ -724,7 +727,7 @@
   </section>
 
   <!-- 9. FAQ -->
-  <section id="faq" class="py-32 bg-stone-50 border-t border-stone-200">
+  <section id="faq" class="py-32 bg-stone-50 border-t border-stone-200" data-landing-surface="light">
       <div class="max-w-[1000px] mx-auto px-8">
           <div class="mb-20 reveal text-center">
               <h2 class="text-5xl font-medium tracking-tighter">Perguntas Frequentes</h2>
@@ -765,7 +768,7 @@
   </section>
 
   <!-- 10. FINAL CTA -->
-  <section id="cta" class="py-40 bg-white relative overflow-hidden border-t border-stone-100 flex items-center justify-center">
+  <section id="cta" class="py-40 bg-white relative overflow-hidden border-t border-stone-100 flex items-center justify-center" data-landing-surface="light">
       <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-stone-100 via-white to-white opacity-50"></div>
 
       <div class="reveal text-center relative z-10 max-w-4xl px-8 flex flex-col items-center">
@@ -782,10 +785,10 @@
           </p>
 
           <a href="#planos" class="btn-beam inline-block scale-110">
-              <button class="btn-beam-content bg-stone-900 !text-white font-bold hover:bg-stone-700">
+              <span class="btn-beam-content bg-stone-900 !text-white font-bold hover:bg-stone-700">
                   <span class="text-sm">Começar gratuitamente</span>
                   <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-              </button>
+              </span>
           </a>
       </div>
   </section>

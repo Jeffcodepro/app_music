@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
   <head>
     <title>AppMusic</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%= render "shared/public_theme_boot" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Nunito:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
     <!-- Icons & Tailwind (Temporary CDN for design prototype, should be moved to yarn/npm later) -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -49,13 +49,21 @@
     </script>
   </head>
 
-  <body>
-    <%= render "shared/flash" %>
-    <%= yield %>
-    <script>
-      document.addEventListener("turbo:load", function() {
-        if (typeof lucide !== "undefined") lucide.createIcons();
-      });
-    </script>
+  <body class="landing-body" data-controller="theme" data-theme-fixed-value="light" data-action="turbo:before-render@document->theme#apply">
+    <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+    <div class="landing-shell" data-controller="app-shell" data-app-shell-drawer-only-value="true" data-app-shell-mobile-breakpoint-value="1023"
+         data-action="keydown@window->app-shell#keydown turbo:before-cache@document->app-shell#beforeCache">
+      <aside id="public-menu" class="landing-drawer" aria-label="Menu AppMusic" data-app-shell-target="sidebar">
+        <div class="landing-drawer__heading"><strong>AppMusic</strong><span data-app-shell-target="toggleSlot"></span></div>
+        <nav aria-label="Navegação mobile" data-action="click->app-shell#navigate">
+          <% public_navigation.each do |item| %><%= link_to item[:label], item[:href] %><% end %>
+        </nav>
+      </aside>
+      <button type="button" class="landing-backdrop" tabindex="-1" aria-label="Fechar menu" data-action="app-shell#close"></button>
+      <div data-app-shell-target="workspace">
+        <%= render "shared/flash" %>
+        <main id="main-content" tabindex="-1"><%= yield %></main>
+      </div>
+    </div>
   </body>
 </html>

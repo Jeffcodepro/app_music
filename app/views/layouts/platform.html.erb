@@ -1,53 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
   <head>
-    <title>AppMusic</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title><%= content_for?(:title) ? "#{yield(:title)} · AppMusic" : "AppMusic · Seu espaço de prática" %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
+    <%= render "shared/theme_boot" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <%= render "shared/fonts" %>
     <script src="https://unpkg.com/tone@14.8.49/build/Tone.js" data-turbo-track="reload"></script>
     <script src="https://unpkg.com/soundfont-player@0.12.0/dist/soundfont-player.min.js" data-turbo-track="reload"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ["Inter", "sans-serif"],
-              mono: ["JetBrains Mono", "monospace"]
-            }
-          }
-        }
-      }
-    </script>
   </head>
-
-  <body class="app-body">
-    <%= render "shared/flash" %>
-
-    <div class="app-shell" data-controller="app-shell" data-app-shell-storage-key-value="app_music_sidebar_collapsed">
+  <body class="platform-ui app-body <%= 'study-editorial' if editorial_study_screen? %> <%= 'exercise-workbench' if controller_name == "student_hub" && action_name == "playground" %>" data-controller="theme" data-action="turbo:before-render@document->theme#apply">
+    <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+    <div class="app-shell <%= 'has-playground' if controller_name == 'student_hub' && action_name == 'playground' %>"
+         data-controller="app-shell" data-app-shell-storage-key-value="app_music_sidebar_collapsed"
+         data-action="keydown@window->app-shell#keydown turbo:before-cache@document->app-shell#beforeCache">
       <%= render "platform/side_nav" %>
-
-      <div class="app-workspace">
+      <button type="button" class="app-backdrop" tabindex="-1" aria-label="Fechar menu" data-action="app-shell#close"></button>
+      <div class="app-workspace" data-app-shell-target="workspace">
         <%= render "platform/top_nav" %>
-        <main class="app-main">
-          <%= yield %>
-        </main>
+        <%= render "shared/flash" %>
+        <main id="main-content" class="app-main" tabindex="-1"><%= yield %></main>
+        <footer class="app-footer">AppMusic <span aria-hidden="true">·</span> Um pouco de música, todos os dias.</footer>
       </div>
     </div>
-
-    <script>
-      document.addEventListener("turbo:load", function() {
-        if (typeof lucide !== "undefined") lucide.createIcons();
-      });
-    </script>
   </body>
 </html>

@@ -1,0 +1,97 @@
+// Compact practice surface; public pages, account forms and curriculum stay scoped out.
+.platform-ui {
+  .theme-picker { position: relative; z-index: 40; color: var(--ui-ink); }
+  .theme-picker > summary { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; list-style: none; cursor: pointer; border: 0; border-radius: 4px; background: transparent; &::-webkit-details-marker { display: none; } }
+  .theme-picker .ui-icon { width: 21px; height: 21px; }
+  .theme-picker__current { display: none; }
+  .theme-picker__options { position: absolute; right: 0; top: calc(100% + 6px); display: flex; gap: 4px; padding: 6px; border: 1px solid var(--ui-control-border); background: var(--ui-surface); border-radius: 6px; }
+  .theme-picker button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid transparent; border-radius: 4px; color: var(--ui-ink); background: transparent; }
+  .theme-picker button[aria-pressed=true] { border-color: var(--ui-control-border); background: var(--ui-soft); }
+  .theme-picker > summary:focus-visible, .theme-picker button:focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
+  @media (hover: hover) { .theme-picker > summary:hover, .theme-picker button:hover { background: var(--ui-soft); } }
+  .practice-index { max-width: 960px; }
+  .practice-history-link { margin-top: 24px; }
+}
+html[data-theme-preference=light] .theme-picker__current--light,
+html[data-theme-preference=dark] .theme-picker__current--dark,
+html[data-theme-preference=system] .theme-picker__current--system { display: inline-flex; }
+.platform-ui.exercise-workbench {
+  --ui-bg: #fafafa; --ui-surface: #fff; --ui-soft: #f2f2f2;
+  background: var(--ui-bg);
+  .playground-page a:focus-visible, .playground-page button:focus-visible,
+  .playground-page summary:focus-visible, .playground-page label:has(input:focus-visible) { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
+  .app-main { max-width: 1160px; padding: 24px 32px; }
+  .playground-page .platform-container { padding: 0; }
+  .playground-page .playground-header { margin: 0 0 12px; padding: 0; }
+  .playground-page .platform-title { font-size: 26px; margin: 0; }
+  .playground-page .practice-switcher { margin-bottom: 16px; }
+  .playground-page .practice-switcher > summary { min-height: 44px; }
+  .playground-page .playground-stage { padding: 0; margin: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .playground-page .perception-session { padding: 0; }
+  .playground-page .playground-scoreboard { display: flex; gap: 16px; margin: 0 0 12px; }
+  .playground-page .playground-scoreboard__item { display: flex; align-items: baseline; gap: 6px; padding: 0; border: 0; background: transparent; strong { font-size: 14px; } }
+  .playground-page .playground-scoreboard__label { font-size: 13px; font-weight: 400; text-transform: none; letter-spacing: 0; }
+  .playground-page .playground-settings { margin: 0 0 16px; }
+  .playground-page .playground-settings summary { min-height: 44px; padding: 10px 0; border: 0; background: transparent; border-radius: 0; font-size: 14px; font-weight: 500; span { font-size: 13px; margin-left: 8px; display: inline; } }
+  .playground-page .playground-controls { padding: 16px; margin-top: 4px; border: 0; background: var(--ui-soft); border-radius: 4px; gap: 16px; }
+  .playground-page .playground-control__label { font-size: 13px; }
+  .playground-page .playground-select-card, .playground-page .playground-direction-card { border-radius: 4px; padding: 10px; min-height: 44px; }
+  .playground-page .playground-direction-card__title, .playground-page .playground-select-card__title { font-size: 14px; }
+  .playground-page .playground-direction-card__meta { font-size: 12px; }
+  .playground-page .playground-stage__grid { display: block; max-width: 920px; }
+  .playground-page .playground-trainer { padding: 20px 24px 12px; margin: 0; background: var(--ui-surface); border: 0; border-radius: 4px 4px 0 0; }
+  .playground-page .playground-trainer .exercise-question { font-size: 20px; font-weight: 600; line-height: 1.4; margin: 0 0 8px; }
+  .playground-page .exercise-context, .playground-page .harmony-essential-context { font-size: 14px; margin: 0 0 12px; color: var(--ui-muted); }
+  .playground-page .reading-notation-card { width: 100%; max-width: 540px; margin: 12px auto 0; padding: 8px; border: 0; background: transparent; }
+  .playground-page .reading-notation-card svg { width: 100%; max-height: 220px; }
+  .playground-page .playground-player-controls, .playground-page .harmony-player-grid { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 0; }
+  .playground-page .harmony-player-panel { padding: 0; margin: 0; border: 0; border-radius: 0; background: transparent; }
+  .playground-page .harmony-exercise-audio { padding: 0 24px 12px; background: var(--ui-surface); }
+  .playground-page .playground-player-button, .playground-page .harmony-listen-button, .playground-page .harmony-transport-button { display: inline-flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; width: auto; min-height: 44px; height: auto; padding: 10px 14px; border: 1px solid var(--ui-control-border); border-radius: 4px; font-size: 14px; font-weight: 500; color: var(--ui-ink); background: var(--ui-surface); box-shadow: none; transform: none; }
+  .playground-page .harmony-listen-button__title, .playground-page .harmony-transport-button__label { font-size: 14px; line-height: 1.4; text-transform: none; letter-spacing: 0; }
+  .playground-page .playground-player-button--primary { background: var(--ui-ink); color: var(--ui-surface); }
+  .playground-page .app-btn__icon, .playground-page .app-btn__icon svg { display: inline-flex; width: 18px; height: 18px; }
+  .playground-page .playback-status { flex-basis: 100%; font-size: 13px; min-height: 24px; margin-top: 8px; }
+  .playground-page .harmony-reference { font-size: 13px; margin-bottom: 8px; }
+  .playground-page .harmony-context-card { padding: 8px; strong { font-size: 14px; } }
+  .playground-page .harmony-prompt-card { margin: 8px 0; padding: 8px 0; border: 0; background: transparent; strong { font-size: 16px; } }
+  .playground-page .harmony-prompt-card__label { font-size: 12px; }
+  .playground-page .harmony-progression-grid { gap: 8px; margin: 8px 0; }
+  .playground-page .harmony-progression-step { padding: 8px; }
+  .playground-page .harmony-progression-step__roman { font-size: 18px; }
+  .playground-page .harmony-progression-step__notes { font-size: 12px; }
+  .playground-page .playground-response-panel { padding: 0 24px 20px; margin: 0; border: 0; border-radius: 0 0 4px 4px; background: var(--ui-surface); }
+  .playground-page .perception-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin: 0; form { min-width: 0; margin: 0; } }
+  .playground-page .perception-option { display: flex; flex-direction: column; justify-content: center; align-items: start; width: 100%; min-height: 48px; height: 100%; padding: 10px 12px; gap: 4px; border-radius: 4px; transform: none; box-shadow: none; }
+  .playground-page .perception-option__label { font-size: 15px; line-height: 1.4; overflow-wrap: anywhere; }
+  .playground-page .rhythm-option { padding: 8px 12px; }
+  .playground-page .rhythm-option__header { font-size: 12px; line-height: 1.3; letter-spacing: .04em; }
+  .playground-page .rhythm-notation-card { margin: 0; padding: 0; border: 0; background: transparent; width: 100%; }
+  .playground-page .rhythm-notation-card svg { display: block; width: 100%; height: auto; max-height: 140px; }
+  .playground-page .playground-feedback { padding: 12px; margin-top: 16px; border-radius: 4px; h3 { font-size: 16px; } p { font-size: 14px; } }
+  .playground-page .playground-next { margin-top: 12px; }
+  .playground-page .playground-next-button { width: auto; min-height: 44px; padding: 10px 0; font-size: 14px; border: 0; border-radius: 4px; background: transparent; }
+  @media (max-width: 767px) {
+    .app-main { padding: 20px 16px; }
+    .playground-page .playground-trainer { padding: 16px 16px 12px; }
+    .playground-page .harmony-exercise-audio { padding-inline: 16px; }
+    .playground-page .playground-response-panel { padding: 0 16px 16px; }
+    .playground-page .perception-options { grid-template-columns: minmax(0,1fr); }
+    .playground-page .rhythm-option { max-width: 540px; }
+    .playground-page .reading-notation-card { padding: 0; }
+  }
+}
+html[data-theme=dark] .platform-ui.exercise-workbench { --ui-bg: #141414; --ui-surface: #202020; --ui-soft: #292929; }
+.platform-ui.exercise-workbench .playground-page {
+  .rhythm-meter-controls { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+  .rhythm-meter-controls select { width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid var(--ui-control-border); border-radius: 4px; color: var(--ui-ink); background: var(--ui-surface); }
+  .metrical-options .rhythm-notation-card { overflow-x: auto; max-width: 100%; }
+  .metrical-options .rhythm-notation-card svg { max-height: none; }
+  @media (max-width: 767px) { .rhythm-meter-controls { grid-template-columns: minmax(0,1fr); gap: 12px; } }
+}
+.platform-ui.exercise-workbench .playground-page {
+  .metrical-answer { min-width: 0; padding: 8px; border: 1px solid var(--ui-control-border); border-radius: 4px; }
+  .metrical-answer .rhythm-score-scroll { padding-bottom: 4px; border-radius: 0; }
+  .metrical-answer .rhythm-score-scroll:focus-visible { outline: 2px solid var(--ui-focus); outline-offset: -2px; }
+  .metrical-answer .rhythm-option { min-height: 44px; margin-top: 8px; padding-block: 8px; align-items: center; }
+}

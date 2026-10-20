@@ -1,0 +1,23 @@
+# Manually specified C-major spellings (not snapshots from HeadMusic).
+# Function names freeze the legacy editorial policy; specialist approval pending.
+- degree: 1
+  pitches: [C3, E3, G3]
+  function: tonic
+- degree: 2
+  pitches: [D3, F3, A3]
+  function: subdominant
+- degree: 3
+  pitches: [E3, G3, B3]
+  function: tonic
+- degree: 4
+  pitches: [F3, A3, C4]
+  function: subdominant
+- degree: 5
+  pitches: [G3, B3, D4]
+  function: dominant
+- degree: 6
+  pitches: [A3, C4, E4]
+  function: tonic
+- degree: 7
+  pitches: [B3, D4, F4]
+  function: leading_tone

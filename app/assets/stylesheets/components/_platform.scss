@@ -614,6 +614,12 @@
   line-height: 1.2;
 }
 
+.playground-direction-card__meta {
+  color: #57534e;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
 .playground-select-card__title {
   font-size: 0.9rem;
 }
@@ -631,9 +637,20 @@
   text-align: center;
 }
 
+.playground-direction-card--detailed {
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 8.5rem;
+  text-align: left;
+}
+
 .playground-direction-card.is-selected .playground-direction-card__title,
 .playground-select-card.is-selected .playground-select-card__title {
   color: #115e59;
+}
+
+.playground-direction-card.is-selected .playground-direction-card__meta {
+  color: #134e4a;
 }
 
 .playground-trainer {
@@ -647,6 +664,12 @@
 .playground-trainer h3,
 .playground-trainer p {
   color: inherit;
+}
+
+.playground-trainer__meta {
+  margin-top: 0.6rem;
+  color: #e7e5e4;
+  font-size: 0.92rem;
 }
 
 .playground-eyebrow {

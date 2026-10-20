@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <title>AppMusic · Sua jornada musical</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <%= csrf_meta_tags %><%= csp_meta_tag %>
+  <%= render "shared/theme_boot" %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+  <%= render "shared/fonts" %>
+</head>
+<body class="platform-ui" data-controller="theme" data-action="turbo:before-render@document->theme#apply">
+  <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+  <header class="auth-header"><%= link_to root_path, class: "app-logo" do %><span class="app-logo__mark"><%= ui_icon("music") %></span>AppMusic<% end %><%= render "shared/theme_control" %></header>
+  <%= render "shared/flash" %>
+  <main id="main-content" class="auth-main" tabindex="-1"><%= yield %></main>
+</body>
+</html>

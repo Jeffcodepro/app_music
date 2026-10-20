@@ -1,0 +1,16 @@
+<% icons = { "leitura" => "book", "ritmica" => "drum", "percepcao" => "headphones", "harmonia" => "music" } %>
+<details class="practice-switcher" data-controller="practice-switcher"
+         data-action="toggle->practice-switcher#sync keydown.esc->practice-switcher#escape click@document->practice-switcher#outside turbo:before-cache@document->practice-switcher#beforeCache">
+  <summary data-practice-switcher-target="summary" aria-controls="practice-destinations" aria-label="Área atual: <%= platform_area_label(selected_activity[:slug]) %>. Escolher prática">
+    <%= ui_icon(icons.fetch(selected_activity[:slug])) %>
+    <span><%= platform_area_label(selected_activity[:slug]) %></span>
+    <svg class="practice-switcher__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+  </summary>
+  <nav id="practice-destinations" aria-label="Áreas de prática" data-action="click->practice-switcher#navigate">
+    <% activities.each do |activity| %>
+      <%= link_to app_playground_path(activity: activity[:slug]), aria: { current: selected_activity[:slug] == activity[:slug] ? "page" : nil }, data: { turbo_frame: "_top" } do %>
+        <%= ui_icon(icons.fetch(activity[:slug])) %><span><%= platform_area_label(activity[:slug]) %></span>
+      <% end %>
+    <% end %>
+  </nav>
+</details>

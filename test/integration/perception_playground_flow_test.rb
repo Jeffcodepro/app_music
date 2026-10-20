@@ -19,8 +19,8 @@ class PerceptionPlaygroundFlowTest < ActionDispatch::IntegrationTest
     get app_playground_path(activity: "percepcao")
 
     assert_response :success
-    assert_includes response.body, "Playground de percep"
-    assert_includes response.body, "Identifique o intervalo melódico"
+    assert_select "h1", text: "Percepção"
+    assert_includes response.body, "Qual intervalo você ouviu?"
     assert_includes response.body, "Tocar intervalo"
   end
 end

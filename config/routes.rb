@@ -13,6 +13,10 @@ Rails.application.routes.draw do
     get "app/carreira", to: "platform#carreira", as: :app_carreira
     get "app/arena", to: "platform#arena", as: :app_arena
     get "app/perfil", to: "platform#perfil", as: :app_perfil
+    get "app/perfil/dados-pessoais", to: "platform#dados_pessoais", as: :app_account_personal
+    get "app/perfil/assinaturas", to: "platform#assinaturas", as: :app_account_subscription
+    get "app/perfil/notificacoes", to: "platform#notificacoes", as: :app_account_notifications
+    get "app/perfil/aparencia", to: "platform#aparencia", as: :app_account_appearance
     patch "app/perfil", to: "platform#update_perfil", as: :update_app_perfil
     patch "app/perfil/plan", to: "platform#update_plan", as: :update_app_plan
 

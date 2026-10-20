@@ -1,0 +1,15 @@
+<section class="study-calendar" data-testid="study-calendar" aria-labelledby="calendar-title">
+  <header><div><p class="study-kicker">Sua constância</p><h2 id="calendar-title"><%= l(calendar.month, format: "%B de %Y").capitalize %></h2></div>
+    <nav aria-label="Meses do calendário"><%= link_to "‹", app_dashboard_path(month: calendar.month.prev_month.strftime('%Y-%m')), aria: { label: "Mês anterior" } %><% if calendar.month < calendar.today.beginning_of_month %><%= link_to "›", app_dashboard_path(month: calendar.month.next_month.strftime('%Y-%m')), aria: { label: "Próximo mês" } %><% end %></nav>
+  </header>
+  <p class="calendar-summary"><strong><%= calendar.practice_counts.size %></strong> <%= calendar.practice_counts.size == 1 ? 'dia' : 'dias' %> com prática neste mês</p>
+  <table><caption class="visually-hidden">Dias de acesso e prática, horário de Brasília</caption><thead><tr><% PlatformHelper::WEEKDAY_LABELS.each do |day| %><th scope="col"><%= day %></th><% end %></tr></thead><tbody>
+    <% calendar.weeks.each do |week| %><tr><% week.each do |date| %>
+      <% inside = date.month == calendar.month.month; visited = inside && calendar.visits[date]; count = inside ? calendar.practice_counts.fetch(date, 0) : 0 %>
+      <% label = [l(date, format: '%d de %B'), ('hoje' if date == calendar.today), ('acessou a plataforma' if visited), ("#{count} registro(s) de prática" if count.positive?)].compact.join(', ') %>
+      <td class="<%= 'is-outside' unless inside %> <%= 'is-today' if date == calendar.today %>" data-date="<%= date.iso8601 %>" data-visited="<%= !!visited %>" data-practiced="<%= count.positive? %>"><time datetime="<%= date.iso8601 %>" aria-label="<%= label %>" title="<%= label %>"><span><%= date.day %></span><span class="calendar-marks" aria-hidden="true"><%= '○' if visited %><%= '■' if count.positive? %></span></time></td>
+    <% end %></tr><% end %>
+  </tbody></table>
+  <div class="calendar-legend"><span><span aria-hidden="true">○</span> Acesso</span><span><span aria-hidden="true">■</span> Prática</span></div>
+  <p class="calendar-note">Horário de Brasília. <% if calendar.visits_available? %>Acessos registrados a partir desta atualização.<% else %>O registro de acessos está temporariamente indisponível.<% end %> Aulas ainda em preparação.</p>
+</section>

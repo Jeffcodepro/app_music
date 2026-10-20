@@ -1,0 +1,5 @@
+<section class="ui-empty" <%= tag.attributes(data: { testid: local_assigns[:testid] }) %>>
+  <span class="ui-empty__icon"><%= ui_icon(local_assigns.fetch(:icon, "book")) %></span>
+  <h2><%= title %></h2><p><%= description %></p>
+  <%= link_to local_assigns.fetch(:action_label, "Explorar os Playgrounds"), local_assigns.fetch(:action_path, app_pratica_path), class: "app-btn app-btn--primary" %>
+</section>

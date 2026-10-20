@@ -7,6 +7,8 @@ class User < ApplicationRecord
 
   validates :full_name, presence: true, on: :create
   has_many :study_activities, dependent: :destroy
+  has_many :exercise_assignments, dependent: :destroy
+  has_many :daily_visits, dependent: :delete_all
   has_one_attached :avatar
 
   def self.from_omniauth(auth)

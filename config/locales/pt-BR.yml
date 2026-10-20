@@ -1,0 +1,113 @@
+pt-BR:
+  date:
+    month_names: [~, janeiro, fevereiro, março, abril, maio, junho, julho, agosto, setembro, outubro, novembro, dezembro]
+    abbr_month_names: [~, jan, fev, mar, abr, mai, jun, jul, ago, set, out, nov, dez]
+  activerecord:
+    models:
+      user: conta
+    attributes:
+      user:
+        email: E-mail
+        password: Senha
+        password_confirmation: Confirmação de senha
+        current_password: Senha atual
+        reset_password_token: Link de recuperação
+        full_name: Nome completo
+        phone: Telefone
+        primary_instrument: Instrumento principal
+        study_goal: Objetivo de estudo
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      blank: "não pode ficar em branco"
+      present: "deve ficar em branco"
+      invalid: "não é válido"
+      taken: "já está em uso"
+      confirmation: "não corresponde a %{attribute}"
+      too_short: "é muito curta (mínimo de %{count} caracteres)"
+      too_long: "é muito longo (máximo de %{count} caracteres)"
+      wrong_length: "deve ter %{count} caracteres"
+      inclusion: "não está na lista de opções"
+      exclusion: "não está disponível"
+      not_a_number: "não é um número"
+      not_an_integer: "deve ser um número inteiro"
+      greater_than: "deve ser maior que %{count}"
+      greater_than_or_equal_to: "deve ser maior ou igual a %{count}"
+      equal_to: "deve ser igual a %{count}"
+      less_than: "deve ser menor que %{count}"
+      less_than_or_equal_to: "deve ser menor ou igual a %{count}"
+      other_than: "deve ser diferente de %{count}"
+      odd: "deve ser ímpar"
+      even: "deve ser par"
+      required: "é obrigatório"
+      record_invalid: "Não foi possível salvar: %{errors}"
+      already_confirmed: "já foi confirmado; tente entrar"
+      confirmation_period_expired: "precisa ser confirmado em %{period}; solicite outro link"
+      expired: "expirou; solicite outro link"
+      not_found: "não foi encontrado"
+      not_locked: "não está bloqueado"
+      not_saved:
+        one: "Revise este erro para salvar sua %{resource}:"
+        other: "Revise estes %{count} erros para salvar sua %{resource}:"
+  simple_form:
+    "yes": Sim
+    "no": Não
+    required:
+      text: obrigatório
+      mark: "*"
+    error_notification:
+      default_message: "Revise os campos indicados abaixo."
+  devise:
+    confirmations:
+      confirmed: "Seu e-mail foi confirmado."
+      send_instructions: "Você receberá instruções para confirmar seu e-mail."
+      send_paranoid_instructions: "Se houver uma conta com esse e-mail, você receberá instruções de confirmação."
+    failure:
+      already_authenticated: "Você já está conectado."
+      inactive: "Sua conta ainda não está ativa."
+      invalid: "E-mail ou senha inválidos."
+      locked: "Sua conta está bloqueada."
+      last_attempt: "Você tem mais uma tentativa antes do bloqueio da conta."
+      not_found_in_database: "E-mail ou senha inválidos."
+      timeout: "Sua sessão expirou. Entre novamente para continuar."
+      unauthenticated: "Entre ou crie uma conta para continuar."
+      unconfirmed: "Confirme seu e-mail para continuar."
+    # Preserve existing outgoing mail subjects and templates. This mission
+    # localizes the UI; email localization is a separate product decision.
+    mailer:
+      confirmation_instructions:
+        subject: "Confirmation instructions"
+      reset_password_instructions:
+        subject: "Reset password instructions"
+      unlock_instructions:
+        subject: "Unlock instructions"
+      email_changed:
+        subject: "Email Changed"
+      password_change:
+        subject: "Password Changed"
+    omniauth_callbacks:
+      failure: "Não foi possível entrar com %{kind}: %{reason}."
+      success: "Você entrou com sua conta %{kind}."
+    passwords:
+      no_token: "Abra o link completo do e-mail de recuperação para definir uma nova senha."
+      send_instructions: "Você receberá instruções para recuperar sua senha."
+      send_paranoid_instructions: "Se houver uma conta com esse e-mail, você receberá um link para recuperar a senha."
+      updated: "Senha alterada. Você está conectado."
+      updated_not_active: "Senha alterada."
+    registrations:
+      destroyed: "Sua conta foi encerrada."
+      signed_up: "Conta criada. Boas práticas!"
+      signed_up_but_inactive: "Conta criada. Aguarde a ativação para entrar."
+      signed_up_but_locked: "Conta criada. Ela está bloqueada no momento."
+      signed_up_but_unconfirmed: "Enviamos um link para confirmar seu e-mail."
+      update_needs_confirmation: "Dados salvos. Confirme seu novo e-mail pelo link enviado."
+      updated: "Dados da conta atualizados."
+      updated_but_not_signed_in: "Dados atualizados. Entre novamente com a nova senha."
+    sessions:
+      signed_in: "Você entrou no AppMusic."
+      signed_out: "Você saiu da conta."
+      already_signed_out: "Você saiu da conta."
+    unlocks:
+      send_instructions: "Você receberá instruções para desbloquear sua conta."
+      send_paranoid_instructions: "Se houver uma conta com esse e-mail, você receberá instruções de desbloqueio."
+      unlocked: "Conta desbloqueada. Entre para continuar."

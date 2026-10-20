@@ -1,0 +1,4 @@
+<%= render "platform/page_header", title: "Minha conta", description: "Assinaturas e compras" %>
+<div class="account-layout"><%= render "platform/account_navigation" %><div class="account-content">
+  <section class="ui-card account-panel"><h2>Plano registrado</h2><p class="account-plan"><%= current_user.plan.presence || "Não selecionado" %></p><p>O plano não define seu nível musical.</p><p class="ui-support">Contratação, pagamentos e histórico de compras ainda não estão disponíveis.</p><div class="platform-actions"><%= link_to "Conhecer os planos", app_plans_compare_path, class: "app-btn" %></div></section>
+</div></div>

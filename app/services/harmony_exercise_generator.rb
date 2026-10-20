@@ -45,15 +45,8 @@ class HarmonyExerciseGenerator
     { id: "eb_major", label: "Mi bemol maior", root_pitch: "Eb3" }
   ].freeze
 
-  FUNCTION_BY_DEGREE = {
-    1 => "tonic",
-    2 => "subdominant",
-    3 => "tonic",
-    4 => "subdominant",
-    5 => "dominant",
-    6 => "tonic",
-    7 => "leading_tone"
-  }.freeze
+  # Compatibility for existing callers; the validator does not consult this.
+  FUNCTION_BY_DEGREE = HarmonicFunctionConvention::BY_DEGREE
 
   TRIAD_ROMAN_NUMERALS = {
     1 => "I",
@@ -190,24 +183,30 @@ class HarmonyExerciseGenerator
     when "scale_degree"
       "Ouça primeiro a tônica da tonalidade e depois o acorde alvo. Identifique em qual grau do campo harmônico maior ele foi formado."
     when "harmonic_function"
-      "Ouça primeiro a tônica da tonalidade e depois o acorde alvo. Identifique sua função harmônica principal dentro da tonalidade."
+      "Ouça primeiro a tônica da tonalidade e depois o acorde alvo. #{HarmonicFunctionConvention::INSTRUCTION}"
     else
       "Ouça a progressão e identifique o grau pedido dentro da sequência."
     end
   end
 
   def self.ordinal_label(position)
-    "#{position}ª posição"
+    ExercisePresentation.ordinal(position)
   end
 
   def self.progression_question(position)
-    "Ouça a progressão inteira e identifique qual grau apareceu na #{ordinal_label(position)}."
+    ExercisePresentation.progression_question(position)
   end
 
-  def initialize(random: Random.new, question_mode: DEFAULT_QUESTION_MODE, chord_structure: DEFAULT_CHORD_STRUCTURE, recent_exercises: [])
+  def initialize(random: Random.new, question_mode: DEFAULT_QUESTION_MODE, chord_structure: DEFAULT_CHORD_STRUCTURE, recent_exercises: [], level: nil, instrument: "piano")
+    @instrument = instrument
+    ExerciseInstrumentRegister.range(instrument)
+    @level = ListeningDifficulty.validate_level!(level) unless level.nil?
     @random = random
     @question_mode = sanitize_question_mode(question_mode)
     @chord_structure = sanitize_chord_structure(chord_structure)
+    if @level && ((!ListeningDifficulty.harmony_modes(@level).include?(@question_mode) && @question_mode != "mixed") || !ListeningDifficulty.harmony_structures(@level).include?(@chord_structure))
+      raise ArgumentError, "content is unavailable at this difficulty level"
+    end
     @recent_exercises = Array(recent_exercises).map { |entry| entry.to_h.symbolize_keys }
   end
 
@@ -226,12 +225,15 @@ class HarmonyExerciseGenerator
                  build_progression_exercise(key_definition:)
                end
 
-    exercise.merge(
+    exercise = exercise.merge(
       question_mode: @question_mode,
       question_mode_label: self.class.question_mode_definition(@question_mode).fetch(:label),
       chord_structure: @chord_structure,
       chord_structure_label: self.class.chord_structure_definition(@chord_structure).fetch(:label)
     )
+    exercise.merge!(level: @level, difficulty_version: "harmony-levels-v1") if @level
+    exercise.merge!(instrument: @instrument, register_version: "concert-register-v1") unless @instrument == "piano"
+    exercise
   end
 
   private
@@ -259,7 +261,7 @@ class HarmonyExerciseGenerator
   def build_scale_degree_exercise(key_definition:)
     degree = sampled_degree(question_type: "scale_degree", key_definition:)
     chord = chord_for_degree(key_definition:, degree:)
-    distractors = ((1..7).to_a - [degree]).sample(3, random: @random)
+    distractors = (degree_pool - [degree]).sample(3, random: @random)
     options = ([degree] + distractors).shuffle(random: @random).map do |candidate_degree|
       candidate_chord = chord_for_degree(key_definition:, degree: candidate_degree)
       {
@@ -327,19 +329,13 @@ class HarmonyExerciseGenerator
       chord_function_id: correct_chord[:function_id],
       chord_function_label: correct_chord[:function_label],
       prompt_label: "Ponto de escuta",
-      prompt_value: "Qual grau apareceu na #{self.class.ordinal_label(focus_position)}?",
+      prompt_value: ExercisePresentation.progression_prompt(focus_position),
       context_items: [
         { label: "Tonalidade", value: key_definition[:label] },
         { label: "Estrutura", value: self.class.chord_structure_definition(@chord_structure).fetch(:label) },
         { label: "Alvo", value: self.class.ordinal_label(focus_position) }
       ],
-      progression_steps: progression_chords.map.with_index(1) do |_chord, position|
-        {
-          roman: self.class.ordinal_label(position),
-          notes: position == focus_position ? "Responda esta posição" : "Memorize o acorde ouvido",
-          focus: position == focus_position
-        }
-      end,
+      progression_steps: ExercisePresentation.progression_steps(progression_chords.size, focus_position),
       audio_sequence: progression_chords.map { |chord| audio_payload_for(chord) },
       correct_option_id: correct_degree.to_s,
       correct_option_label: degree_option_label(correct_chord),
@@ -355,6 +351,7 @@ class HarmonyExerciseGenerator
       question_type:,
       question_type_label: self.class.question_type_label(question_type, @chord_structure),
       question: self.class.question_prompt(question_type, @chord_structure),
+      function_convention_id: HarmonicFunctionConvention::VERSION,
       key_id: key_definition[:id],
       key_label: key_definition[:label],
       chord_degree: chord[:degree],
@@ -385,9 +382,24 @@ class HarmonyExerciseGenerator
       pitch_collection = HeadMusic::Analysis::PitchCollection.new(chord_pitches)
       quality_id = pitch_collection.sonority.identifier.to_s
       quality_definition = self.class.quality_definition(@chord_structure, quality_id)
+      root_label = self.class.localize_spelling(chord_pitches.first.spelling.to_s)
+      inversion = @level == 4 ? @random.rand(1...chord_pitches.size) : 0
+      if inversion.positive?
+        notes = chord_pitches.map { |p| MusicTheory::Note.parse(p.to_s) }
+        chord_pitches = notes.drop(inversion) + notes.take(inversion).map { |p| MusicTheory::Note.new(step: p.step, alter: p.alter, octave: p.octave + 1) }
+      end
+      register_offset = ExerciseInstrumentRegister.chord_offset(chord_pitches.map { |pitch| MusicTheory::Note.parse(pitch.to_s) }, @instrument)
+      unless register_offset.zero?
+        chord_pitches = chord_pitches.map do |pitch|
+          note = MusicTheory::Note.parse(pitch.to_s)
+          MusicTheory::Note.new(step: note.step, alter: note.alter, octave: note.octave + register_offset / 12)
+        end
+      end
 
       {
         degree:,
+        register_offset:,
+        inversion:,
         roman: roman_for_degree(degree),
         degree_card_label: "#{roman_for_degree(degree)} (#{degree}º grau)",
         quality_id:,
@@ -395,8 +407,8 @@ class HarmonyExerciseGenerator
         quality_short_label: quality_definition.fetch(:short_label),
         function_id: function_for_degree(degree),
         function_label: self.class.function_definition(function_for_degree(degree)).fetch(:label),
-        root_label: self.class.localize_spelling(chord_pitches.first.spelling.to_s),
-        notes_label: chord_pitches.map { |pitch| self.class.localize_spelling(pitch.spelling.to_s) }.join(" - "),
+        root_label:,
+        notes_label: chord_pitches.map { |pitch| self.class.localize_spelling(pitch.spelling.to_s.sub(/-?\d+\z/, "")) }.join(" - "),
         pitches: chord_pitches.map(&:to_s),
         frequencies: chord_pitches.map { |pitch| pitch.frequency.round(3) }
       }
@@ -412,11 +424,14 @@ class HarmonyExerciseGenerator
   end
 
   def audio_payload_for(chord)
-    {
+    payload = {
       label: chord[:roman],
       pitches: chord[:pitches],
       frequencies: chord[:frequencies]
     }
+    payload[:inversion] = chord[:inversion] if @level
+    payload[:register_offset] = chord[:register_offset] unless @instrument == "piano"
+    payload
   end
 
   def scale_for(key_definition)
@@ -426,7 +441,7 @@ class HarmonyExerciseGenerator
 
   def sampled_question_type
     candidates = if @question_mode == "mixed"
-                   QUESTION_MODES.reject { |mode| mode[:id] == "mixed" }.map { |mode| mode[:id] }
+                   @level ? ListeningDifficulty.harmony_modes(@level) : QUESTION_MODES.reject { |mode| mode[:id] == "mixed" }.map { |mode| mode[:id] }
                  else
                    [@question_mode]
                  end
@@ -438,8 +453,9 @@ class HarmonyExerciseGenerator
 
   def sampled_key_definition
     recent_key_ids = @recent_exercises.filter_map { |entry| entry[:key_id].presence }
-    candidates = MAJOR_KEYS.reject { |key| recent_key_ids.last(2).include?(key[:id]) }
-    (candidates.presence || MAJOR_KEYS).sample(random: @random)
+    pool = @level ? MAJOR_KEYS.select { |k| ListeningDifficulty.harmony_keys(@level).include?(k[:id]) } : MAJOR_KEYS
+    candidates = pool.reject { |key| recent_key_ids.last(2).include?(key[:id]) }
+    (candidates.presence || pool).sample(random: @random)
   end
 
   def sampled_degree(question_type:, key_definition:)
@@ -451,9 +467,11 @@ class HarmonyExerciseGenerator
       entry[:degree].presence&.to_i
     end
 
-    candidates = (1..7).to_a.reject { |degree| recent_degrees.last(3).include?(degree) }
-    (candidates.presence || (1..7).to_a).sample(random: @random)
+    candidates = degree_pool.reject { |degree| recent_degrees.last(3).include?(degree) }
+    (candidates.presence || degree_pool).sample(random: @random)
   end
+
+  def degree_pool = @level ? ListeningDifficulty.harmony_degrees(@level) : (1..7).to_a
 
   def sampled_progression_template(key_definition:)
     recent_template_ids = @recent_exercises.filter_map do |entry|
@@ -464,8 +482,9 @@ class HarmonyExerciseGenerator
       entry[:progression_template_id].presence
     end
 
-    candidates = PROGRESSION_TEMPLATES.reject { |template| recent_template_ids.last(2).include?(template[:id]) }
-    (candidates.presence || PROGRESSION_TEMPLATES).sample(random: @random)
+    pool = @level == 3 ? PROGRESSION_TEMPLATES.first(2) : PROGRESSION_TEMPLATES
+    candidates = pool.reject { |template| recent_template_ids.last(2).include?(template[:id]) }
+    (candidates.presence || pool).sample(random: @random)
   end
 
   def sampled_progression_focus_position(template)

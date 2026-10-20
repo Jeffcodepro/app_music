@@ -1,0 +1,257 @@
+{
+  "rhythm_format": "meter-v1",
+  "level": 1,
+  "meter_id": "4-4",
+  "meter": {
+    "numerator": 4,
+    "denominator": 4,
+    "groups": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "kind": "simple",
+    "bpm_unit_steps": 4
+  },
+  "measure_count": 1,
+  "total_steps": 16,
+  "bpm_unit_label": "semínima",
+  "requested_activity_mode": "precision",
+  "activity_mode": "precision",
+  "activity_mode_label": "Precisão",
+  "question": "Qual partitura você ouviu?",
+  "tempo_bpm": 72,
+  "time_signature_label": "4/4",
+  "count_in_beats": 4,
+  "metronome_during_pattern": true,
+  "playback_cycles": 1,
+  "audio_events": [
+    {
+      "start_step": 0,
+      "duration_steps": 4
+    },
+    {
+      "start_step": 4,
+      "duration_steps": 2
+    },
+    {
+      "start_step": 6,
+      "duration_steps": 2
+    },
+    {
+      "start_step": 9,
+      "duration_steps": 1
+    },
+    {
+      "start_step": 10,
+      "duration_steps": 1
+    },
+    {
+      "start_step": 11,
+      "duration_steps": 1
+    },
+    {
+      "start_step": 12,
+      "duration_steps": 4
+    }
+  ],
+  "correct_option_id": "n4.n2.n2.r1.n1.n1.n1.n4",
+  "correct_option_label": "semínima, colcheia, colcheia, pausa de semicolcheia, semicolcheia, semicolcheia, semicolcheia, semínima",
+  "options": [
+    {
+      "id": "n4.n2.n2.r1.n1.n1.n1.n4",
+      "pattern_signature": "n4.n2.n2.r1.n1.n1.n1.n4",
+      "tokens": [
+        {
+          "token": "n4",
+          "kind": "note",
+          "duration_steps": 4
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        },
+        {
+          "token": "r1",
+          "kind": "rest",
+          "duration_steps": 1
+        },
+        {
+          "token": "n1",
+          "kind": "note",
+          "duration_steps": 1
+        },
+        {
+          "token": "n1",
+          "kind": "note",
+          "duration_steps": 1
+        },
+        {
+          "token": "n1",
+          "kind": "note",
+          "duration_steps": 1
+        },
+        {
+          "token": "n4",
+          "kind": "note",
+          "duration_steps": 4
+        }
+      ],
+      "aria_label": "semínima, colcheia, colcheia, pausa de semicolcheia, semicolcheia, semicolcheia, semicolcheia, semínima"
+    },
+    {
+      "id": "n4.n1.n1.n1.n1.n2.n2.n2.n2",
+      "pattern_signature": "n4.n1.n1.n1.n1.n2.n2.n2.n2",
+      "tokens": [
+        {
+          "token": "n4",
+          "kind": "note",
+          "duration_steps": 4
+        },
+        {
+          "token": "n1",
+          "kind": "note",
+          "duration_steps": 1
+        },
+        {
+          "token": "n1",
+          "kind": "note",
+          "duration_steps": 1
+        },
+        {
+          "token": "n1",
+          "kind": "note",
+          "duration_steps": 1
+        },
+        {
+          "token": "n1",
+          "kind": "note",
+          "duration_steps": 1
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        }
+      ],
+      "aria_label": "semínima, semicolcheia, semicolcheia, semicolcheia, semicolcheia, colcheia, colcheia, colcheia, colcheia"
+    },
+    {
+      "id": "n1.n1.n1.n1.n2.n2.n2.n2.n2.r2",
+      "pattern_signature": "n1.n1.n1.n1.n2.n2.n2.n2.n2.r2",
+      "tokens": [
+        {
+          "token": "n1",
+          "kind": "note",
+          "duration_steps": 1
+        },
+        {
+          "token": "n1",
+          "kind": "note",
+          "duration_steps": 1
+        },
+        {
+          "token": "n1",
+          "kind": "note",
+          "duration_steps": 1
+        },
+        {
+          "token": "n1",
+          "kind": "note",
+          "duration_steps": 1
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        },
+        {
+          "token": "r2",
+          "kind": "rest",
+          "duration_steps": 2
+        }
+      ],
+      "aria_label": "semicolcheia, semicolcheia, semicolcheia, semicolcheia, colcheia, colcheia, colcheia, colcheia, colcheia, pausa de colcheia"
+    },
+    {
+      "id": "n4.n2.r2.r2.n2.r4",
+      "pattern_signature": "n4.n2.r2.r2.n2.r4",
+      "tokens": [
+        {
+          "token": "n4",
+          "kind": "note",
+          "duration_steps": 4
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        },
+        {
+          "token": "r2",
+          "kind": "rest",
+          "duration_steps": 2
+        },
+        {
+          "token": "r2",
+          "kind": "rest",
+          "duration_steps": 2
+        },
+        {
+          "token": "n2",
+          "kind": "note",
+          "duration_steps": 2
+        },
+        {
+          "token": "r4",
+          "kind": "rest",
+          "duration_steps": 4
+        }
+      ],
+      "aria_label": "semínima, colcheia, pausa de colcheia, pausa de colcheia, colcheia, pausa de semínima"
+    }
+  ],
+  "signature": "d89308da7a13f6a0f8512fc2490f2f2c04051da1d2b50ae35303605a0c624d7c"
+}

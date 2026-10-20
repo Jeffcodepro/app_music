@@ -40,3 +40,18 @@
 # Ignore Mac and Linux file system files
 *.swp
 .DS_Store
+
+# Local browser evidence, screenshots, recordings and test reports.
+/output/
+/.playwright-mcp/
+/playwright-report/
+/test-results/
+/coverage/
+
+# Private key files and local provider credentials.
+*.key
+*.pem
+*.p12
+*.pfx
+/.aws/
+/.ssh/

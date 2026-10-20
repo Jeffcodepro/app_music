@@ -4,12 +4,25 @@ export default class extends Controller {
   static targets = ["primary", "secondary"]
 
   connect() {
-    this.fadeDuration = 3.5; 
-    
+    this.fadeDuration = 3.5;
+    this.timers = new Set();
+    this.motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.motionChanged = () => {
+      this.timers.forEach(timer => clearTimeout(timer));
+      this.timers.clear();
+      if (this.motion.matches) { this.primaryTarget.pause(); this.secondaryTarget.pause(); }
+      else {
+        this.element.classList.remove("fading");
+        this.secondaryTarget.pause();
+        this.primaryTarget.play().catch(() => {});
+      }
+    };
+    this.motion.addEventListener("change", this.motionChanged);
+
     // Tentamos fazer o play inicial
-    this.primaryTarget.play().catch(() => {});
-    
-    // Só ligamos a escuta no primaryTarget. 
+    if (!this.motion.matches) this.primaryTarget.play().catch(() => {});
+
+    // Só ligamos a escuta no primaryTarget.
     // Quando ele estiver acabando, cruzamos pro secondary.
     // Quando o secondary estiver acabando, cruzamos de volta pro primary.
     this.primaryHandler = () => this.checkFade(this.primaryTarget, this.secondaryTarget, true);
@@ -20,15 +33,19 @@ export default class extends Controller {
   }
 
   disconnect() {
+    this.motion.removeEventListener("change", this.motionChanged);
+    this.timers.forEach(timer => clearTimeout(timer));
+    this.primaryTarget.pause();
+    this.secondaryTarget.pause();
     this.primaryTarget.removeEventListener('timeupdate', this.primaryHandler);
     this.secondaryTarget.removeEventListener('timeupdate', this.secondaryHandler);
   }
 
   checkFade(activeVideo, standbyVideo, isPrimaryToSecondary) {
-    if (!activeVideo.duration) return;
+    if (this.motion.matches || !Number.isFinite(activeVideo.duration) || activeVideo.duration <= 0) return;
 
     const timeRemaining = activeVideo.duration - activeVideo.currentTime;
-    
+
     if (timeRemaining <= this.fadeDuration && standbyVideo.paused) {
       standbyVideo.currentTime = 0;
       standbyVideo.play().catch(() => {});
@@ -42,9 +59,11 @@ export default class extends Controller {
       }
 
       // Parar o vídeo antigo logo após o CSS terminar a transição (mais folga na CPU)
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         activeVideo.pause();
+        this.timers.delete(timer);
       }, this.fadeDuration * 1000);
+      this.timers.add(timer);
     }
   }
 }

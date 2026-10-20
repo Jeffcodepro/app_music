@@ -1,5 +1,5 @@
 /* --- Core Theme (Based on DS7 White Aesthetic) --- */
-:root {
+.landing-body {
   --pure-white: #FFFFFF;
   --stone-light: #EAEAE5;
   --stone-base: #D6D3D1;
@@ -8,7 +8,7 @@
   --accent-blue: rgba(255, 255, 255, 0.1);
 }
 
-body {
+.landing-body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: var(--pure-white);
   color: var(--stone-dark);
@@ -16,6 +16,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+.landing-body {
 /* --- Custom Animations (Creative & Out of the Box) --- */
 
 /* Floating Orbs Parallax */
@@ -258,4 +259,6 @@ body {
 
 .flash-card:hover::after {
   opacity: 1;
+}
+
 }

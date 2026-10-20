@@ -1,27 +1,13 @@
-<section class="platform-shell">
+<section class="platform-shell playground-page">
   <div class="platform-container">
     <div class="playground-header">
       <div>
-        <h1 class="platform-title">Playgrounds</h1>
-        <p class="playground-header__subtitle">Selecione a atividade que deseja praticar. Leitura, rítmica, percepção e harmonia já geram novas rodadas automaticamente, sempre com quatro alternativas e uma única resposta correta.</p>
+        <% content_for :title, platform_area_label(@selected_activity[:slug]) %>
+        <h1 class="platform-title"><%= platform_area_label(@selected_activity[:slug]) %></h1>
       </div>
     </div>
 
-    <div class="playground-activity-grid">
-      <% @playground_activities.each do |activity| %>
-        <% active = @selected_activity[:slug] == activity[:slug] %>
-        <%= link_to app_playground_path(activity: activity[:slug]), class: "playground-activity-card #{'is-active' if active} #{'is-available' if activity[:available]}" do %>
-          <div class="playground-activity-card__head">
-            <span class="playground-activity-card__icon">
-              <i data-lucide="<%= activity[:icon] %>"></i>
-            </span>
-            <span class="playground-status <%= activity[:available] ? 'is-available' : '' %>"><%= activity[:badge] %></span>
-          </div>
-          <h2><%= activity[:title] %></h2>
-          <p><%= activity[:description] %></p>
-        <% end %>
-      <% end %>
-    </div>
+    <%= render "student_hub/practice_switcher", activities: @playground_activities, selected_activity: @selected_activity %>
 
     <% if @selected_activity[:slug] == "percepcao" %>
       <%= render "perception_playground",
@@ -38,6 +24,7 @@
                  reading_preferences: @reading_preferences,
                  reading_clef_modes: @reading_clef_modes,
                  reading_question_modes: @reading_question_modes,
+                 reading_season_modes: @reading_season_modes,
                  playground_feedback: @playground_feedback,
                  reading_scoreboard: @reading_scoreboard %>
     <% elsif @selected_activity[:slug] == "ritmica" %>
@@ -56,15 +43,6 @@
                  harmony_instruments: @harmony_instruments,
                  playground_feedback: @playground_feedback,
                  harmony_scoreboard: @harmony_scoreboard %>
-    <% else %>
-      <article class="platform-card playground-placeholder">
-        <p class="playground-eyebrow">Selecionado</p>
-        <h2><%= @selected_activity[:title] %></h2>
-        <p>Essa atividade já pode ser escolhida no fluxo de prática, mas o gerador específico ainda será desenvolvido. O próximo passo é aplicar o mesmo padrão de geração automática usado na percepção, leitura e harmonia para a parte de rítmica.</p>
-        <ul class="platform-list">
-          <li>Rítmica: padrões, subdivisão e resposta com pulso</li>
-        </ul>
-      </article>
     <% end %>
   </div>
 </section>

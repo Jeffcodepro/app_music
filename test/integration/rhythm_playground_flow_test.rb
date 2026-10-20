@@ -19,7 +19,7 @@ class RhythmPlaygroundFlowTest < ActionDispatch::IntegrationTest
     get app_playground_path(activity: "ritmica")
 
     assert_response :success
-    assert_includes response.body, "Playground de rítmica"
+    assert_select "h1", text: "Rítmica"
     assert_includes response.body, "Tipo de atividade"
     assert_includes response.body, "<svg"
   end
@@ -28,7 +28,7 @@ class RhythmPlaygroundFlowTest < ActionDispatch::IntegrationTest
     post user_session_path, params: { user: { email: @user.email, password: @password } }
     follow_redirect! if response.redirect?
 
-    get app_playground_path(activity: "ritmica", activity_mode: "syncopation")
+    get app_playground_path(activity: "ritmica", activity_mode: "subdivision")
 
     state_token = @request.session[:rhythm_playground_state_token]
     state_key = "playground:ritmica:#{@user.id}:#{state_token}"
@@ -41,6 +41,18 @@ class RhythmPlaygroundFlowTest < ActionDispatch::IntegrationTest
     assert_equal 4, stored_exercise.fetch("o").size
   end
 
+  test "syncopation cannot be selected or requested through an old link" do
+    post user_session_path, params: { user: { email: @user.email, password: @password } }
+    get app_playground_path(activity: "ritmica")
+    assert_response :success
+    assert_select 'input[name="activity_mode"][value="syncopation"]', count: 0
+    assert_no_difference ["ExerciseAssignment.count", "StudyActivity.count"] do
+      get app_playground_path(activity: "ritmica", activity_mode: "syncopation")
+      assert_redirected_to app_pratica_path
+      assert_includes flash[:alert], "nenhuma resposta foi contabilizada"
+    end
+  end
+
   test "correct answer generates a fresh rhythm round in the turbo frame" do
     post user_session_path, params: { user: { email: @user.email, password: @password } }
     follow_redirect! if response.redirect?
@@ -51,13 +63,16 @@ class RhythmPlaygroundFlowTest < ActionDispatch::IntegrationTest
     state_token = @request.session[:rhythm_playground_state_token]
     state_key = "playground:ritmica:#{@user.id}:#{state_token}"
     exercise = StudentHubController::RHYTHM_PLAYGROUND_STATE_FALLBACK_STORE.read(state_key).fetch("exercise")
+    submitted_assignment = @user.exercise_assignments.order(:id).last
     initial_signature = response.body[/data-rhythm-player-exercise-signature-value="([^"]+)"/, 1]
 
     post submit_app_playground_answer_path,
          params: {
            activity: "ritmica",
            selected_option_id: exercise.fetch("a"),
-           exercise_signature: initial_signature,
+           assignment_id: submitted_assignment.public_id,
+           attempt_token: submitted_assignment.answer_token,
+           playback_status: "ready",
            activity_mode: "pulse"
          },
          headers: { "Turbo-Frame" => "rhythm_playground" }

@@ -1,4 +1,6 @@
 class RhythmExerciseGenerator
+  class InvalidPattern < ArgumentError; end
+  class GenerationError < StandardError; end
   ACTIVITY_MODES = [
     { id: "pulse", label: "Pulso" },
     { id: "subdivision", label: "Subdivisão" },
@@ -88,11 +90,11 @@ class RhythmExerciseGenerator
   TOTAL_STEPS = BEATS_PER_MEASURE * STEPS_PER_BEAT
 
   def self.activity_modes
-    ACTIVITY_MODES
+    ACTIVITY_MODES.reject { |mode| mode[:id] == "syncopation" }
   end
 
   def self.activity_mode_ids
-    ACTIVITY_MODES.map { |mode| mode[:id] }
+    activity_modes.map { |mode| mode[:id] }
   end
 
   def self.activity_mode_definition(id)
@@ -104,9 +106,11 @@ class RhythmExerciseGenerator
   end
 
   def self.parse_pattern_signature(signature)
-    signature.to_s.split(".").filter_map do |token|
+    raise InvalidPattern, "empty_pattern" unless signature.is_a?(String) && signature.present?
+
+    signature.split(".", -1).map do |token|
       match = token.match(/\A([nr])(1|2|4)\z/)
-      next if match.blank?
+      raise InvalidPattern, "unknown_token" unless match
 
       {
         token:,
@@ -131,6 +135,16 @@ class RhythmExerciseGenerator
       tokens:,
       aria_label: pattern_aria_label(tokens)
     }
+  rescue InvalidPattern
+    nil
+  end
+
+  # Short percussion cannot reliably distinguish notated releases or split rests.
+  # Single-choice distractors must therefore differ in their attack positions.
+  def self.auditory_signature_for(signature)
+    raise InvalidPattern, "incomplete_measure" unless option_from_signature(signature)
+
+    audio_events_for_signature(signature).map { |event| event[:start_step] }
   end
 
   def self.audio_events_for_signature(signature)
@@ -219,6 +233,7 @@ class RhythmExerciseGenerator
 
   def sanitize_activity_mode(activity_mode)
     activity_mode = activity_mode.to_s
+    raise GenerationError, "Syncopation requires a reviewed sustain and metric-accent convention" if activity_mode == "syncopation"
     return activity_mode if self.class.activity_mode_ids.include?(activity_mode)
 
     DEFAULT_ACTIVITY_MODE
@@ -246,7 +261,7 @@ class RhythmExerciseGenerator
       return segments if valid_segments_for_mode?(segments, activity_mode) && not_recent_signature?(activity_mode, segments)
 
       attempts += 1
-      return segments if attempts >= 36
+      raise GenerationError, "No valid rhythm within generation budget" if attempts >= 36
     end
   end
 
@@ -269,20 +284,31 @@ class RhythmExerciseGenerator
 
       if signature != correct_signature &&
          distractors.exclude?(signature) &&
-         valid_segments_for_mode?(variant_segments, activity_mode)
+         valid_segments_for_mode?(variant_segments, activity_mode) &&
+         distinct_attacks?(signature, [correct_signature] + distractors)
         distractors << signature
       end
 
       attempts += 1
     end
 
-    while distractors.size < 3
+    while distractors.size < 3 && attempts < 240
       candidate_segments = sampled_segments(activity_mode)
       signature = self.class.pattern_signature(candidate_segments.flatten)
-      distractors << signature if signature != correct_signature && distractors.exclude?(signature)
+      if distinct_attacks?(signature, [correct_signature] + distractors)
+        distractors << signature
+      end
+      attempts += 1
     end
 
+    raise GenerationError, "No unambiguous options within generation budget" if distractors.size != 3
+
     ([correct_signature] + distractors).shuffle(random: @random)
+  end
+
+  def distinct_attacks?(signature, others)
+    projection = self.class.auditory_signature_for(signature)
+    others.none? { |other| self.class.auditory_signature_for(other) == projection }
   end
 
   def replacement_motif_for(activity_mode, current_motif)
@@ -302,7 +328,7 @@ class RhythmExerciseGenerator
     when "subdivision"
       segments.any? { |segment| segment.size >= 2 }
     when "syncopation"
-      segments.count { |segment| segment.first.start_with?("r") } >= 2
+      false
     when "precision"
       segments.count { |segment| segment.size >= 3 } >= 2
     else

@@ -1,19 +1,6 @@
 class PerceptionIntervalExerciseGenerator
-  NOTE_LABELS = {
-    "C" => "Dó",
-    "D" => "Ré",
-    "E" => "Mi",
-    "F" => "Fá",
-    "G" => "Sol",
-    "A" => "Lá",
-    "B" => "Si"
-  }.freeze
-  ACCIDENTAL_LABELS = {
-    "#" => "sustenido",
-    "##" => "duplo sustenido",
-    "b" => "bemol",
-    "bb" => "duplo bemol"
-  }.freeze
+  NOTE_LABELS = ExercisePresentation::NOTE_LABELS
+  ACCIDENTAL_LABELS = ExercisePresentation::PITCH_ACCIDENTAL_LABELS
   DIRECTION_MODES = [
     { id: "ascending", label: "Ascendente" },
     { id: "descending", label: "Descendente" },
@@ -54,8 +41,8 @@ class PerceptionIntervalExerciseGenerator
     { id: "perfect_fifteenth", label: "Décima quinta justa (P15)", head_music: :perfect_fifteenth }
   ].freeze
   REFERENCE_PITCHES = %w[A2 B2 C3 D3 E3 F3 G3 A3 B3 C4 D4 E4 F4 G4 A4 B4 C5 D5 E5].freeze
-  MINIMUM_TARGET = HeadMusic::Rudiment::Pitch.get("A2").midi
-  MAXIMUM_TARGET = HeadMusic::Rudiment::Pitch.get("C6").midi
+  MINIMUM_TARGET = MusicTheory::Note.parse("A2").midi
+  MAXIMUM_TARGET = MusicTheory::Note.parse("C6").midi
 
   def self.direction_modes
     DIRECTION_MODES
@@ -82,17 +69,11 @@ class PerceptionIntervalExerciseGenerator
   end
 
   def self.localize_pitch_name(pitch_name)
-    match_data = pitch_name.to_s.match(/\A([A-G])(bb|##|b|#)?(-?\d+)\z/)
-    return pitch_name.to_s if match_data.blank?
-
-    note = NOTE_LABELS.fetch(match_data[1])
-    accidental = ACCIDENTAL_LABELS[match_data[2]]
-    octave = match_data[3]
-
-    [note, accidental, octave].compact.join(" ")
+    ExercisePresentation.pitch_label(pitch_name)
   end
 
-  def initialize(random: Random.new, direction_mode: DEFAULT_DIRECTION_MODE, instrument: DEFAULT_INSTRUMENT, recent_exercises: [])
+  def initialize(random: Random.new, direction_mode: DEFAULT_DIRECTION_MODE, instrument: DEFAULT_INSTRUMENT, recent_exercises: [], level: nil)
+    @level = ListeningDifficulty.validate_level!(level) unless level.nil?
     @random = random
     @direction_mode = sanitize_direction_mode(direction_mode)
     @instrument = sanitize_instrument(instrument)
@@ -105,27 +86,32 @@ class PerceptionIntervalExerciseGenerator
     direction = selected_direction
     reference_pitch = sampled_reference_pitch(interval:, direction:, interval_definition:)
     target_pitch = build_target_pitch(interval:, reference_pitch:, direction:)
-    distractors = INTERVAL_LIBRARY.reject { |candidate| candidate[:id] == interval_definition[:id] }.sample(3, random: @random)
+    written_interval = MusicTheory::Interval.new(from: reference_pitch, to: target_pitch)
+    unless written_interval.name.tr(" ", "_") == interval_definition.fetch(:id) &&
+           written_interval.written_direction == direction && written_interval.sounding_direction == direction
+      raise ArgumentError, "transposition disagrees with the selected interval"
+    end
+    distractors = interval_pool.reject { |candidate| candidate[:id] == interval_definition[:id] }.sample(3, random: @random)
     options = ([interval_definition] + distractors).shuffle(random: @random).map do |definition|
       { id: definition[:id], label: definition[:label] }
     end
 
-    {
-      question: "Ouça duas notas consecutivas e identifique o intervalo melódico.",
+    exercise = {
+      question: ExercisePresentation::INTERVAL_QUESTION,
       instrument: @instrument,
       instrument_label: instrument_label,
       direction_mode: @direction_mode,
       direction_mode_label: direction_mode_label,
       direction: direction.to_s,
       direction_label: direction_label(direction),
-      reference_pitch: reference_pitch.to_s,
-      target_pitch: target_pitch.to_s,
+      reference_pitch: reference_pitch.spelling,
+      target_pitch: target_pitch.spelling,
       reference_frequency: reference_pitch.frequency.round(3),
       target_frequency: target_pitch.frequency.round(3),
       correct_option_id: interval_definition[:id],
       correct_option_label: interval_definition[:label],
-      correct_interval_name: interval.name,
-      correct_interval_shorthand: interval.shorthand,
+      correct_interval_name: written_interval.name,
+      correct_interval_shorthand: written_interval.shorthand,
       signature: exercise_signature(
         interval_id: interval_definition[:id],
         direction: direction,
@@ -134,13 +120,20 @@ class PerceptionIntervalExerciseGenerator
       ),
       options:
     }
+    exercise.merge!({ level: @level, difficulty_version: "perception-levels-v1" }) if @level
+    exercise[:register_version] = "concert-register-v1" unless @instrument == "piano"
+    exercise
   end
 
   private
 
+  def interval_pool
+    @level ? INTERVAL_LIBRARY.select { |i| ListeningDifficulty.intervals(@level).include?(i[:id]) } : INTERVAL_LIBRARY
+  end
+
   def sampled_interval_definition
-    candidates = INTERVAL_LIBRARY.reject { |definition| recent_interval_ids.include?(definition[:id]) }
-    candidates = INTERVAL_LIBRARY if candidates.empty?
+    candidates = interval_pool.reject { |definition| recent_interval_ids.include?(definition[:id]) }
+    candidates = interval_pool if candidates.empty?
     candidates.sample(random: @random)
   end
 
@@ -168,14 +161,19 @@ class PerceptionIntervalExerciseGenerator
   end
 
   def eligible_reference_pitches(interval:, direction:)
-    REFERENCE_PITCHES.map { |name| HeadMusic::Rudiment::Pitch.get(name) }.select do |reference_pitch|
+    names = %w[flute clarinet].include?(@instrument) ? (2..7).flat_map { |octave| %w[C D E F G A B].map { |step| "#{step}#{octave}" } } : REFERENCE_PITCHES
+    register = ExerciseInstrumentRegister.range(@instrument)
+    names.map { |name| MusicTheory::Note.parse(name) }.select do |reference_pitch|
+      next false unless register.cover?(reference_pitch.midi)
       target_pitch = build_target_pitch(interval:, reference_pitch:, direction:)
-      target_pitch.midi.between?(MINIMUM_TARGET, MAXIMUM_TARGET)
+      register.cover?(reference_pitch.midi) && register.cover?(target_pitch.midi) &&
+        (%w[flute clarinet].include?(@instrument) || target_pitch.midi.between?(MINIMUM_TARGET, MAXIMUM_TARGET))
     end
   end
 
   def build_target_pitch(interval:, reference_pitch:, direction:)
-    direction == :descending ? interval.below(reference_pitch) : interval.above(reference_pitch)
+    target = direction == :descending ? interval.below(reference_pitch.to_s) : interval.above(reference_pitch.to_s)
+    MusicTheory::Note.parse(target.to_s)
   end
 
   def direction_label(direction)
@@ -202,8 +200,8 @@ class PerceptionIntervalExerciseGenerator
     [
       interval_id,
       direction,
-      reference_pitch.to_s,
-      target_pitch.to_s
+      reference_pitch.spelling,
+      target_pitch.spelling
     ].join("|")
   end
 

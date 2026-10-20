@@ -1,34 +1,8 @@
-<section class="platform-shell">
-  <div class="platform-container platform-container--narrow">
-    <p class="muted">Trilhas de estudo</p>
-    <h1 class="platform-title"><%= @study_track_theme[:title] %></h1>
-
-    <article class="platform-card">
-      <h2>Visão geral</h2>
-      <p><%= @study_track_theme[:overview] %></p>
-    </article>
-
-    <article class="platform-card trilha-detail-card">
-      <h2>Assuntos abordados</h2>
-      <p class="muted">Progressão por níveis internos da plataforma.</p>
-
-      <div class="trilha-detail-levels">
-        <% @study_track_theme[:levels].each do |level| %>
-          <section class="trilha-detail-level">
-            <h3><%= level[:name] %></h3>
-            <ul class="platform-list">
-              <% level[:topics].each do |topic| %>
-                <li><%= topic %></li>
-              <% end %>
-            </ul>
-          </section>
-        <% end %>
-      </div>
-
-      <div class="platform-actions">
-        <%= link_to "Escolher por onde começar em Aulas", app_aulas_path, class: "app-btn app-btn--primary" %>
-        <%= link_to "Voltar para trilhas", app_trilhas_path, class: "app-btn" %>
-      </div>
-    </article>
-  </div>
-</section>
+<%= link_to "← Trilhas de estudo", app_trilhas_path, class: "ui-text-link" %>
+<%= render "platform/page_header", title: @study_track_theme[:title], description: "Disponibilidade de estudo nesta área." %>
+<% activity = playground_activity_for(@study_track_theme[:slug]) %>
+<% if activity %>
+  <section class="ui-card"><span class="ui-status">Prática disponível</span><h2><%= activity[:title] %></h2><p><%= activity[:description] %></p><p class="ui-support">A sequência de aulas e a avaliação por nível ainda estão em preparação.</p><div class="platform-actions"><%= link_to "Abrir Playground", app_playground_path(activity: activity[:slug]), class: "app-btn app-btn--primary" %></div></section>
+<% else %>
+  <%= render "platform/empty_state", title: "Conteúdo em preparação", description: "Ainda não há aulas ou exercícios publicados nesta área. Enquanto isso, explore as práticas disponíveis." %>
+<% end %>

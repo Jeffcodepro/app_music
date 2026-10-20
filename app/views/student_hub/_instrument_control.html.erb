@@ -1,0 +1,15 @@
+      <div class="playground-control">
+        <span class="playground-control__label">Instrumento</span>
+        <div class="playground-option-grid">
+          <% instruments.each do |instrument| %>
+            <% checked = selected_instrument == instrument[:id] %>
+            <label class="playground-select-card <%= 'is-selected' if checked %>">
+              <%= radio_button_tag :instrument, instrument[:id], checked, class: "playground-select-card__input", data: { action: "change->#{player}-player#stop change->preferences#submit" } %>
+              <span class="playground-select-card__icon"><%= instrument_option_icon(instrument[:id]) %></span>
+              <span class="playground-select-card__body">
+                <span class="playground-select-card__title"><%= instrument[:label] %></span>
+              </span>
+            </label>
+          <% end %>
+        </div>
+      </div>

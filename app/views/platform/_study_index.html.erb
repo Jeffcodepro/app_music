@@ -1,0 +1,12 @@
+<% descriptions = { "leitura" => "Reconheça notas, claves e a escrita musical.", "percepcao" => "Ouça duas notas e reconheça o intervalo.", "ritmica" => "Relacione o que você ouve à notação rítmica.", "harmonia" => "Explore acordes e progressões pelo ouvido." } %>
+<ol class="study-index__list">
+  <% %w[leitura percepcao ritmica harmonia].each_with_index do |area, index| %>
+    <li>
+      <%= link_to app_playground_path(activity: area), class: "study-area study-index__entry" do %>
+        <span class="study-index__number" aria-hidden="true"><%= format("%02d", index + 1) %></span>
+        <div class="study-index__body"><h3><%= platform_area_label(area) %></h3><p><%= descriptions.fetch(area) %></p></div>
+        <span class="study-index__action"><span>Praticar</span><%= ui_icon("arrow") %></span>
+      <% end %>
+    </li>
+  <% end %>
+</ol>

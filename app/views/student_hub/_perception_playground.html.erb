@@ -1,70 +1,46 @@
+<% if perception_exercise[:question_type] == "melodic_dictation" %>
+  <%= render "student_hub/melodic_dictation_playground", perception_exercise: perception_exercise, perception_preferences: perception_preferences, perception_instruments: perception_instruments, playground_feedback: playground_feedback, perception_scoreboard: perception_scoreboard, perception_autoplay: perception_autoplay %>
+<% else %>
 <%= turbo_frame_tag "perception_playground" do %>
-  <article class="platform-card playground-stage"
+  <article class="platform-card playground-stage perception-editorial"
+           data-audio-diagnostics="<%= Rails.env.development? || (Rails.env.test? && ENV["APP_MUSIC_AUDIO_DIAGNOSTICS"] == "1") %>"
            data-controller="interval-player preferences"
            data-interval-player-first-frequency-value="<%= perception_exercise[:reference_frequency] %>"
            data-interval-player-second-frequency-value="<%= perception_exercise[:target_frequency] %>"
            data-interval-player-first-pitch-value="<%= perception_exercise[:reference_pitch] %>"
            data-interval-player-second-pitch-value="<%= perception_exercise[:target_pitch] %>"
            data-interval-player-auto-play-value="<%= perception_autoplay ? 'true' : 'false' %>"
-           data-interval-player-exercise-signature-value="<%= perception_exercise[:signature] %>"
+           data-interval-player-exercise-signature-value="<%= perception_exercise[:assignment_id] %>"
            data-interval-player-instrument-value="<%= perception_exercise[:instrument] %>">
-    <% answered = playground_feedback.present? %>
-    <% answered_correctly = playground_feedback&.dig(:correct) %>
+    <% answered = feedback_for_round?(playground_feedback, perception_exercise, area: "percepcao") %>
+    <% answered_correctly = answered && playground_feedback[:correct] %>
     <% answered_incorrectly = answered && !answered_correctly %>
-    <div class="playground-stage__header">
-      <div>
-        <p class="playground-eyebrow">Modo ativo</p>
-        <h2>Playground de percepção</h2>
-        <p>Ouça duas notas consecutivas e identifique o intervalo melódico. Agora você pode escolher o instrumento sintetizado e travar a direção da pergunta em crescente, decrescente ou misto.</p>
-      </div>
-    </div>
-
-    <% if playground_feedback.present? %>
-      <div class="playground-feedback <%= playground_feedback[:correct] ? 'is-correct' : 'is-incorrect' %>" data-interval-player-target="feedback">
-        <p class="playground-eyebrow">Última resposta</p>
-        <% if playground_feedback[:synchronization_error] %>
-          <h3>Reproduza o intervalo atual novamente</h3>
-          <p>O áudio mais recente não correspondia a esta rodada. Repita o intervalo atual antes de responder.</p>
-        <% elsif playground_feedback[:correct] %>
-          <h3>Resposta correta</h3>
-          <p>Você acertou com <strong><%= playground_feedback[:selected_label] %></strong>.</p>
-          <p class="muted">Rodada: <strong><%= playground_feedback[:direction_label] %></strong> | Notas sorteadas: <strong><%= playground_feedback[:notes] %></strong></p>
-        <% else %>
-          <h3>Você errou este intervalo</h3>
-          <p>Se quiser tentar novamente, repita o áudio ou avance para o próximo intervalo.</p>
-        <% end %>
-      </div>
-    <% end %>
-
-    <div class="playground-scoreboard">
-      <div class="playground-scoreboard__item is-correct">
-        <span class="playground-scoreboard__label">Acertos</span>
-        <strong><%= perception_scoreboard[:correct_count] %></strong>
-      </div>
-      <div class="playground-scoreboard__item is-incorrect">
-        <span class="playground-scoreboard__label">Erros</span>
-        <strong><%= perception_scoreboard[:incorrect_count] %></strong>
-      </div>
-    </div>
-
-    <%= form_with url: app_playground_path, method: :get, class: "playground-controls playground-controls--stacked", data: { turbo_frame: "perception_playground", preferences_target: "form" } do %>
-      <%= hidden_field_tag :activity, "percepcao" %>
-
-      <div class="playground-control">
-        <span class="playground-control__label">Instrumento</span>
-        <div class="playground-option-grid">
-          <% perception_instruments.each do |instrument| %>
-            <% checked = perception_preferences[:instrument] == instrument[:id] %>
-            <label class="playground-select-card <%= 'is-selected' if checked %>">
-              <%= radio_button_tag :instrument, instrument[:id], checked, class: "playground-select-card__input", data: { action: "change->interval-player#stop change->preferences#submit" } %>
-              <span class="playground-select-card__icon"><%= instrument_option_icon(instrument[:id]) %></span>
-              <span class="playground-select-card__body">
-                <span class="playground-select-card__title"><%= instrument[:label] %></span>
-              </span>
-            </label>
-          <% end %>
+    <div class="perception-session">
+      <div class="playground-scoreboard" aria-label="Resultados desta sessão">
+        <div class="playground-scoreboard__item is-correct">
+          <span class="playground-scoreboard__label">Acertos</span>
+          <strong><%= perception_scoreboard[:correct_count] %></strong>
+        </div>
+        <div class="playground-scoreboard__item is-incorrect">
+          <span class="playground-scoreboard__label">Erros</span>
+          <strong><%= perception_scoreboard[:incorrect_count] %></strong>
         </div>
       </div>
+    </div>
+
+
+    <div class="playground-stage__grid">
+      <div class="playground-trainer">
+        <h2 class="exercise-question">Qual intervalo você ouviu?</h2>
+    <details class="playground-settings" data-preferences-target="panel"
+             data-action="toggle->preferences#rememberExpanded" data-preferences-key="percepcao">
+      <summary>Configurar treino <span><%= PerceptionIntervalExerciseGenerator.instrument_definition(perception_preferences[:instrument])[:label] %> · <%= ExercisePresentation::DIRECTION_MODES.fetch(perception_preferences[:direction_mode]) %></span></summary>
+    <%= form_with url: app_playground_path, method: :get, class: "playground-controls playground-controls--stacked", data: { turbo_frame: "perception_playground", turbo_action: "replace", preferences_target: "form" } do %>
+      <%= hidden_field_tag :activity, "percepcao" %>
+      <%= render "student_hub/listening_level_control", selected_level: perception_preferences[:level], player: "interval" %>
+      <%= render "student_hub/perception_mode_control", perception_preferences: perception_preferences, player: "interval" %>
+
+      <%= render "student_hub/instrument_control", instruments: perception_instruments, selected_instrument: perception_preferences[:instrument], player: "interval" %>
 
       <div class="playground-control">
         <span class="playground-control__label">Direção do intervalo</span>
@@ -80,78 +56,90 @@
       </div>
     <% end %>
 
-    <div class="playground-stage__grid">
-      <div class="playground-trainer">
-        <p class="playground-eyebrow">Rodada atual</p>
-        <h3>Identifique o intervalo melódico</h3>
-        <p><%= perception_exercise[:question] %></p>
+    </details>
         <div class="playground-player-controls">
-          <button type="button"
-                  class="playground-player-button"
-                  data-action="interval-player#repeat"
-                  aria-label="Repetir intervalo">
-            <span class="app-btn__icon"><%= interface_symbol_icon("restart") %></span>
-          </button>
-
           <% if answered_correctly %>
             <%= link_to app_playground_path(activity: "percepcao", refresh: 1, autoplay: 1, **perception_preferences),
                         class: "playground-player-button playground-player-button--primary",
                         data: { turbo_frame: "perception_playground", action: "click->interval-player#stop" },
                         aria: { label: "Próximo intervalo e tocar" } do %>
               <span class="app-btn__icon"><%= interface_symbol_icon("play") %></span>
+              <span>Próximo e tocar</span>
             <% end %>
           <% else %>
             <button type="button"
                     class="playground-player-button playground-player-button--primary"
                     data-action="interval-player#play"
                     data-interval-player-target="trigger"
-                    aria-label="Tocar intervalo"
-                    <%= "disabled" if answered_incorrectly %>>
+                    aria-label="Tocar intervalo">
               <span class="app-btn__icon"><%= interface_symbol_icon("play") %></span>
+              <span>Tocar</span>
             </button>
           <% end %>
-
-          <%= link_to app_playground_path(activity: "percepcao", refresh: 1, **perception_preferences),
-                      class: "playground-player-button",
-                      data: { turbo_frame: "perception_playground", action: "click->interval-player#stop" },
-                      aria: { label: "Próximo intervalo" } do %>
-            <span class="app-btn__icon"><%= interface_symbol_icon("next") %></span>
-          <% end %>
+          <button type="button" class="playground-player-button perception-repeat"
+                  data-action="interval-player#repeat" aria-label="Repetir intervalo">
+            <span class="app-btn__icon"><%= interface_symbol_icon("restart") %></span><span>Repetir</span>
+          </button>
         </div>
+        <%= render "student_hub/audio_status", player: "interval" %>
       </div>
 
       <div class="playground-response-panel">
-        <p class="playground-eyebrow">Resposta</p>
-        <h3>Escolha a opção correta</h3>
+        <h3 class="visually-hidden">Alternativas</h3>
+        <p hidden role="status" data-interval-player-target="hint">Ouça o áudio completo antes de responder.</p>
         <div class="perception-options">
           <% perception_exercise[:options].each do |option| %>
+            <% selected = answered && playground_feedback[:selected_label] == option[:label] %>
             <%= button_to submit_app_playground_answer_path,
                           method: :post,
                           params: {
                             activity: "percepcao",
                             selected_option_id: option[:id],
-                            exercise_signature: perception_exercise[:signature],
+                            assignment_id: perception_exercise[:assignment_id],
+                            attempt_token: perception_exercise[:attempt_token],
+                            playback_status: "",
+                            question_mode: perception_preferences[:question_mode],
                             instrument: perception_preferences[:instrument],
-                            direction_mode: perception_preferences[:direction_mode]
+                            direction_mode: perception_preferences[:direction_mode],
+                            level: perception_preferences[:level]
                           },
-                          class: "perception-option",
+                          class: "perception-option #{'is-last-answer' if selected}",
                           disabled: answered_correctly,
                           data: { action: "click->interval-player#guardAnswer" },
                           form: { data: { turbo_frame: "perception_playground" } } do %>
               <span class="perception-option__label"><%= option[:label] %></span>
-              <span class="perception-option__meta">
-                <%= if answered_correctly
-                      "Rodada encerrada"
-                    elsif answered_incorrectly
-                      "Tentar novamente"
-                    else
-                      "Tentar esta resposta"
-                    end %>
-              </span>
+              <% if selected %><span class="perception-option__meta">Sua resposta</span><% end %>
             <% end %>
           <% end %>
         </div>
+      <% if answered %>
+        <div role="status" aria-live="polite" aria-atomic="true" class="playground-feedback <%= playground_feedback[:correct] ? 'is-correct' : 'is-incorrect' %>" data-interval-player-target="feedback">
+          <p class="playground-eyebrow">Última resposta</p>
+          <% if playground_feedback[:synchronization_error] %>
+            <h3>Reproduza o intervalo atual novamente</h3>
+            <p>O áudio mais recente não correspondia a esta rodada. Repita o intervalo atual antes de responder.</p>
+          <% elsif playground_feedback[:correct] %>
+            <h3>Resposta correta</h3>
+            <p>Você acertou com <strong><%= playground_feedback[:selected_label] %></strong>.</p>
+            <p class="muted">Rodada: <strong><%= playground_feedback[:direction_label] %></strong> | Notas sorteadas: <strong><%= playground_feedback[:notes] %></strong></p>
+          <% else %>
+            <h3>Resposta incorreta. Vamos ouvir de novo?</h3>
+            <p>Tente outra resposta ou repita o áudio se quiser.</p>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="playground-next">
+        <%= link_to app_playground_path(activity: "percepcao", refresh: 1, **perception_preferences),
+                        class: "playground-next-button",
+                        data: { turbo_frame: "perception_playground", action: "click->interval-player#stop" },
+                        aria: { label: "Próximo intervalo" } do %>
+              <span class="app-btn__icon"><%= interface_symbol_icon("next") %></span>
+            <span>Próximo intervalo</span>
+            <% end %>
+      </div>
       </div>
     </div>
   </article>
+<% end %>
 <% end %>

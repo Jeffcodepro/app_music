@@ -1,0 +1,114 @@
+// Compact the existing playgrounds without changing musical coordinates or colors.
+.playground-page {
+  .playground-header { margin-bottom: 0.6rem; }
+  .platform-title { font-size: 1.6rem; margin-bottom: 0; }
+  .playground-activity-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 0;
+  }
+  .playground-activity-card {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.55rem 0.7rem;
+    border-radius: 0.8rem;
+    color: #1c1917;
+    font-weight: 700;
+    font-size: 0.9rem;
+    svg { width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
+  }
+  .playground-stage { margin-top: 0.75rem; padding: 1rem; }
+  .playground-stage__header { margin-bottom: 0.4rem; }
+  .playground-stage__header h2 { margin: 0; }
+  .playground-scoreboard { gap: 0.5rem; margin-bottom: 0.5rem; }
+  .playground-scoreboard__item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 0.25rem 0.6rem;
+    strong { font-size: 1rem; }
+  }
+  .playground-settings { margin-bottom: 0.75rem; }
+  .playground-settings summary {
+    cursor: pointer;
+    min-height: 44px;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid #e7e5e4;
+    border-radius: 0.65rem;
+    font-weight: 700;
+    span { font-size: 0.8rem; font-weight: 400; color: #57534e; margin-left: 0.4rem; }
+  }
+  .playground-settings[open] summary { margin-bottom: 0.5rem; }
+  .playground-controls { margin-bottom: 0; }
+  .playground-direction-card--detailed { min-height: 0; }
+  .playground-stage__grid { gap: 0.85rem; align-items: start; }
+  .playground-stage__grid > * { min-width: 0; }
+  .playground-trainer { padding: 0.85rem; }
+  .playground-trainer h3, .playground-response-panel h3 { font-size: 1.15rem; margin-bottom: 0.35rem; }
+  .playground-trainer p { line-height: 1.5; }
+  .playground-trainer__meta { margin-top: 0.4rem; }
+  .playground-eyebrow { margin-bottom: 0.25rem; }
+  .reading-notation-card {
+    width: 100%;
+    max-width: 480px;
+    margin: 0.65rem auto 0;
+    padding: 0.35rem;
+  }
+  .reading-notation-card svg { width: 100%; height: auto; }
+  .playground-reader-actions { margin-top: 0.5rem; }
+  .playground-next { display: flex; justify-content: flex-end; margin-top: 0.75rem; }
+  .playground-next-button {
+    display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px;
+    padding: 0.5rem 0.8rem; border: 1px solid #d6d3d1; border-radius: 0.8rem;
+    background: #fafaf9; color: #1c1917; font-weight: 700; text-decoration: none;
+  }
+  .playground-player-controls { margin-top: 0.75rem; gap: 0.5rem; }
+  .perception-options { gap: 0.6rem; margin-top: 0.5rem; }
+  .perception-option { min-height: 64px; padding: 0.65rem 0.8rem; border-radius: 0.8rem; }
+  .perception-option__label { font-size: 1rem; }
+  .playground-feedback { margin: 0.85rem 0 0; padding: 0.75rem; }
+  .harmony-context-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.4rem; margin-top: 0.6rem; }
+  .harmony-context-card, .harmony-prompt-card, .harmony-progression-step { padding: 0.55rem; }
+  .harmony-context-card strong { font-size: 0.9rem; overflow-wrap: anywhere; }
+  .harmony-prompt-card, .harmony-progression-grid { margin-top: 0.6rem; }
+  .harmony-progression-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; }
+  .harmony-player-panel { padding: 0.65rem; margin-top: 0.6rem; }
+  .harmony-player-panel__header { gap: 0.5rem; margin-bottom: 0.5rem; }
+  .harmony-player-grid, .harmony-player-grid.is-harmonic, .harmony-player-grid.is-melodic {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .harmony-listen-button { grid-column: auto; padding: 0.6rem; min-height: 44px; }
+  .harmony-transport-button { min-height: 44px; flex-direction: row; padding: 0.5rem; }
+  .harmony-player-grid > .harmony-transport-button { grid-column: 1 / -1; }
+  .harmony-listen-button__title { font-size: 0.9rem; }
+  .harmony-listen-button__meta { font-size: 0.78rem; }
+  .rhythm-option { min-height: 44px; padding: 0.6rem; }
+  .rhythm-options { grid-template-columns: minmax(0, 1fr); }
+  .rhythm-notation-card { max-width: 480px; padding: 0.25rem; }
+  a:focus-visible, button:focus-visible, summary:focus-visible,
+  label:has(input:focus-visible) { outline: 3px solid #0f766e; outline-offset: 3px; }
+}
+
+@media (min-width: 768px) {
+  .playground-page .playground-activity-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 992px) {
+
+  .playground-page {
+    .playground-activity-card { padding: 0.45rem 0.6rem; }
+    .playground-settings summary span { display: block; margin-left: 1rem; }
+    .playground-player-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .playground-player-controls > :last-child { justify-self: center; }
+    .harmony-listen-button { grid-column: 1 / -1; }
+    .harmony-context-grid { grid-template-columns: minmax(0, 1fr); }
+    .harmony-context-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); align-items: baseline; gap: 0.5rem; }
+    .harmony-context-card__label { margin-bottom: 0; }
+  }
+}
+@media (min-width: 1100px) {
+  .playground-page .playground-stage__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
