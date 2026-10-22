@@ -19,9 +19,9 @@ class HarmonyPlaygroundFlowTest < ActionDispatch::IntegrationTest
     get app_playground_path(activity: "harmonia")
 
     assert_response :success
-    assert_includes response.body, "Playground de harmonia"
-    assert_includes response.body, "Ouvir blocado"
-    assert_includes response.body, "Ouvir nota por nota"
+    assert_select "h1", text: "Harmonia"
+    assert_select 'button[data-action="harmony-player#playBlocked"]', count: 1
+    assert_select 'button[data-action="harmony-player#playBroken"]', count: 1
   end
 
   test "stores a compact harmony exercise server-side and keeps only a token in session" do
@@ -53,13 +53,16 @@ class HarmonyPlaygroundFlowTest < ActionDispatch::IntegrationTest
     state_token = @request.session[:harmony_playground_state_token]
     state_key = "playground:harmonia:#{@user.id}:#{state_token}"
     exercise = StudentHubController::HARMONY_PLAYGROUND_STATE_FALLBACK_STORE.read(state_key).fetch("exercise")
+    submitted_assignment = @user.exercise_assignments.order(:id).last
     initial_signature = response.body[/data-harmony-player-exercise-signature-value="([^"]+)"/, 1]
 
     post submit_app_playground_answer_path,
          params: {
            activity: "harmonia",
            selected_option_id: exercise.fetch("a"),
-           exercise_signature: initial_signature,
+           assignment_id: submitted_assignment.public_id,
+           attempt_token: submitted_assignment.answer_token,
+           playback_status: "ready",
            question_mode: "quality",
            chord_structure: "triad",
            instrument: "piano"
@@ -79,7 +82,8 @@ class HarmonyPlaygroundFlowTest < ActionDispatch::IntegrationTest
     get app_playground_path(activity: "harmonia", instrument: "flute")
 
     assert_response :success
-    refute_includes response.body, "Ouvir blocado"
-    assert_includes response.body, "reproduz o material nota por nota"
+    assert_select 'button[data-action="harmony-player#playBlocked"]', count: 0
+    assert_select 'button[data-action="harmony-player#playBroken"]', count: 1
+    assert_includes response.body, "Ouvir em sequência"
   end
 end

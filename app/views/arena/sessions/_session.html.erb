@@ -1,0 +1,107 @@
+<div data-arena-session-state data-host="<%= state[:host] %>" data-listening-policy="<%= state[:listening_policy] %>" data-audio-required="<%= state[:audio_required] %>" data-audio-check-id="<%= state.dig(:audio_check,:id) %>" data-audio-check-own-ready="<%= state.dig(:audio_check,:own_ready) %>" data-audio-check-needs-activation="<%= state.dig(:audio_check,:needs_activation) %>" data-sequence="<%= state[:sequence] %>" data-version="<%= state[:version] %>" data-round-id="<%= state.dig(:round,:id) %>" data-server-now="<%= state[:server_now] %>" data-deadline="<%= state.dig(:round,:deadline_at) %>" data-round-state="<%= state.dig(:round,:state) %>" data-paused-from="<%= state.dig(:round,:paused_from) %>" data-experience="<%= state[:experience] %>" data-duration-seconds="<%= @room&.duration_seconds %>" data-phase="<%= state[:phase] %>" data-phase-started-at="<%= state[:phase_started_at] %>" data-next-transition-at="<%= state[:next_transition_at] %>" data-invite-expired="<%= state.dig(:invite,:expired) %>">
+  <header class="arena-heading arena-heading--room">
+    <div><%= link_to "← Arena Musical", app_arena_path, class: "arena-back" %><h1><%= state[:title] %></h1></div>
+    <div class="arena-status"><span class="arena-state-badge"><i aria-hidden="true"></i><%= arena_session_state_label(state[:state]) %></span><span><% if ArenaSession::TERMINAL.include?(state[:state]) %><%= state[:ranking]&.size || state[:participant_count] %> participantes<% else %><%= state[:participant_count] %> / <%= state[:capacity] %> jogadores<% end %></span><span><%= state[:visibility] == "public" ? "Pública" : "Com convite" %></span></div>
+  </header>
+  <% if state[:technical_preview] %><p class="arena-note">Conteúdo local em revisão · Sem XP</p><% end %>
+  <% if state[:own_identity] %><div class="arena-player-signature"><%= render "arena/shared/avatar", avatar_id: state[:own_identity][:avatar_id] %><span>Você joga como <strong><%= state[:own_identity][:nickname] %></strong></span><% if state[:scoring_version] == Arena::Scoring::CURRENT %><span class="arena-rules-pill">Rapidez + combo</span><% end %></div><% end %>
+  <% if state[:host_audio_excluded] %><p class="arena-feedback">Você não ativou o áudio no prazo e saiu da disputa. Os jogadores prontos continuam; você mantém a condução da sala.</p><% end %>
+  <%= render "arena/sessions/controls", state: state %>
+  <% if state[:host] && ArenaSession::TERMINAL.include?(state[:state]) %><div class="arena-report-access"><span>Resultados observados nesta partida</span><%= link_to "Relatório dos participantes →", report_app_arena_session_path(state[:id]), class: "arena-button" %></div><% end %>
+  <% if state[:state] == "paused" %><aside class="arena-pause-banner" role="status"><span aria-hidden="true">Ⅱ</span><div><strong><%= state.dig(:round,:state) == "results" ? "Pausa para a explicação" : "Jogo pausado" %></strong><p><%= state.dig(:round,:state) == "results" ? "A resposta está disponível. O anfitrião escolhe quando continuar." : "O tempo está parado e as respostas estão suspensas." %></p></div></aside><% end %>
+  <% if state[:roster] %><div class="arena-lobby-stage <%= 'arena-lobby-stage--guest' unless state[:host] %>"><%= render "arena/sessions/roster", state: state %><% end %>
+  <% if state[:host] && state[:invite] && state[:state] == "lobby_open" %>
+    <% invite_url = arena_invite_url(state[:invite][:code]) %>
+    <section class="arena-invite arena-card" aria-labelledby="arena-invite-heading">
+      <div class="arena-invite-content"><p class="arena-eyebrow">Sua sala está aberta</p><h2 id="arena-invite-heading">Convide para a próxima nota.</h2><p>Compartilhe o código, o link ou o QR. Quem entrar usa a própria conta.</p>
+        <% if state[:invite][:expired] %>
+          <div class="arena-entry-error" role="status"><strong>Convite expirado</strong><p>Renove para receber novas pessoas. Os participantes já admitidos continuam na sala.</p></div>
+          <%= button_to "Renovar convite", command_app_arena_session_path(state[:id]), params: { command: "renew_invite", version: state[:version] }, class: "arena-button arena-button--primary" %>
+        <% else %>
+          <label class="arena-field-label" for="arena-invite-code">Código da sala</label><input id="arena-invite-code" class="arena-invite-code" readonly value="<%= state[:invite][:code].scan(/.{1,4}/).join(" ") %>" data-action="focus->arena-live#selectText">
+          <div class="arena-actions"><button type="button" class="arena-button arena-button--primary" data-action="arena-live#copy" data-copy-text="<%= state[:invite][:code] %>">Copiar código</button><button type="button" class="arena-button" data-action="arena-live#copy" data-copy-text="<%= invite_url %>">Copiar link</button></div>
+          <label class="arena-field-label" for="arena-invite-link">Link do convite</label><input id="arena-invite-link" class="arena-invite-link" readonly value="<%= invite_url %>" data-action="focus->arena-live#selectText">
+          <p data-arena-live-target="copyStatus" class="arena-copy-status" role="status" aria-live="polite"></p><p class="arena-hint">O convite vale por duas horas. A entrada fecha ao iniciar.</p>
+        <% end %>
+      </div>
+      <% unless state[:invite][:expired] %><div class="arena-qr-column"><figure class="arena-qr"><%= arena_invite_qr(invite_url) %><figcaption>Escaneie para entrar</figcaption></figure><% if %w[localhost 127.0.0.1].include?(URI.parse(invite_url).host) %><p class="arena-hint">Para entrar pelo celular, abra a Arena pelo endereço do Mac na mesma rede.</p><% end %></div><% end %>
+    </section>
+  <% end %>
+  <% if state[:roster] %></div><% end %>
+  <% if state[:round] && state[:participant] && !ArenaSession::TERMINAL.include?(state[:state]) %>
+    <div class="arena-game-stats" aria-label="Seu progresso"><span><small>Rodada</small><strong><%= state[:round][:position] %> / <%= state[:question_count] %></strong></span><span><small>Seus pontos</small><strong data-arena-points><%= state.dig(:own_result,:points) || 0 %></strong></span><span><small>Sequência de acertos</small><strong><%= state.dig(:own_result,:streak) || 0 %></strong></span></div>
+  <% end %>
+  <% if state[:phase] == "audio_check" %>
+    <%= render "arena/sessions/audio_check", state: state %>
+  <% elsif state[:phase] == "audio_excluded" %>
+    <section class="arena-card arena-waiting"><h2>O jogo seguiu com quem estava pronto.</h2><p>Você não ativou o áudio nos 45 segundos e saiu desta partida. Nenhum erro ou pontuação foi registrado.</p><%= link_to "Voltar para a Arena", app_arena_path(audio: "expired"), class: "arena-button arena-button--primary" %></section>
+  <% elsif state[:state] == "cancelled" && state[:audio_check_attempted] && !state[:round] %>
+    <section class="arena-card arena-waiting"><h2>Esta partida não chegou a começar.</h2><p>A preparação foi encerrada. Crie outra sala quando a turma estiver pronta.</p><%= link_to "Voltar para a Arena", app_arena_path, class: "arena-button" %></section>
+  <% elsif state[:phase] == "departed" %>
+    <section class="arena-card arena-departed"><%= render "arena/shared/avatar", avatar_id: state.dig(:own_identity,:avatar_id) || "owl" %><h2>Seus pontos continuam no jogo.</h2><p>Você saiu desta sala com <strong><%= state.dig(:own_result,:points) || 0 %> pontos</strong>. Quando a partida terminar, poderá consultar o resultado e aparecer no pódio conforme sua classificação.</p><%= link_to "Voltar para a Arena", app_arena_path, class: "arena-button arena-button--primary" %></section>
+  <% elsif state[:phase] == "podium" && state[:podium] %>
+    <%= render "arena/sessions/podium", state: state %>
+  <% elsif state[:round] %>
+    <% round = state[:round] %>
+    <% if round[:question].nil? %>
+      <section class="arena-countdown arena-card" data-arena-phase-panel>
+        <p class="arena-eyebrow">Questão <%= round[:position] %> de <%= state[:question_count] %></p>
+        <h2 class="arena-phase-title" tabindex="-1"><%= state[:state] == "paused" ? "Rodada pausada" : "Valendo em…" %></h2>
+        <div class="arena-countdown-band" aria-hidden="true"><%= render "arena/shared/avatar", avatar_id: state.dig(:own_identity,:avatar_id) || "owl" %><span>♪</span></div>
+        <div class="arena-countdown-number" data-arena-live-target="timer" aria-hidden="true"><%= state[:state] == "paused" ? "Ⅱ" : "3" %></div>
+        <p><%= state[:state] == "paused" ? "O anfitrião retoma quando o grupo estiver pronto." : "A próxima nota está chegando." %></p>
+      </section>
+    <% else %>
+      <section class="arena-round arena-card arena-round--<%= state[:phase] %>" data-arena-phase-panel>
+        <div class="arena-round-header"><p class="arena-eyebrow">Questão <%= round[:position] %> de <%= state[:question_count] %></p><span class="arena-timer" data-arena-live-target="timer" aria-label="Tempo restante" aria-live="off"><%= state[:state] == "paused" ? "Pausado" : "—" %></span></div>
+        <div class="arena-answer-clock" aria-hidden="true"><span data-arena-answer-clock></span></div>
+        <progress class="arena-game-progress" max="<%= state[:question_count] %>" value="<%= round[:position] %>" aria-label="Progresso da partida"></progress>
+        <% if round[:question][:topic] %><p class="arena-topic"><%= round[:question][:topic] %></p><% end %>
+        <h2 class="arena-phase-title" tabindex="-1"><%= round[:question][:prompt] %></h2>
+        <p class="arena-instruction"><%= round[:question][:stimulus] && round[:question][:stimulus]["kind"] != "visual" ? "Ouça o trecho e escolha a resposta correspondente. Uma escolha envia sua resposta." : "Observe a notação e escolha a resposta. Uma escolha envia sua resposta." %></p>
+        <% if round.dig(:playback,:can_play) %><template data-arena-audio-template="<%= round[:id] %>:<%= round.dig(:playback,:generation) %>"><%= render "arena/sessions/audio", state: state, round: round %></template><% elsif round[:playback] && state[:phase] == "listening" && round.dig(:playback,:policy) != "sequence-v1" %><p class="arena-hint"><%= round.dig(:playback,:presenter) ? "Ouça o trecho na tela do anfitrião." : "Aguarde as escutas do restante da turma." %></p><% end %>
+        <% if round[:playback] && state[:phase] == "listening" && round.dig(:playback,:policy) != "sequence-v1" %><p class="arena-hint"><%= round.dig(:playback,:ready_count) %> / <%= round.dig(:playback,:required_count) %> escutas concluídas · cronômetro parado</p><% end %>
+        <div class="arena-score" data-testid="arena-score"><%= round[:question][:svg]&.html_safe %></div>
+        <% if state[:participant] %>
+          <% if round[:state] == "results" %>
+            <% if round[:technical_exclusion] %><p class="arena-feedback">Escuta indisponível. Esta rodada não entra na sua avaliação nem interrompe seu combo.</p><% else %>
+            <div class="arena-feedback arena-feedback--result" data-arena-result data-correct="<%= !!round.dig(:result,:correct) %>" data-streak="<%= round.dig(:result,:streak) %>"><% if round.dig(:result,:correct) %><div class="arena-result-sparks" aria-hidden="true"><% 10.times do |spark| %><i style="--spark:<%= spark %>"><%= spark.even? ? "✦" : "♪" %></i><% end %></div><% end %><div class="arena-result-character" aria-hidden="true"><%= render "arena/shared/avatar", avatar_id: state.dig(:own_identity,:avatar_id) || "owl" %><span><%= round.dig(:result,:correct) ? "✦" : "♪" %></span></div><h3><%= round.dig(:result,:correct) ? "Você acertou!" : (round[:answered] ? "Essa passou. A próxima é sua." : "Tempo encerrado") %></h3><p>Resposta: <strong><%= round.dig(:result,:correct_label) %></strong>.</p><strong class="arena-round-points">+<%= round.dig(:result,:points) %> pontos</strong><% if round.dig(:result,:streak_bonus).to_i > 0 %><p class="arena-combo">Combo de <%= round.dig(:result,:streak) %> acertos · +<%= round.dig(:result,:streak_bonus) %> de bônus!</p><% elsif round.dig(:result,:correct) && state[:scoring_version] == Arena::Scoring::CURRENT %><p class="arena-hint">Rapidez no ponto. Começou sua sequência!</p><% end %></div>
+            <% end %>
+          <% elsif round[:state] == "void" %>
+            <p class="arena-feedback">Rodada anulada. Ela não conta no resultado.</p>
+          <% elsif round[:answered] %>
+            <div class="arena-answer-received" role="status" data-arena-answer-received><div class="arena-ack-character" aria-hidden="true"><%= render "arena/shared/avatar", avatar_id: state.dig(:own_identity,:avatar_id) || "owl" %><span>✓</span></div><h3>Resposta recebida.</h3><p>Você já respondeu. Aguarde o grupo.</p></div>
+          <% elsif round[:technical_exclusion] && state[:phase] == "question" %>
+            <p class="arena-feedback" role="status">Sua escuta não foi concluída. Você volta na próxima questão, sem contar como erro.</p>
+          <% else %>
+            <%= form_with url: answer_app_arena_round_path(round[:id]), class: "arena-answer-form", data: { action: "submit->arena-live#submitAnswer" } do |form| %>
+              <%= form.hidden_field :idempotency_key, value: SecureRandom.uuid %>
+              <fieldset <%= "disabled" unless round[:can_answer] %>><legend class="visually-hidden">Escolha a resposta correta. Sua escolha será enviada.</legend>
+                <div class="arena-answers"><% round[:question][:options].each_with_index do |option,index| %>
+                  <button type="submit" class="arena-answer arena-answer--direct arena-answer--<%= index %> <%= 'arena-answer--score' if option[:svg] %>" name="option_id" value="<%= option[:id] %>"><span aria-hidden="true" class="arena-answer-shape"><%= arena_answer_figure(index) %></span><% if option[:svg] %><span class="visually-hidden"><%= option[:label] %></span><%= option[:svg].html_safe %><% else %><span><%= option[:label] %></span><% end %></button>
+                <% end %></div>
+              </fieldset>
+            <% end %>
+          <% end %>
+        <% else %>
+          <p class="arena-hint"><%= round[:state] == "results" ? "Rodada encerrada. Você pode avançar." : "A turma está respondendo. O gabarito aparece após o fechamento." %></p>
+          <% if round[:state] == "results" %><p class="arena-feedback">Resposta: <strong><%= round.dig(:result,:correct_label) %></strong></p><% end %>
+        <% end %>
+        <% if round[:state] == "results" && round.dig(:result,:correct_svg) %><figure class="arena-result-score"><figcaption>Partitura correspondente ao áudio</figcaption><%= round.dig(:result,:correct_svg).html_safe %></figure><% end %>
+        <% if state[:state] == "paused" %><p class="arena-hint">O anfitrião pausou a rodada.</p><% end %>
+        <% if round[:state] == "answering" %><p class="arena-response-count"><strong><%= round[:answered_count] %> / <%= state[:participant_count] %></strong> respostas recebidas</p><% end %>
+        <% if state[:experience] == "party" && round[:state] == "results" %><p class="arena-next-hint"><%= state[:state] == "paused" ? "Intervalo pausado." : (round[:position] == state[:question_count] ? "Preparando o pódio…" : "A próxima rodada começa automaticamente.") %></p><% end %>
+      </section>
+    <% end %>
+  <% elsif !state[:host] && !ArenaSession::TERMINAL.include?(state[:state]) %>
+    <section class="arena-waiting arena-card" data-arena-phase-panel><%= ui_icon("music") %><h2 class="arena-phase-title" tabindex="-1">Tudo pronto por aqui</h2><p>Aguarde o anfitrião iniciar a primeira questão.</p></section>
+  <% end %>
+  <% if state[:ranking] %>
+    <% if state[:phase] == "podium" %><details class="arena-ranking-disclosure"><summary>Classificação completa <span aria-hidden="true">↓</span></summary><% end %>
+    <section class="arena-card arena-results"><h2><%= state[:state] == "completed" ? "Resultado da sala" : "Placar da rodada" %></h2><div class="arena-table-scroll"><table><thead><tr><th>Posição</th><th>Apelido</th><th>Acertos</th><th>Pontos</th></tr></thead><tbody><% state[:ranking].each do |row| %><tr class="<%= 'arena-ranking-self' if row[:you] %>"><td><%= row[:place] ? "#{row[:place]}º" : "Não classificado" %></td><th scope="row"><span class="arena-ranking-name"><%= render "arena/shared/avatar", avatar_id: row[:avatar_id] %><span><%= row[:nickname] %><%= " · Você" if row[:you] %></span></span></th><td><%= row[:correct] %> / <%= row[:total] %></td><td><strong><%= row[:points] %></strong></td></tr><% end %></tbody></table></div></section>
+    <% if state[:phase] == "podium" %></details><% end %>
+  <% elsif state[:own_result] && ArenaSession::TERMINAL.include?(state[:state]) %>
+    <section class="arena-card arena-final"><h2>Seu resultado</h2><strong><%= state[:own_result][:points] %> <small>pontos</small></strong><p><%= state[:own_result][:correct] %> acertos em <%= state[:own_result][:total] %> rodadas válidas.</p></section>
+  <% end %>
+  <% if ArenaSession::TERMINAL.include?(state[:state]) %><p class="arena-hint">Sessão encerrada. As respostas e o resultado foram preservados.</p><% end %>
+</div>

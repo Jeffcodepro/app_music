@@ -1,36 +1,4 @@
 class PlatformController < ApplicationController
-  GUIDED_TOPICS = [
-    {
-      slug: "leitura",
-      title: "Estruturação / Leitura",
-      description: "Leitura de pauta, claves e organização visual da música."
-    },
-    {
-      slug: "ritmica",
-      title: "Rítmica",
-      description: "Pulso, subdivisão e controle de tempo para execução com precisão."
-    },
-    {
-      slug: "percepcao",
-      title: "Percepção",
-      description: "Escuta ativa, identificação de intervalos e reconhecimento de padrões."
-    },
-    {
-      slug: "harmonia",
-      title: "Harmonia",
-      description: "Escalas, graus e construção de acordes em progressão musical."
-    }
-  ].freeze
-
-  AREA_LABELS = {
-    "leitura" => "Estruturação / Leitura",
-    "ritmica" => "Rítmica",
-    "percepcao" => "Percepção",
-    "harmonia" => "Harmonia",
-    "apreciacao" => "Apreciação",
-    "historia" => "História da Música"
-  }.freeze
-
   STUDY_TRACK_THEMES = [
     {
       slug: "leitura",
@@ -278,41 +246,12 @@ class PlatformController < ApplicationController
     }
   ].freeze
 
-  INTERNAL_STAGES = [
-    {
-      name: "Fundamentos",
-      lessons: [
-        { slug: "fundamentos-1", title: "Conceitos-base", objective: "Base visual e auditiva inicial." },
-        { slug: "fundamentos-2", title: "Leitura inicial", objective: "Primeira fluidez de leitura e pulso." }
-      ]
-    },
-    {
-      name: "Consolidação",
-      lessons: [
-        { slug: "consolidacao-1", title: "Conexão de elementos", objective: "Unir leitura, ritmo e escuta." },
-        { slug: "consolidacao-2", title: "Aplicação guiada", objective: "Fixar padrões em contexto musical." }
-      ]
-    },
-    {
-      name: "Aplicação",
-      lessons: [
-        { slug: "aplicacao-1", title: "Integração entre áreas", objective: "Usar conceitos em combinação." },
-        { slug: "aplicacao-2", title: "Checkpoint preparatório", objective: "Ajustes antes da avaliação." }
-      ]
-    },
-    {
-      name: "Domínio",
-      lessons: [
-        { slug: "dominio-1", title: "Situações avançadas", objective: "Resolver contextos mais complexos." },
-        { slug: "dominio-2", title: "Síntese final", objective: "Consolidar entendimento global." }
-      ]
-    }
-  ].freeze
-
   before_action :authenticate_user!
   layout "platform"
 
-  def dashboard; end
+  def dashboard
+    @study_calendar = StudyCalendar.new(current_user, month: params[:month], access_available: !@daily_visit_unavailable)
+  end
 
   def nivelamento; end
 
@@ -327,15 +266,7 @@ class PlatformController < ApplicationController
     redirect_to app_trilhas_path, alert: "Tema da trilha não encontrado."
   end
 
-  def aulas
-    @selected_mode = select_mode
-    @guided_topics = GUIDED_TOPICS
-    @selected_area = select_area
-    @selected_area_label = AREA_LABELS[@selected_area]
-    @stage_index = internal_stage_index(current_user, @selected_area)
-    @current_stage = INTERNAL_STAGES[@stage_index]
-    @recommended_lesson = @current_stage[:lessons].first
-  end
+  def aulas; end
 
   def pratica; end
 
@@ -345,12 +276,17 @@ class PlatformController < ApplicationController
 
   def perfil; end
 
+  def dados_pessoais; end
+  def assinaturas; end
+  def notificacoes; end
+  def aparencia; end
+
   def update_perfil
     if current_user.update(perfil_params)
-      redirect_to app_perfil_path, notice: "Sua conta foi atualizada com sucesso."
+      redirect_to app_account_personal_path, notice: "Sua conta foi atualizada com sucesso."
     else
       flash.now[:alert] = "Não foi possível salvar as alterações."
-      render :perfil, status: :unprocessable_entity
+      render :dados_pessoais, status: :unprocessable_entity
     end
   end
 
@@ -359,45 +295,18 @@ class PlatformController < ApplicationController
     allowed_plans = ["Primeira Nota", "Pulso", "Harmonia", "Maestro"]
 
     unless allowed_plans.include?(selected_plan)
-      redirect_to app_perfil_path(anchor: "assinatura"), alert: "Selecione um plano válido."
+      redirect_to app_account_subscription_path, alert: "Selecione um plano válido."
       return
     end
 
     if current_user.update(plan: selected_plan)
-      redirect_to app_perfil_path(anchor: "assinatura"), notice: "Plano atualizado com sucesso."
+      redirect_to app_account_subscription_path, notice: "Plano atualizado com sucesso."
     else
-      redirect_to app_perfil_path(anchor: "assinatura"), alert: "Não foi possível atualizar o plano."
+      redirect_to app_account_subscription_path, alert: "Não foi possível atualizar o plano."
     end
   end
 
   private
-
-  def select_mode
-    requested_mode = params[:mode].to_s
-    return requested_mode if %w[guiado livre].include?(requested_mode)
-
-    nil
-  end
-
-  def select_area
-    requested = params[:area].to_s
-    return requested if AREA_LABELS.key?(requested)
-
-    area_counts = current_user.study_activities.group(:area).count
-    most_practiced = area_counts.max_by { |_area, count| count }&.first
-    AREA_LABELS.key?(most_practiced) ? most_practiced : "leitura"
-  end
-
-  def internal_stage_index(user, area)
-    activity_count = user.study_activities.where(area: area).count
-
-    case activity_count
-    when 0..5 then 0
-    when 6..14 then 1
-    when 15..29 then 2
-    else 3
-    end
-  end
 
   def perfil_params
     params.require(:user).permit(

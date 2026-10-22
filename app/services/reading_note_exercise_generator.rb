@@ -1,4 +1,5 @@
 class ReadingNoteExerciseGenerator
+  STAFF_POSITION_RANGE = (-6..14)
   QUESTION_MODES = [
     { id: "note_name", label: "Notas" },
     { id: "accidental", label: "Acidentes" },
@@ -10,21 +11,8 @@ class ReadingNoteExerciseGenerator
     { id: "accidental", label: "Acidente da nota" },
     { id: "key_signature", label: "Tonalidade da armadura" }
   ].freeze
-  NOTE_OPTIONS = [
-    { id: "c", letter: "C", label: "Dó" },
-    { id: "d", letter: "D", label: "Ré" },
-    { id: "e", letter: "E", label: "Mi" },
-    { id: "f", letter: "F", label: "Fá" },
-    { id: "g", letter: "G", label: "Sol" },
-    { id: "a", letter: "A", label: "Lá" },
-    { id: "b", letter: "B", label: "Si" }
-  ].freeze
-  ACCIDENTALS = [
-    { id: "sharp", label: "Sustenido", symbol: "♯" },
-    { id: "flat", label: "Bemol", symbol: "♭" },
-    { id: "natural", label: "Bequadro", symbol: "♮" },
-    { id: "double_sharp", label: "Duplo sustenido", symbol: "𝄪" }
-  ].freeze
+  NOTE_OPTIONS = ExercisePresentation::NOTE_LABELS.map { |letter, label| { id: letter.downcase, letter:, label: }.freeze }.freeze
+  ACCIDENTALS = ExercisePresentation::ACCIDENTALS.map { |id, definition| definition.merge(id:).freeze }.freeze
   CLEFS = [
     {
       id: "treble",
@@ -55,14 +43,79 @@ class ReadingNoteExerciseGenerator
     { id: "mixed", label: "Misto" }
   ].freeze
   KEY_SIGNATURES = [
+    { id: "c_major", label: "Dó maior", accidental_kind: "natural", count: 0 },
     { id: "g_major", label: "Sol maior", accidental_kind: "sharp", count: 1 },
     { id: "d_major", label: "Ré maior", accidental_kind: "sharp", count: 2 },
     { id: "a_major", label: "Lá maior", accidental_kind: "sharp", count: 3 },
     { id: "e_major", label: "Mi maior", accidental_kind: "sharp", count: 4 },
+    { id: "b_major", label: "Si maior", accidental_kind: "sharp", count: 5 },
+    { id: "fs_major", label: "Fá sustenido maior", accidental_kind: "sharp", count: 6 },
+    { id: "cs_major", label: "Dó sustenido maior", accidental_kind: "sharp", count: 7 },
     { id: "f_major", label: "Fá maior", accidental_kind: "flat", count: 1 },
     { id: "bb_major", label: "Si bemol maior", accidental_kind: "flat", count: 2 },
     { id: "eb_major", label: "Mi bemol maior", accidental_kind: "flat", count: 3 },
-    { id: "ab_major", label: "Lá bemol maior", accidental_kind: "flat", count: 4 }
+    { id: "ab_major", label: "Lá bemol maior", accidental_kind: "flat", count: 4 },
+    { id: "db_major", label: "Ré bemol maior", accidental_kind: "flat", count: 5 },
+    { id: "gb_major", label: "Sol bemol maior", accidental_kind: "flat", count: 6 },
+    { id: "cb_major", label: "Dó bemol maior", accidental_kind: "flat", count: 7 }
+  ].freeze
+  SEASON_MODES = [
+    {
+      id: "level_1",
+      label: "Nível 1",
+      topics: [
+        "Pauta musical",
+        "Claves",
+        "Símbolos básicos",
+        "Organização visual da música",
+        "Leitura inicial"
+      ],
+      staff_position_range: (0..8),
+      accidental_ids: %w[sharp flat natural],
+      key_signature_ids: %w[c_major g_major f_major]
+    },
+    {
+      id: "level_2",
+      label: "Nível 2",
+      topics: [
+        "Consolidação da leitura",
+        "Figuras em contexto",
+        "Relação entre leitura e compasso",
+        "Leitura mais fluida"
+      ],
+      staff_position_range: (-2..10),
+      accidental_ids: %w[sharp flat natural],
+      key_signature_ids: %w[c_major g_major d_major f_major bb_major]
+    },
+    {
+      id: "level_3",
+      label: "Nível 3",
+      topics: [
+        "Leitura com mais complexidade rítmica",
+        "Leitura associada à percepção e forma"
+      ],
+      staff_position_range: (-4..12),
+      accidental_ids: %w[sharp flat natural double_sharp double_flat],
+      key_signature_ids: %w[c_major g_major d_major a_major e_major f_major bb_major eb_major ab_major]
+    },
+    {
+      id: "level_4",
+      label: "Nível 4",
+      topics: [
+        "Leitura aplicada a contextos mais avançados",
+        "Interpretação estrutural da escrita musical"
+      ],
+      staff_position_range: (-6..14),
+      accidental_ids: %w[sharp flat natural double_sharp double_flat],
+      key_signature_ids: KEY_SIGNATURES.map { |definition| definition[:id] }
+    },
+    {
+      id: "mixed",
+      label: "Misto",
+      topics: [
+        "Mistura todos os níveis e temporadas da plataforma"
+      ]
+    }
   ].freeze
   KEY_SIGNATURE_PITCHES = {
     "treble" => {
@@ -80,7 +133,8 @@ class ReadingNoteExerciseGenerator
   }.freeze
   DEFAULT_CLEF_MODE = "mixed".freeze
   DEFAULT_QUESTION_MODE = "mixed".freeze
-  STAFF_POSITION_RANGE = (-2..10)
+  DEFAULT_SEASON_MODE = "mixed".freeze
+  DEFAULT_SEASON_ID = "level_4".freeze
 
   def self.clef_modes
     CLEF_MODES
@@ -90,12 +144,20 @@ class ReadingNoteExerciseGenerator
     QUESTION_MODES
   end
 
+  def self.season_modes
+    SEASON_MODES
+  end
+
   def self.clef_mode_ids
     CLEF_MODES.map { |mode| mode[:id] }
   end
 
   def self.question_mode_ids
     QUESTION_MODES.map { |mode| mode[:id] }
+  end
+
+  def self.season_mode_ids
+    SEASON_MODES.map { |mode| mode[:id] }
   end
 
   def self.clef_definition(id)
@@ -114,6 +176,14 @@ class ReadingNoteExerciseGenerator
     QUESTION_TYPES.find { |type| type[:id] == id.to_s }
   end
 
+  def self.season_mode_definition(id)
+    SEASON_MODES.find { |mode| mode[:id] == id.to_s }
+  end
+
+  def self.season_definition(id)
+    SEASON_MODES.find { |mode| mode[:id] == id.to_s && mode[:id] != DEFAULT_SEASON_MODE }
+  end
+
   def self.note_option(id)
     NOTE_OPTIONS.find { |option| option[:id] == id.to_s }
   end
@@ -126,23 +196,30 @@ class ReadingNoteExerciseGenerator
     ACCIDENTALS.find { |accidental| accidental[:id] == id.to_s }
   end
 
+  def self.accidental_note_option_id(note_option_id:, accidental_id:)
+    [note_option_id, accidental_id].join("__")
+  end
+
+  def self.accidental_note_option(id)
+    note_option_id, accidental_id = id.to_s.split("__", 2)
+    note_option = note_option(note_option_id)
+    accidental = accidental_definition(accidental_id)
+    return if note_option.blank? || accidental.blank?
+
+    {
+      id: accidental_note_option_id(note_option_id:, accidental_id:),
+      note_option_id:,
+      accidental_id:,
+      label: [note_option[:label], accidental[:label].downcase].join(" ")
+    }
+  end
+
   def self.key_signature_definition(id)
     KEY_SIGNATURES.find { |definition| definition[:id] == id.to_s }
   end
 
   def self.localize_pitch_name(pitch_name)
-    match_data = pitch_name.to_s.match(/\A([A-G])(bb|##|b|#)?(-?\d+)\z/)
-    return pitch_name.to_s if match_data.blank?
-
-    note = note_option_for_letter(match_data[1])&.fetch(:label)
-    accidental = {
-      "#" => "sustenido",
-      "##" => "duplo sustenido",
-      "b" => "bemol",
-      "bb" => "duplo bemol"
-    }[match_data[2]]
-
-    [note, accidental, match_data[3]].compact.join(" ")
+    ExercisePresentation.pitch_label(pitch_name)
   end
 
   def self.key_signature_accidentals_for(clef_id, key_signature_id)
@@ -165,25 +242,27 @@ class ReadingNoteExerciseGenerator
     end
   end
 
-  def initialize(random: Random.new, clef_mode: DEFAULT_CLEF_MODE, question_mode: DEFAULT_QUESTION_MODE, recent_exercises: [])
+  def initialize(random: Random.new, clef_mode: DEFAULT_CLEF_MODE, question_mode: DEFAULT_QUESTION_MODE, season_mode: DEFAULT_SEASON_MODE, recent_exercises: [])
     @random = random
     @clef_mode = sanitize_clef_mode(clef_mode)
     @question_mode = sanitize_question_mode(question_mode)
+    @season_mode = sanitize_season_mode(season_mode)
     @recent_exercises = Array(recent_exercises).map { |entry| entry.to_h.symbolize_keys }
   end
 
   def call
+    season_definition = sampled_season_definition
     question_type = sampled_question_type
     clef_definition = sampled_clef_definition
     clef = HeadMusic::Rudiment::Clef.get(clef_definition[:head_music])
 
     exercise = case question_type
                when "note_name"
-                 build_note_name_exercise(clef_definition:, clef:, question_type:)
+                 build_note_name_exercise(clef_definition:, clef:, question_type:, season_definition:)
                when "accidental"
-                 build_accidental_exercise(clef_definition:, clef:, question_type:)
+                 build_accidental_exercise(clef_definition:, clef:, question_type:, season_definition:)
                else
-                 build_key_signature_exercise(clef_definition:, question_type:)
+                 build_key_signature_exercise(clef_definition:, question_type:, season_definition:)
                end
 
     exercise.merge(
@@ -194,8 +273,8 @@ class ReadingNoteExerciseGenerator
 
   private
 
-  def build_note_name_exercise(clef_definition:, clef:, question_type:)
-    staff_position_index = sampled_staff_position_index(clef_definition:, clef:, question_type:)
+  def build_note_name_exercise(clef_definition:, clef:, question_type:, season_definition:)
+    staff_position_index = sampled_staff_position_index(clef_definition:, clef:, question_type:, season_definition:)
     pitch = pitch_for_staff_position(clef:, staff_position_index:)
     note_definition = note_definition_for_pitch(pitch)
     distractors = NOTE_OPTIONS.reject { |option| option[:id] == note_definition[:id] }.sample(3, random: @random)
@@ -205,6 +284,7 @@ class ReadingNoteExerciseGenerator
 
     build_common_exercise(
       question_type:,
+      season_definition:,
       question: "Observe a pauta e identifique a nota escrita.",
       clef_definition:,
       correct_option_id: note_definition[:id],
@@ -218,20 +298,29 @@ class ReadingNoteExerciseGenerator
     )
   end
 
-  def build_accidental_exercise(clef_definition:, clef:, question_type:)
-    staff_position_index = sampled_staff_position_index(clef_definition:, clef:, question_type:)
+  def build_accidental_exercise(clef_definition:, clef:, question_type:, season_definition:)
+    staff_position_index = sampled_staff_position_index(clef_definition:, clef:, question_type:, season_definition:)
     pitch = pitch_for_staff_position(clef:, staff_position_index:)
-    accidental_definition = sampled_accidental_definition(clef_definition:, pitch_name: pitch.to_s, staff_position_index:)
-    options = ACCIDENTALS.shuffle(random: @random).map do |accidental|
-      { id: accidental[:id], label: accidental[:label] }
+    accidental_definition = sampled_accidental_definition(clef_definition:, pitch_name: pitch.to_s, staff_position_index:, season_definition:)
+    written_note = pitch.with_alter(accidental_definition.fetch(:alter))
+    note_definition = note_definition_for_pitch(written_note)
+    correct_option = self.class.accidental_note_option(
+      self.class.accidental_note_option_id(note_option_id: note_definition[:id], accidental_id: accidental_definition[:id])
+    )
+    distractors = accidental_note_options_for(season_definition)
+      .reject { |option| option[:id] == correct_option[:id] }
+      .sample(3, random: @random)
+    options = ([correct_option] + distractors).shuffle(random: @random).map do |option|
+      { id: option[:id], label: option[:label] }
     end
 
     build_common_exercise(
       question_type:,
-      question: "Observe a nota na pauta e identifique o acidente musical indicado.",
+      season_definition:,
+      question: "Observe a nota na pauta e identifique a nota completa com o acidente musical indicado.",
       clef_definition:,
-      correct_option_id: accidental_definition[:id],
-      correct_option_label: accidental_definition[:label],
+      correct_option_id: correct_option[:id],
+      correct_option_label: correct_option[:label],
       signature: self.class.exercise_signature(
         question_type:,
         clef_id: clef_definition[:id],
@@ -249,8 +338,8 @@ class ReadingNoteExerciseGenerator
     )
   end
 
-  def build_key_signature_exercise(clef_definition:, question_type:)
-    key_signature_definition = sampled_key_signature_definition(clef_definition:, question_type:)
+  def build_key_signature_exercise(clef_definition:, question_type:, season_definition:)
+    key_signature_definition = sampled_key_signature_definition(clef_definition:, question_type:, season_definition:)
     distractors = KEY_SIGNATURES.reject { |definition| definition[:id] == key_signature_definition[:id] }.sample(3, random: @random)
     options = ([key_signature_definition] + distractors).shuffle(random: @random).map do |definition|
       { id: definition[:id], label: definition[:label] }
@@ -258,6 +347,7 @@ class ReadingNoteExerciseGenerator
 
     build_common_exercise(
       question_type:,
+      season_definition:,
       question: "Observe a armadura de clave e identifique a tonalidade maior correspondente.",
       clef_definition:,
       correct_option_id: key_signature_definition[:id],
@@ -271,13 +361,18 @@ class ReadingNoteExerciseGenerator
     )
   end
 
-  def build_common_exercise(question_type:, question:, clef_definition:, correct_option_id:, correct_option_label:, signature:, options:, **attributes)
+  def build_common_exercise(question_type:, season_definition:, question:, clef_definition:, correct_option_id:, correct_option_label:, signature:, options:, **attributes)
     question_type_definition = self.class.question_type_definition(question_type)
 
     {
       question:,
       question_type:,
       question_type_label: question_type_definition.fetch(:label),
+      season_mode: @season_mode,
+      season_mode_label: season_mode_label,
+      season_id: season_definition[:id],
+      season_label: season_definition[:label],
+      season_topics: season_definition[:topics],
       clef_mode: @clef_mode,
       clef_mode_label: clef_mode_label,
       clef_id: clef_definition[:id],
@@ -308,74 +403,101 @@ class ReadingNoteExerciseGenerator
     (candidates.presence || CLEFS).sample(random: @random)
   end
 
-  def sampled_staff_position_index(clef_definition:, clef:, question_type:)
-    candidates = STAFF_POSITION_RANGE.to_a
+  def sampled_season_definition
+    return self.class.season_definition(@season_mode) unless @season_mode == DEFAULT_SEASON_MODE
+
+    recent_season_ids = @recent_exercises.filter_map { |entry| entry[:season_id].presence }.last(1)
+    candidates = available_seasons.reject { |season| recent_season_ids.include?(season[:id]) }
+    (candidates.presence || available_seasons).sample(random: @random)
+  end
+
+  def sampled_staff_position_index(clef_definition:, clef:, question_type:, season_definition:)
+    candidates = season_definition.fetch(:staff_position_range, STAFF_POSITION_RANGE).to_a
     filtered_candidates = candidates.reject do |staff_position_index|
-      pitch = pitch_for_staff_position(clef:, staff_position_index:)
-      recent_signatures.include?(
-        self.class.exercise_signature(question_type:, clef_id: clef_definition[:id], pitch_name: pitch.to_s)
-      ) || recent_staff_positions_for(clef_definition[:id]).include?(staff_position_index)
+      recent_staff_positions_for(clef_definition[:id], season_definition[:id]).include?(staff_position_index)
     end
 
     (filtered_candidates.presence || candidates).sample(random: @random)
   end
 
-  def sampled_accidental_definition(clef_definition:, pitch_name:, staff_position_index:)
-    candidates = ACCIDENTALS.reject do |accidental|
-      recent_signatures.include?(
-        self.class.exercise_signature(
-          question_type: "accidental",
-          clef_id: clef_definition[:id],
-          pitch_name:,
-          accidental_id: accidental[:id]
-        )
-      ) && recent_staff_positions_for(clef_definition[:id]).include?(staff_position_index)
+  def sampled_accidental_definition(clef_definition:, pitch_name:, staff_position_index:, season_definition:)
+    candidates = allowed_accidentals_for(season_definition).reject do |accidental|
+      recent_accidental_ids_for(clef_definition[:id], season_definition[:id], staff_position_index).include?(accidental[:id])
     end
 
-    (candidates.presence || ACCIDENTALS).sample(random: @random)
+    (candidates.presence || allowed_accidentals_for(season_definition)).sample(random: @random)
   end
 
-  def sampled_key_signature_definition(clef_definition:, question_type:)
-    candidates = KEY_SIGNATURES.reject do |definition|
-      recent_signatures.include?(
-        self.class.exercise_signature(question_type:, clef_id: clef_definition[:id], key_signature_id: definition[:id])
-      )
+  def sampled_key_signature_definition(clef_definition:, question_type:, season_definition:)
+    allowed_key_signatures = allowed_key_signatures_for(season_definition)
+    candidates = allowed_key_signatures.reject do |definition|
+      recent_key_signature_ids_for(clef_definition[:id], question_type, season_definition[:id]).include?(definition[:id])
     end
 
-    (candidates.presence || KEY_SIGNATURES).sample(random: @random)
+    (candidates.presence || allowed_key_signatures).sample(random: @random)
   end
 
   def pitch_for_staff_position(clef:, staff_position_index:)
-    if staff_position_index.even?
-      clef.pitch_for_line((staff_position_index / 2) + 1)
-    else
-      clef.pitch_for_space(((staff_position_index - 1) / 2) + 1)
-    end
+    pitch = if staff_position_index.even?
+              clef.pitch_for_line((staff_position_index / 2) + 1)
+            else
+              clef.pitch_for_space(((staff_position_index - 1) / 2) + 1)
+            end
+    MusicTheory::Note.parse(pitch.to_s)
   end
 
   def note_definition_for_pitch(pitch)
-    letter = pitch.to_s.match(/\A([A-G])/)&.captures&.first
-    self.class.note_option_for_letter(letter) || NOTE_OPTIONS.first
+    self.class.note_option_for_letter(pitch.step)
   end
 
-  def recent_signatures
-    @recent_signatures ||= @recent_exercises.filter_map { |entry| entry[:signature].presence }
-  end
-
-  def recent_staff_positions_for(clef_id)
-    @recent_staff_positions_by_clef ||= @recent_exercises.each_with_object(Hash.new { |hash, key| hash[key] = [] }) do |entry, positions|
+  def recent_staff_positions_for(clef_id, season_id)
+    @recent_staff_positions_by_context ||= @recent_exercises.each_with_object(Hash.new { |hash, key| hash[key] = [] }) do |entry, positions|
       next if entry[:clef_id].blank?
+      next if entry[:season_id].blank?
       next if entry[:staff_position_index].blank?
+      next unless %w[note_name accidental].include?(entry[:question_type])
 
-      positions[entry[:clef_id]] << entry[:staff_position_index].to_i
-      positions[entry[:clef_id]] = positions[entry[:clef_id]].last(2)
+      key = [entry[:clef_id], entry[:season_id]]
+      positions[key] << entry[:staff_position_index].to_i
     end
 
-    @recent_staff_positions_by_clef[clef_id]
+    @recent_staff_positions_by_context[[clef_id, season_id]]
+  end
+
+  def recent_accidental_ids_for(clef_id, season_id, staff_position_index)
+    @recent_accidentals_by_context ||= @recent_exercises.each_with_object(Hash.new { |hash, key| hash[key] = [] }) do |entry, accidental_ids|
+      next if entry[:clef_id].blank?
+      next if entry[:season_id].blank?
+      next unless entry[:question_type] == "accidental"
+      next if entry[:staff_position_index].blank? || entry[:note_accidental_id].blank?
+
+      key = [entry[:clef_id], entry[:season_id], entry[:staff_position_index].to_i]
+      accidental_ids[key] << entry[:note_accidental_id]
+    end
+
+    @recent_accidentals_by_context[[clef_id, season_id, staff_position_index.to_i]]
+  end
+
+  def recent_key_signature_ids_for(clef_id, _question_type, season_id)
+    @recent_key_signatures_by_context ||= @recent_exercises.each_with_object(Hash.new { |hash, key| hash[key] = [] }) do |entry, key_signature_ids|
+      next if entry[:clef_id].blank?
+      next if entry[:season_id].blank?
+      next unless entry[:question_type] == "key_signature"
+      next if entry[:key_signature_id].blank?
+
+      key = [entry[:clef_id], entry[:season_id]]
+      key_signature_ids[key] << entry[:key_signature_id]
+    end
+
+    @recent_key_signatures_by_context[[clef_id, season_id]]
   end
 
   def clef_mode_label
     self.class.clef_mode_definition(@clef_mode).fetch(:label)
+  end
+
+  def season_mode_label
+    self.class.season_mode_definition(@season_mode).fetch(:label)
   end
 
   def question_mode_label
@@ -390,6 +512,35 @@ class ReadingNoteExerciseGenerator
   def sanitize_question_mode(question_mode)
     question_mode = question_mode.to_s
     self.class.question_mode_ids.include?(question_mode) ? question_mode : DEFAULT_QUESTION_MODE
+  end
+
+  def sanitize_season_mode(season_mode)
+    season_mode = season_mode.to_s
+    self.class.season_mode_ids.include?(season_mode) ? season_mode : DEFAULT_SEASON_MODE
+  end
+
+  def available_seasons
+    @available_seasons ||= SEASON_MODES.reject { |mode| mode[:id] == DEFAULT_SEASON_MODE }
+  end
+
+  def allowed_accidentals_for(season_definition)
+    accidental_ids = season_definition.fetch(:accidental_ids, ACCIDENTALS.map { |accidental| accidental[:id] })
+    ACCIDENTALS.select { |accidental| accidental_ids.include?(accidental[:id]) }
+  end
+
+  def allowed_key_signatures_for(season_definition)
+    key_signature_ids = season_definition.fetch(:key_signature_ids, KEY_SIGNATURES.map { |definition| definition[:id] })
+    KEY_SIGNATURES.select { |definition| key_signature_ids.include?(definition[:id]) }
+  end
+
+  def accidental_note_options_for(season_definition)
+    allowed_accidentals_for(season_definition).flat_map do |accidental|
+      NOTE_OPTIONS.map do |note_option|
+        self.class.accidental_note_option(
+          self.class.accidental_note_option_id(note_option_id: note_option[:id], accidental_id: accidental[:id])
+        )
+      end
+    end
   end
 
   def self.exercise_signature(question_type:, clef_id:, pitch_name: nil, accidental_id: nil, key_signature_id: nil)

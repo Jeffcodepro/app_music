@@ -1,0 +1,7 @@
+<%# Providers are real integrations: offer them only when configured. Never print credentials. %>
+<% if ENV["GOOGLE_CLIENT_ID"].present? && ENV["GOOGLE_CLIENT_SECRET"].present? %>
+  <div class="auth-provider"><%= button_to "Continuar com Google", user_google_oauth2_omniauth_authorize_path, method: :post, data: { turbo: false }, class: "app-btn" %></div>
+<% end %>
+<% if ENV["APPLE_CLIENT_ID"].present? && ENV["APPLE_TEAM_ID"].present? && ENV["APPLE_KEY_ID"].present? && ENV["APPLE_PRIVATE_KEY"].present? %>
+  <div class="auth-provider"><%= button_to "Continuar com Apple", user_apple_omniauth_authorize_path, method: :post, data: { turbo: false }, class: "app-btn" %></div>
+<% end %>

@@ -1,0 +1,11 @@
+<div class="playground-control">
+  <span class="playground-control__label">Exercício</span>
+  <div class="playground-direction-grid">
+    <% [["interval", "Intervalos"], ["melodic_dictation", "Ditado melódico"]].each do |value, label| %>
+      <label class="playground-direction-card <%= 'is-selected' if perception_preferences[:question_mode] == value %>">
+        <%= radio_button_tag :question_mode, value, perception_preferences[:question_mode] == value, class: "playground-direction-card__input", data: { action: "change->#{player}-player#stop change->preferences#submit" } %>
+        <span class="playground-direction-card__title"><%= label %></span>
+      </label>
+    <% end %>
+  </div>
+</div>

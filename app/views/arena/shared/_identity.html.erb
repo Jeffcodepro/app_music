@@ -1,0 +1,15 @@
+<div class="arena-identity-progress" aria-label="Sua entrada"><span data-arena-identity-target="stepLabel">1 · Personagem</span><span>2 · Seu nome</span></div>
+<fieldset class="arena-character-picker" data-arena-identity-target="characters">
+  <legend>Quem vai entrar no palco?</legend>
+  <div class="arena-character-grid">
+    <% Arena::Avatars::CHOICES.each do |id,label| %>
+      <div><%= radio_button_tag avatar_field, id, selected_avatar == id, id: "#{prefix}-#{id}", required: true, data: { action: "arena-identity#choose" } %><%= label_tag "#{prefix}-#{id}" do %><span aria-hidden="true"><%= render "arena/shared/avatar", avatar_id: id %></span><span><%= label %></span><span class="arena-character-check" aria-hidden="true">✓</span><% end %></div>
+    <% end %>
+  </div>
+</fieldset>
+<button type="button" class="arena-button arena-button--primary arena-identity-next" hidden data-arena-identity-target="advance" data-action="arena-identity#next">Continuar com este personagem →</button>
+<div class="arena-identity-profile" data-arena-identity-target="profile">
+  <div class="arena-identity-preview" data-arena-identity-target="preview" aria-hidden="true"></div>
+  <div><%= label_tag nickname_field, "#{prefix == 'create' ? 'Seu apelido no jogo' : 'Seu apelido na sala'}" %><%= text_field_tag nickname_field, nickname, required: true, maxlength: 32, autocomplete: "off", placeholder: "Como quer aparecer no jogo?", data: { arena_identity_target: "nickname" } %><p class="arena-hint">Seu personagem e apelido aparecem na sala. Evite nome completo ou e-mail.</p></div>
+  <button type="button" class="arena-identity-back" hidden data-arena-identity-target="back" data-action="arena-identity#back">← Trocar personagem</button>
+</div>

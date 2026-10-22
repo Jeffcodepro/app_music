@@ -1,0 +1,7 @@
+<nav class="account-links" aria-label="Seções da conta">
+  <% account_navigation.each do |label, path, icon| %>
+    <%= link_to path, aria: { current: account_page_active?(path) ? "page" : nil } do %>
+      <%= ui_icon(icon) %><span><%= label %></span><span aria-hidden="true">›</span>
+    <% end %>
+  <% end %>
+</nav>

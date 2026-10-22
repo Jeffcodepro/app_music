@@ -1,0 +1,19 @@
+<% content_for :title, "#{@state[:title]} · Lobby" %>
+<section class="arena arena-preparation">
+  <header class="arena-heading arena-heading--room"><div><%= link_to "← Arena Musical", app_arena_path, class: "arena-back" %><p class="arena-eyebrow">Lobby da sala</p><h1><%= @state[:title] %></h1></div><div class="arena-status"><span><%= @state[:participant_count] %> / <%= @state[:capacity] %> prontos</span><span><%= @state[:visibility] == "public" ? "Pública" : "Com convite" %></span></div></header>
+  <div class="arena-lobby-preparation-grid">
+    <section class="arena-card arena-player-editor" aria-labelledby="arena-prepare-heading"><p class="arena-eyebrow">Sua vez de entrar em cena</p><h2 id="arena-prepare-heading">Quem vem jogar?</h2><p class="arena-panel-intro">Um personagem e seu apelido. A banda espera por você.</p>
+      <% if @arena_identity_error %><p class="arena-entry-error" role="alert"><%= @arena_identity_error %></p><% end %>
+      <%= form_with url: ready_app_arena_session_path(@room), class: "arena-form", data: { controller: "arena-identity", action: "submit->arena-identity#submit" } do |form| %>
+        <%= render "arena/shared/identity", prefix: "lobby", avatar_field: :avatar_id, selected_avatar: @avatar_id, nickname_field: :nickname, nickname: @nickname %>
+        <div data-arena-identity-target="settings"><p class="arena-hint">Ao confirmar, você aparece como pronto nesta sala.</p></div>
+        <%= form.submit "Estou pronto!", class: "arena-button arena-button--primary", data: { arena_identity_target: "confirm" } %>
+      <% end %>
+    </section>
+    <aside class="arena-lobby-welcome"><div class="arena-lobby-spotlight" aria-hidden="true"><%= render "arena/shared/avatar", avatar_id: "robot" %><span>♪</span><span>✦</span></div><h2>O palco está quase pronto.</h2>
+      <% if @state[:host] %><p>Primeiro, confirme seu personagem e apelido. Depois, compartilhe o convite e acompanhe quem está pronto para jogar.</p><% else %><p>Seu lugar no palco começa aqui. Quando confirmar, o anfitrião recebe o aviso de que você está pronto.</p><% end %>
+      <p class="arena-hint">Só aparece para a turma depois de confirmar.</p>
+      <% if @state[:host] %><%= button_to "Encerrar esta sala", command_app_arena_session_path(@room), params: { command: "end", version: @state[:version] }, class: "arena-button" %><% end %>
+    </aside>
+  </div>
+</section>

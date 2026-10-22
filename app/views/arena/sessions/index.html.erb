@@ -1,0 +1,60 @@
+<% content_for :title, "Arena Musical" %>
+<section class="arena arena-entry" data-controller="arena-setup">
+  <% if params[:audio] == "expired" %><p class="arena-entry-notice" role="status">Você saiu da partida porque não ativou o áudio em 45 segundos. Nenhum erro ou pontuação foi registrado. Entre em outra sala quando estiver pronto.</p><% end %>
+  <header class="arena-hero"><div><p class="arena-eyebrow">Seu próximo encontro musical</p><h1>Junte sua banda.</h1><p>Um personagem. Uma sala. A próxima nota é com vocês.</p></div><div class="arena-hero-characters" aria-hidden="true"><%= render "arena/shared/avatar", avatar_id: "fox" %><%= render "arena/shared/avatar", avatar_id: "robot" %><span>♪</span></div></header>
+  <% if @active_host_sessions.any? %>
+    <section class="arena-owned-rooms arena-card" aria-labelledby="arena-owned-title">
+      <div class="arena-section-heading"><h2 id="arena-owned-title">Suas salas abertas</h2><span>Você conduz</span></div>
+      <p class="arena-hint">Prepare seus lobbies à vontade. Até <%= Arena::Sessions::MAX_IN_PROGRESS %> partidas podem estar em andamento ao mesmo tempo; pausas e preparação de áudio também ocupam uma vaga.</p>
+      <p class="arena-copy-status" role="status" data-arena-setup-target="roomStatus"></p>
+      <ul><% @active_host_sessions.each do |room| %>
+        <li data-arena-setup-target="room">
+          <div><h3><%= room.title %></h3><span><%= arena_session_state_label(room.state) %></span></div>
+          <div class="arena-owned-actions"><%= link_to "Abrir sala", app_arena_session_path(room), class: "arena-button" %>
+            <details><summary class="arena-button arena-button--quiet">Encerrar sala</summary><div class="arena-owned-confirm"><p>Finalizar esta sala? Respostas e resultados já registrados serão preservados.</p>
+              <%= button_to "Sim, encerrar sala", command_app_arena_session_path(room), params: { command: "finish", version: room.lock_version, return_to: "arena" }, class: "arena-button arena-button--danger", form: { data: { action: "submit->arena-setup#finishRoom", room_title: room.title } } %>
+            </div></details>
+          </div>
+        </li>
+      <% end %></ul>
+      <p class="arena-hint" data-arena-setup-target="emptyRooms" hidden>Suas salas foram encerradas. Tudo pronto para reunir outra turma.</p>
+    </section>
+  <% end %>
+  <section class="arena-open-rooms" aria-labelledby="arena-open-title"><div class="arena-section-heading"><div><p class="arena-eyebrow">Encontre sua turma</p><h2 id="arena-open-title">Salas abertas</h2></div><%= link_to "Atualizar salas ↻", app_arena_path, class: "arena-back" %></div>
+    <% if @public_rooms.any? %><ul class="arena-open-grid"><% @public_rooms.each do |room| %><li><span class="arena-room-open">Entrada aberta</span><h3><%= room[:title] %></h3><p><%= room[:content] %></p><div><span><strong><%= room[:participants] %> / <%= room[:capacity] %></strong> no palco</span><span><%= room[:duration_seconds] %>s por questão</span></div><%= link_to "Abrir lobby →", app_arena_path(public_session_id: room[:id], anchor: "arena-join-title"), class: "arena-button" %></li><% end %></ul>
+    <% else %><p class="arena-directory-empty">O palco está livre. Crie uma sala pública e seja o primeiro a reunir a banda.</p><% end %>
+  </section>
+  <div class="arena-entry-grid">
+    <section class="arena-card arena-join-panel" aria-labelledby="arena-join-title">
+      <div class="arena-panel-heading"><span class="arena-panel-icon"><%= ui_icon("radio") %></span><span class="arena-eyebrow">Vou jogar</span></div>
+      <h2 id="arena-join-title">Entre no ritmo.</h2><p class="arena-panel-intro"><%= @public_room ? "Você escolheu #{@public_room[:title]}. Prepare seu personagem e confirme." : "Abra o lobby pelo convite. Você escolhe personagem e apelido dentro da sala." %></p>
+      <% if @arena_entry_error %><p class="arena-entry-error" role="alert"><%= @arena_entry_error %></p><% end %>
+      <%= form_with url: prepare_app_arena_path, class: "arena-form" do |form| %>
+        <div><%= form.label :code, "Código ou link do convite" %><%= form.text_field :code, value: @invitation_code, required: true, maxlength: 2048, autocomplete: "off", spellcheck: false, placeholder: "Cole seu convite aqui" %></div>
+        <%= form.submit "Abrir lobby", class: "arena-button arena-button--primary" %>
+      <% end %>
+    </section>
+    <% if @can_host %><section class="arena-card arena-create-panel" aria-labelledby="arena-create-title">
+      <div class="arena-panel-heading"><span class="arena-panel-icon"><%= ui_icon("music") %></span><span class="arena-eyebrow">Vou reunir a turma</span></div><h2 id="arena-create-title">Monte seu palco.</h2><p class="arena-panel-intro">Jogue com a turma ou conduza pelo telão. Quem joga escolhe personagem e apelido dentro do lobby.</p>
+      <% if @arena_create_error %><p class="arena-entry-error" role="alert"><%= @arena_create_error %></p><% end %>
+      <% if @catalog.any? || Arena::Catalog.technical_preview? %><%= form_with url: app_arena_sessions_path, class: "arena-form" do |form| %>
+        <%= form.hidden_field :prepare_lobby, value: "1" %>
+        <div class="arena-game-settings">
+          <div><%= form.label :title, "Nome da sala" %><%= form.text_field :title, value: params[:title].presence || "Banda de amigos", required: true, maxlength: 120 %></div>
+          <div class="arena-fields-row"><div><%= form.label :visibility, "Quem pode entrar?" %><span class="arena-select"><%= form.select :visibility, [["Com convite · privada","private"],["Visível na Arena · pública","public"]], selected: params[:visibility].presence || "private" %><span class="arena-select-chevron" aria-hidden="true"></span></span></div><div><%= form.label :capacity, "Limite de jogadores" %><%= form.number_field :capacity, value: params[:capacity].presence || 10, min: 2, max: 40, step: 1, required: true %></div></div>
+          <p class="arena-hint">Na sala pública, nome, conteúdo e vagas ficam visíveis a quem tem conta. O limite inclui você quando joga junto.</p>
+          <fieldset class="arena-host-mode"><legend>Como você quer participar?</legend><label><%= form.radio_button :host_mode, "play", checked: params[:host_mode] != "present" %><span><strong>Jogar junto</strong><small>Você responde e disputa com a turma.</small></span></label><label><%= form.radio_button :host_mode, "present", checked: params[:host_mode] == "present" %><span><strong>Só conduzir · apresentação</strong><small>Projete sua tela. A turma responde; você toca, pausa, explica e avança.</small></span></label></fieldset>
+          <div class="arena-fields-row"><div><%= form.label :music_area, "Área" %><span class="arena-select"><%= form.select :music_area, Arena::MusicContent::AREAS.map { |id,label| [label,id] }, { selected: params[:music_area] || "leitura" }, { data: { arena_setup_target: "area", action: "change->arena-setup#update" } } %><span class="arena-select-chevron" aria-hidden="true"></span></span></div><div><%= form.label :music_level, "Dificuldade" %><span class="arena-select"><%= form.select :music_level, (1..4).map { |n| ["Nível #{n}",n.to_s] } + [["Níveis mistos","mixed"]], selected: params[:music_level] || "1" %><span class="arena-select-chevron" aria-hidden="true"></span></span></div></div>
+          <%= form.hidden_field :music_kind, value: "mixed" %><p class="arena-hint">Todas as áreas + um nível: mistura de conteúdos nesse nível. Níveis mistos: dificuldade sorteada a cada questão. Em Percepção, Harmonia e Rítmica, ouça antes de escolher a resposta.</p>
+          <div class="arena-fields-row"><div><%= form.label :question_count, "Questões" %><span class="arena-select"><%= form.select :question_count, [1,3,5,10,15,20,30,40,50], selected: params[:question_count].presence || 5 %><span class="arena-select-chevron" aria-hidden="true"></span></span></div><div><%= form.label :duration_seconds, "Por questão" %><span class="arena-select"><%= form.select :duration_seconds, [10,15,30,45,60,90,120].map { |value| ["#{value} segundos",value] }, selected: params[:duration_seconds].presence || 30 %><span class="arena-select-chevron" aria-hidden="true"></span></span></div></div>
+
+          <div data-arena-setup-target="listening" <%= "hidden" if (params[:music_area].presence || "leitura") == "leitura" %>><%= form.label :listening_repetitions, "Escutas por questão sonora" %><span class="arena-select"><%= form.select :listening_repetitions, (1..5).map { |n| ["#{n} #{n == 1 ? 'vez' : 'vezes'}", n] }, { selected: params[:listening_repetitions].presence || 3 }, { disabled: (params[:music_area].presence || "leitura") == "leitura", data: { arena_setup_target: "repetitions" } } %><span class="arena-select-chevron" aria-hidden="true"></span></span><p class="arena-hint">Anúncio antes de cada escuta e uma pausa entre elas. Depois, as respostas abrem automaticamente. Sem repetições extras.</p></div>
+          <p class="arena-scoring-note">Acertou rápido? Mais pontos. Acertou em sequência? Bônus de combo. Tudo calculado pelo jogo, sem XP.</p>
+        </div>
+        <%= form.submit "Criar sala e abrir lobby", class: "arena-button arena-button--primary" %>
+      <% end %><% else %><p>Nenhum conteúdo publicado disponível. Aguarde a revisão editorial.</p><% end %>
+    </section><% end %>
+  </div>
+  <% if @recent_sessions.any? %><section class="arena-recent"><div class="arena-section-heading"><h2>Continue de onde parou</h2><span>Suas salas recentes</span></div><ul><% @recent_sessions.each do |room| %><li><%= link_to app_arena_session_path(room) do %><span class="arena-recent-role"><%= room.host_id == current_user.id ? "Você criou" : "Você participa" %></span><strong><%= room.title %></strong><span class="arena-recent-state"><%= arena_session_state_label(room.state) %><%= ui_icon("arrow") %></span><% end %></li><% end %></ul></section><% end %>
+  <% if Arena::Catalog.technical_preview? %><p class="arena-note">Quatro áreas · Conteúdos locais em revisão · Sem XP</p><% end %>
+</section>

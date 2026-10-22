@@ -1,0 +1,70 @@
+// Compatibility for the recovered public design. No authenticated layout rules.
+.landing-body {
+  margin: 0;
+  main { overflow-x: clip; }
+  .landing-orbs { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  h1, h2, h3, h4, h5, h6 { font-family: Nunito, Helvetica, sans-serif; }
+  .ui-icon { width: 20px; height: 20px; }
+  .skip-link { position: fixed; top: -100px; left: 12px; z-index: 160; padding: 12px; background: var(--ui-surface); color: var(--ui-ink); &:focus { top: 8px; } }
+  :focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 4px; }
+  #hero :focus-visible, [data-landing-surface=dark] :focus-visible { outline-color: #ffffff; }
+  #hero p.reveal { text-shadow: 0 1px 3px #000000, 0 0 14px rgba(0,0,0,.8); }
+  .theme-control { display: inline-flex; align-items: center; gap: 4px; margin: 0; border: 1px solid var(--ui-control-border); border-radius: 999px; padding-left: 8px; background: var(--ui-surface); color: var(--ui-ink); font: 12px Inter, sans-serif; select { min-height: 36px; width: 92px; padding: 4px; border: 0; border-radius: 999px; background: transparent; color: inherit; } }
+  .landing-menu-toggle { display: none; align-items: center; justify-content: center; width: 32px; min-height: 36px; flex-shrink: 0; border: 1px solid var(--ui-control-border); border-radius: 50%; background: var(--ui-surface); color: var(--ui-ink); }
+  .landing-drawer { display: none; }
+  .landing-backdrop { display: none; }
+  .landing-drawer__heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .landing-drawer nav { display: grid; gap: 12px; a { color: var(--ui-ink); padding: 12px; min-height: 44px; } .theme-control { margin-top: 20px; width: max-content; } }
+  // Keep the original permanent dark blocks dark in both modes. Adapt only
+  // originally light compositions; every nested dark card remains protected.
+  [data-landing-surface=dark] { color-scheme: dark; h1, h2, h3, h4, h5, h6 { color: #ffffff; } }
+  [data-landing-surface=light], footer {
+    .text-stone-400 { color: #737373; }
+    .bg-stone-900 .text-stone-400, .bg-stone-950 .text-stone-400 { color: #a8a29e; }
+  }
+  @media (max-width: 1023px) {
+    .landing-desktop-theme { display: none; }
+    .landing-menu-toggle { display: inline-flex; }
+    // Bootstrap's px/gap utilities use !important and otherwise override these
+    // legacy Tailwind classes. Keep this correction limited to the public menu.
+    .landing-nav__pill { padding-inline: 12px !important; gap: 8px !important; }
+    .landing-nav__pill > a { gap: 8px !important; }
+    .landing-nav__pill > a > span { font-size: 16px; }
+    .landing-nav__pill > div:last-child { gap: 4px !important; > a { padding-inline: 10px !important; } }
+    .landing-drawer { display: block; visibility: hidden; position: fixed; inset: 0 auto 0 0; width: 300px; max-width: calc(100vw - 48px); z-index: 150; padding: 24px; background: var(--ui-surface); color: var(--ui-ink); overflow-y: auto; }
+    .is-drawer-open { .landing-drawer { visibility: visible; } .landing-backdrop { display: block; position: fixed; inset: 0; z-index: 140; border: 0; background: rgba(0,0,0,.6); } }
+  }
+  @media (max-width: 767px) {
+    #hero { height: auto; min-height: 100svh; padding-top: 128px; padding-bottom: 64px; }
+    #cta > div { min-width: 0; max-width: 100%; }
+    #cta h2 { overflow-wrap: anywhere; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    .reveal, .text-reveal-content { opacity: 1; transform: none; }
+    .scroll-steps .step-card { opacity: 1 !important; }
+  }
+}
+
+html[data-theme=dark] .landing-body {
+  background: var(--ui-bg); color: var(--ui-ink);
+  .landing-nav__pill { background: rgba(23,23,23,.94); border-color: #525252; color: #f5f5f5; }
+  .landing-nav__pill .text-stone-600, .landing-nav__pill .text-stone-700 { color: #d4d4d4; }
+  .landing-nav__pill a:hover { color: #ffffff; }
+  // These backgrounds were light in the original. In dark mode their text and
+  // controls use the same neutral palette without changing layout or spacing.
+  [data-landing-surface=light], footer {
+    background: var(--ui-bg); color: var(--ui-ink); border-color: var(--ui-border);
+    .bg-white, .bg-stone-50, .bg-stone-100, [class~="bg-[#F9F9F8]"] { background-color: var(--ui-surface) !important; }
+    .text-stone-900, .text-stone-800, .text-stone-700 { color: var(--ui-ink); }
+    .text-stone-600, .text-stone-500, .text-stone-400 { color: var(--ui-muted); }
+    .border-stone-100, .border-stone-200, .border-stone-300 { border-color: var(--ui-border); }
+    .bg-stone-900 { background-color: #262626; }
+    .bg-stone-900.text-white { color: #ffffff; }
+    .study-modes-shell, .study-mode-card, .study-mode-icon { background: var(--ui-surface); border-color: var(--ui-border); box-shadow: none; }
+    .study-mode-card::before { opacity: 0; }
+    .study-mode-icon--dark { background: #262626; color: #ffffff; }
+    .bg-grid { background-image: linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px); }
+  }
+  [data-landing-surface=light] { background-image: none; }
+}

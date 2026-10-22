@@ -1,19 +1,12 @@
-<section class="platform-shell">
-  <div class="platform-container platform-container--narrow">
-    <h1 class="platform-title">Resultado da prática</h1>
-
-    <article class="platform-card">
-      <h2>Resumo da sessão</h2>
-      <p>Acertos, erros, explicações e recomendação de revisão curta.</p>
-      <ul class="platform-list">
-        <li>Acertos: 16</li>
-        <li>Erros: 4</li>
-        <li>Tema recomendado para revisão: Percepção de intervalos</li>
-      </ul>
-      <div class="platform-actions">
-        <%= link_to "Revisar aula relacionada", app_aulas_path, class: "app-btn" %>
-        <%= link_to "Abrir playground sugerido", app_playground_path(activity: "percepcao"), class: "app-btn app-btn--primary" %>
-      </div>
-    </article>
-  </div>
+<% attempts = platform_attempts(current_user) %>
+<%= render "platform/page_header", eyebrow: "Seu percurso", title: "Histórico de prática", description: "Suas respostas registradas nos Playgrounds, em todas as sessões." %>
+<section class="history-totals" aria-label="Todas as respostas da sua conta">
+  <div><strong><%= attempts.count %></strong><span>Respostas registradas</span></div>
+  <div><strong data-testid="correct-count"><%= attempts.where(correct: true).count %></strong><span>Corretas</span></div>
+  <div><strong><%= attempts.where(correct: false).count %></strong><span>Incorretas</span></div>
+  <p>Totais de todas as respostas. A lista abaixo mostra até 50 registros recentes.</p>
+</section>
+<section class="history-entries" aria-labelledby="history-entries-title">
+  <div class="section-heading"><h2 id="history-entries-title">Últimas 50 respostas</h2><%= link_to "Continuar praticando", app_pratica_path, class: "ui-text-link" %></div>
+  <%= render "platform/history", attempts: attempts.includes(:exercise_assignment).order(created_at: :desc, id: :desc).limit(50) %>
 </section>

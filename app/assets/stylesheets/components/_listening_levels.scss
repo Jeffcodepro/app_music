@@ -1,0 +1,51 @@
+.platform-ui {
+  .account-menu { margin: 0; }
+  .account-menu > summary { cursor: pointer; list-style: none; &::-webkit-details-marker { display: none; } }
+  .account-menu .sidebar-account__arrow { font-size: 13px; line-height: .65; text-align: center; }
+  .account-menu__panel { position: fixed; left: 16px; bottom: 80px; z-index: 100; width: 380px; max-width: calc(100vw - 32px); overflow-y: auto; background: var(--ui-surface); border: 1px solid var(--ui-control-border); border-radius: 12px; box-shadow: 0 12px 40px #0003; color: var(--ui-ink); }
+  .account-menu__identity { display: flex; align-items: center; gap: 12px; padding: 18px; border-bottom: 1px solid var(--ui-border); > div { min-width: 0; overflow-wrap: anywhere; strong, span { display: block; } strong { font-size: 15px; } span { font-size: 13px; color: var(--ui-muted); } } .app-avatar { width: 42px; height: 42px; flex: 0 0 42px; } }
+  .account-menu__panel > a, .account-menu__panel button { width: 100%; display: flex; align-items: center; gap: 14px; min-height: 54px; padding: 14px 20px; border: 0; border-bottom: 1px solid var(--ui-border); background: transparent; color: var(--ui-ink); text-decoration: none; font-size: 15px; }
+  .account-menu__panel form { margin: 0; } .account-menu__panel button { border-bottom: 0; }
+  .account-menu__panel > a:hover, .account-menu__panel button:hover { background: var(--ui-soft); }
+}
+.platform-ui.exercise-workbench .playground-page {
+  .listening-level-control select { min-height: 44px; width: 100%; max-width: 360px; border: 1px solid var(--ui-control-border); color: var(--ui-ink); background: var(--ui-surface); border-radius: 4px; padding: 8px 12px; }
+  .voiced-options { grid-template-columns: minmax(0,1fr); }
+  .voiced-answer { min-width: 0; }
+  .voiced-score-scroll { overflow-x: auto; padding: 4px; outline-offset: 2px; }
+  .voiced-score-scroll svg { display: block; width: 100%; max-height: none; }
+  .voiced-answer form { margin: 0; min-width: calc(var(--score-min-width) + 18px); }
+  .voiced-answer button { min-height: 44px; max-width: none; align-items: center; padding: 8px; }
+  .metrical-answer .rhythm-score-scroll { display: block; }
+  .metrical-answer form { width: max-content; min-width: 100%; }
+  .metrical-answer .rhythm-option { width: 100%; max-width: none; margin-top: 0; }
+  .audio-quality-note { color: var(--ui-muted); font-size: 12px; margin-block: 8px; }
+  .playground-select-card__icon-image { width: 48px; height: 48px; object-fit: contain; }
+}
+html[data-theme=dark] .platform-ui .instrument-pictogram--ink { filter: invert(1); }
+
+// Keep the single-select arrow inside the field, independent of native widgets.
+.platform-ui.exercise-workbench {
+  --practice-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='m1 1 5 5 5-5' stroke='%23171717' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  .playground-page :is(.listening-level-control, .rhythm-meter-controls) select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-inline-end: 44px;
+    background-image: var(--practice-select-arrow);
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 12px 8px;
+    text-overflow: ellipsis;
+    &:focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
+  }
+}
+html[data-theme=dark] .platform-ui.exercise-workbench {
+  --practice-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='m1 1 5 5 5-5' stroke='%23f5f5f5' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+@media (forced-colors: active) {
+  .platform-ui.exercise-workbench .playground-page :is(.listening-level-control, .rhythm-meter-controls) select {
+    appearance: auto;
+    -webkit-appearance: auto;
+    background-image: none;
+  }
+}

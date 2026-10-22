@@ -1,90 +1,55 @@
-<section class="platform-shell">
-  <div class="platform-container">
-    <% streak = platform_streak_days(current_user) %>
-    <% xp = platform_xp_total(current_user) %>
-    <% minutes = platform_practice_minutes(current_user) %>
-    <% active_days = platform_activity_days_count(current_user) %>
-    <% lessons_count = current_user.study_activities.count %>
-    <% profile_fields = [
-      current_user.full_name,
-      current_user.phone,
-      current_user.primary_instrument,
-      current_user.study_goal,
-      (current_user.avatar.attached? ? "avatar" : nil)
-    ] %>
-    <% profile_percent = ((profile_fields.compact.size.to_f / 5) * 100).round %>
-
-    <section class="dashboard-clean">
-      <article class="dashboard-clean__welcome">
-        <div class="dashboard-clean__identity">
-          <%= user_avatar(current_user, css_class: "dashboard-clean__avatar") %>
-          <div>
-            <p>Bem-vindo</p>
-            <h1><%= current_user.full_name.presence || "Aluno" %></h1>
-          </div>
-        </div>
-        <div class="dashboard-clean__profile">
-          <span>Perfil <%= profile_percent %>% completo</span>
-          <strong><%= xp %> XP</strong>
-        </div>
-      </article>
-
-      <div class="dashboard-clean__metrics">
-        <article>
-          <i data-lucide="play-circle"></i>
-          <strong><%= lessons_count %></strong>
-          <p>Aulas assistidas</p>
-        </article>
-        <article>
-          <i data-lucide="clock-3"></i>
-          <strong><%= minutes %></strong>
-          <p>Minutos praticados</p>
-        </article>
-        <article>
-          <i data-lucide="flame"></i>
-          <strong><%= streak %></strong>
-          <p>Dias estudando</p>
-        </article>
-        <article>
-          <i data-lucide="calendar-check-2"></i>
-          <strong><%= active_days %></strong>
-          <p>Dias com atividade</p>
-        </article>
-      </div>
-    </section>
-
-    <div class="platform-grid">
-      <article class="platform-card">
-        <h2>Progresso</h2>
-        <p>Dias de sequência: <strong><%= streak %></strong></p>
-        <p>XP acumulado: <strong><%= xp %></strong></p>
-        <p>Minutos praticados: <strong><%= minutes %></strong></p>
-        <p>Dias com estudo: <strong><%= active_days %></strong></p>
-      </article>
-
-      <article class="platform-card">
-        <h2>Visão geral</h2>
-        <p>Resumo de progresso semanal, trilha ativa e próximos passos.</p>
-        <div class="platform-actions">
-          <%= link_to "Ir para Trilhas", app_trilhas_path, class: "app-btn app-btn--primary" %>
-        </div>
-      </article>
-      <article class="platform-card">
-        <h2>Próxima ação</h2>
-        <p>Retomar a aula mais recente e completar a prática sugerida.</p>
-        <div class="platform-actions">
-          <%= link_to "Abrir Aulas", app_aulas_path, class: "app-btn" %>
-          <%= link_to "Ir para Prática", app_pratica_path, class: "app-btn" %>
-        </div>
-      </article>
-      <article class="platform-card">
-        <h2>Atalhos</h2>
-        <p>Acesso rápido para trilhas, aulas, playgrounds e modo carreira.</p>
-        <div class="platform-actions">
-          <%= link_to "Modo Carreira", app_carreira_path, class: "app-btn" %>
-          <%= link_to "Arena ao Vivo", app_arena_path, class: "app-btn" %>
-        </div>
-      </article>
+<% content_for :title, "Dashboard" %>
+<% attempts = platform_attempts(current_user) %>
+<% recent_attempts = attempts.includes(:exercise_assignment).order(created_at: :desc, id: :desc).limit(5) %>
+<% last_assignment = recent_attempts.first&.exercise_assignment %>
+<div class="dashboard-editorial">
+  <header class="study-welcome">
+    <div>
+      <p class="study-kicker">Seu estudo</p>
+      <h1>Olá, <%= current_user.full_name.to_s.split.first.presence || "estudante" %>.</h1>
+      <p>Escolha sua próxima prática.</p>
     </div>
+    <div class="dashboard-start">
+      <% if last_assignment %>
+        <span>Última prática: <%= platform_area_label(last_assignment.area) %></span>
+        <%= link_to platform_assignment_practice_path(last_assignment), class: "app-btn app-btn--primary", data: { testid: "resume-practice" } do %>Praticar novamente <%= ui_icon("arrow") %><% end %>
+      <% else %>
+        <%= link_to app_pratica_path, class: "app-btn app-btn--primary" do %>Começar a praticar <%= ui_icon("arrow") %><% end %>
+      <% end %>
+    </div>
+  </header>
+  <section class="study-record" aria-label="Sua atividade registrada">
+    <div><strong data-testid="xp-total"><%= platform_xp_total(current_user) %></strong><span>XP acumulado</span></div>
+    <div><strong data-testid="attempt-count"><%= attempts.count %></strong><span>Respostas registradas</span></div>
+    <div><strong><%= @study_calendar.total_practice_days %></strong><span>Dias com atividade</span></div>
+  </section>
+  <div class="study-desk">
+    <section class="study-index" aria-labelledby="study-index-title">
+      <div class="study-section-heading"><h2 id="study-index-title">Praticar</h2><%= link_to "Todas as práticas", app_pratica_path, class: "ui-text-link" %></div>
+      <%= render "platform/study_index" %>
+    </section>
+    <%= render "platform/study_calendar", calendar: @study_calendar %>
   </div>
-</section>
+    <section class="study-journal" aria-labelledby="study-journal-title">
+      <div class="study-section-heading"><h2 id="study-journal-title">Últimas respostas</h2><%= link_to "Ver histórico", app_practice_result_path, class: "ui-text-link" %></div>
+      <% if recent_attempts.any? %>
+        <ol class="study-journal__list">
+          <% recent_attempts.each do |attempt| %>
+            <li data-testid="history-row">
+              <span class="study-journal__result" aria-hidden="true"><%= attempt.correct? ? "✓" : "↻" %></span>
+              <div><h3><%= platform_area_label(attempt.exercise_assignment.area) %></h3>
+                <p><%= attempt.correct? ? "Resposta correta" : "Resposta incorreta" %> <span aria-hidden="true">·</span> <%= attempt.xp_earned %> XP nesta tentativa</p>
+                <time datetime="<%= attempt.created_at.iso8601 %>"><%= l(attempt.created_at.in_time_zone(DailyVisit::ZONE), format: "%d/%m/%Y · %H:%M %Z") %></time>
+              </div>
+            </li>
+          <% end %>
+        </ol>
+      <% else %>
+        <div class="study-journal__empty" data-testid="empty-history">
+          <%= ui_icon("music") %><h3>Sua primeira nota começa aqui.</h3>
+          <p>Escolha uma prática. Suas respostas aparecerão neste espaço.</p>
+          <%= link_to "Escolher uma prática", app_pratica_path, class: "ui-text-link" %>
+        </div>
+      <% end %>
+    </section>
+</div>

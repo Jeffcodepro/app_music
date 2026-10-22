@@ -2,32 +2,49 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   connect() {
-    this.configureScrollRestoration();
-    this.initReveal();
+    this.configureScrollRestoration()
+    this.motion = window.matchMedia("(prefers-reduced-motion: reduce)")
+    this.motionChanged = () => this.setupEffects()
+    this.motion.addEventListener("change", this.motionChanged)
+    this.setupEffects()
+    this.initLucideIcons()
+  }
 
-    // Bind the mousemove handler
-    this.mouseMoveHandler = this.handleMouseMove.bind(this);
-    document.addEventListener('mousemove', this.mouseMoveHandler);
+  setupEffects() {
+    this.releaseEffects()
+    this.effects = new AbortController()
+    if (this.motion.matches) {
+      this.element.querySelectorAll('.reveal').forEach(el => el.classList.add('active'))
+      this.element.querySelectorAll('.step-card').forEach(el => { el.style.opacity = '1' })
+      this.element.querySelectorAll('.orb, .glass-3d').forEach(el => { el.style.transform = '' })
+      return
+    }
+    this.initReveal()
+    this.mouseMoveHandler = this.handleMouseMove.bind(this)
+    document.addEventListener('mousemove', this.mouseMoveHandler, { signal: this.effects.signal })
+    this.init3DCardHover()
+    this.initScrollSteps()
+  }
 
-    this.init3DCardHover();
-    this.initScrollSteps();
-    this.initLucideIcons();
+  releaseEffects() {
+    this.effects?.abort()
+    this.revealObserver?.disconnect()
+    if (this.scrollStepsRequestTick) {
+      window.removeEventListener('scroll', this.scrollStepsRequestTick)
+      window.removeEventListener('resize', this.scrollStepsRequestTick)
+    }
+    if (this.animationFrame) cancelAnimationFrame(this.animationFrame)
   }
 
   disconnect() {
-    if (this.mouseMoveHandler) {
-      document.removeEventListener('mousemove', this.mouseMoveHandler);
-    }
-
-    if (this.scrollStepsRequestTick) {
-      window.removeEventListener('scroll', this.scrollStepsRequestTick);
-      window.removeEventListener('resize', this.scrollStepsRequestTick);
-    }
+    this.releaseEffects()
+    this.motion.removeEventListener("change", this.motionChanged)
+    if ('scrollRestoration' in history) history.scrollRestoration = this.previousScrollRestoration
   }
 
   // 1. Initial Reveal Logic (Intersection Observer)
   initReveal() {
-    const revealElements = document.querySelectorAll('.reveal');
+    const revealElements = this.element.querySelectorAll('.reveal');
     
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -49,12 +66,13 @@ export default class extends Controller {
         });
     }, { threshold: 0, rootMargin: '0px 0px -4% 0px' });
 
+    this.revealObserver = observer;
     revealElements.forEach(el => observer.observe(el));
   }
 
   // 2. Parallax Orbs & Mouse Tracking
   handleMouseMove(e) {
-    const orbs = document.querySelectorAll('.orb');
+    const orbs = this.element.querySelectorAll('.orb');
     const { clientX, clientY } = e;
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
@@ -67,7 +85,7 @@ export default class extends Controller {
     });
 
     // Flashlight cards
-    const flashCards = document.querySelectorAll('.flash-card');
+    const flashCards = this.element.querySelectorAll('.flash-card');
     flashCards.forEach(card => {
         const rect = card.getBoundingClientRect();
         const x = clientX - rect.left;
@@ -79,7 +97,7 @@ export default class extends Controller {
 
   // 3. 3D Card Hover Logic
   init3DCardHover() {
-    const glassCards = document.querySelectorAll('.glass-3d');
+    const glassCards = this.element.querySelectorAll('.glass-3d');
     glassCards.forEach(card => {
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
@@ -91,11 +109,11 @@ export default class extends Controller {
             const rotateX = (centerY - y) / 10;
             const rotateY = (x - centerX) / 10;
             card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-        });
+        }, { signal: this.effects.signal });
 
         card.addEventListener('mouseleave', () => {
             card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
-        });
+        }, { signal: this.effects.signal });
     });
   }
 
@@ -107,6 +125,7 @@ export default class extends Controller {
 
   configureScrollRestoration() {
     if ('scrollRestoration' in history) {
+      this.previousScrollRestoration = history.scrollRestoration;
       history.scrollRestoration = 'manual';
     }
 
@@ -119,7 +138,7 @@ export default class extends Controller {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion || window.innerWidth < 768) return;
 
-    const wrappers = document.querySelectorAll("[data-scroll-steps]");
+    const wrappers = this.element.querySelectorAll("[data-scroll-steps]");
     if (!wrappers.length) return;
 
     let ticking = false;
@@ -150,7 +169,7 @@ export default class extends Controller {
     this.scrollStepsRequestTick = () => {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(update);
+      this.animationFrame = requestAnimationFrame(update);
     };
 
     window.addEventListener("scroll", this.scrollStepsRequestTick, { passive: true });

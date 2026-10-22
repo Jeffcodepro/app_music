@@ -11,8 +11,27 @@ Rails.application.routes.draw do
     get "app/aulas", to: "platform#aulas", as: :app_aulas
     get "app/pratica", to: "platform#pratica", as: :app_pratica
     get "app/carreira", to: "platform#carreira", as: :app_carreira
-    get "app/arena", to: "platform#arena", as: :app_arena
+    get "app/arena", to: "arena/sessions#index", as: :app_arena
+    post "app/arena/entrar", to: "arena/sessions#join", as: :join_app_arena
+    post "app/arena/preparar", to: "arena/sessions#prepare", as: :prepare_app_arena
+    post "app/arena/salas", to: "arena/sessions#create", as: :app_arena_sessions
+    get "app/arena/salas/:id", to: "arena/sessions#show", as: :app_arena_session
+    post "app/arena/salas/:id/pronto", to: "arena/sessions#ready", as: :ready_app_arena_session
+    post "app/arena/salas/:id/sair", to: "arena/sessions#leave", as: :leave_app_arena_session
+    get "app/arena/salas/:id/relatorio", to: "arena/sessions#report", as: :report_app_arena_session
+    post "app/arena/salas/:id/comando", to: "arena/sessions#command", as: :command_app_arena_session
+    post "app/arena/salas/:id/audio-pronto", to: "arena/sessions#audio_ready", as: :audio_ready_app_arena_session
+    post "app/arena/salas/:id/sincronizar", to: "arena/sessions#settle", as: :settle_app_arena_session
+    post "app/arena/salas/:id/revanche", to: "arena/sessions#rematch", as: :rematch_app_arena_session
+    post "app/arena/salas/:id/participantes/:membership_id/remover", to: "arena/sessions#remove_member", as: :remove_member_app_arena_session
+    post "app/arena/rodadas/:id/escutar", to: "arena/playbacks#create", as: :playback_app_arena_round
+    post "app/arena/rodadas/:id/escuta-concluida", to: "arena/playbacks#complete", as: :complete_playback_app_arena_round
+    post "app/arena/rodadas/:id/responder", to: "arena/answers#create", as: :answer_app_arena_round
     get "app/perfil", to: "platform#perfil", as: :app_perfil
+    get "app/perfil/dados-pessoais", to: "platform#dados_pessoais", as: :app_account_personal
+    get "app/perfil/assinaturas", to: "platform#assinaturas", as: :app_account_subscription
+    get "app/perfil/notificacoes", to: "platform#notificacoes", as: :app_account_notifications
+    get "app/perfil/aparencia", to: "platform#aparencia", as: :app_account_appearance
     patch "app/perfil", to: "platform#update_perfil", as: :update_app_perfil
     patch "app/perfil/plan", to: "platform#update_plan", as: :update_app_plan
 

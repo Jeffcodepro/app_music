@@ -1,0 +1,198 @@
+{
+  "date": "2026-10-18",
+  "git_head": "fa822740142a456d706388d65352b74104f14b35",
+  "branch": "fix/exercise-integrity",
+  "status": "Two originals recovered from historical applied patches and independently matching full file reads; three Arena versions not recovered.",
+  "recovered_originals": [
+    {
+      "filename": "20260325101500_add_performance_fields_to_study_activities.rb",
+      "source_session": "private-session-reference-omitted",
+      "source_read_line": 205,
+      "timestamp": "2026-03-25T21:18:27.134Z",
+      "sha256": "959e064992a66305fcffe4b56fa00ede7ca4f7ec1496ad1d209d7f6b179a9b89",
+      "full_read_matches_patch": true,
+      "original_patch_line": 93,
+      "patch_success_output_line": 95,
+      "patch_applied_successfully": true
+    },
+    {
+      "filename": "20260325114000_create_playground_attempts.rb",
+      "source_session": "private-session-reference-omitted",
+      "source_read_line": 426,
+      "timestamp": "2026-03-25T21:35:49.382Z",
+      "sha256": "03179fcad6aa1058d5e4e620b9932770ddd74b977259b3980575db43eb99a39d",
+      "full_read_matches_patch": true,
+      "original_patch_line": 267,
+      "patch_success_output_line": 269,
+      "patch_applied_successfully": true
+    }
+  ],
+  "unrecovered_versions": [
+    "20260320120000",
+    "20260325120000",
+    "20260325123000"
+  ],
+  "log_observations": [
+    {
+      "version": "20260320120000",
+      "class": "CreateArenaCore",
+      "line": 49037,
+      "operations_observed": [
+        "(16.8ms)  CREATE TABLE \"arena_rooms\" (\"id\" bigserial primary key, \"host_id\" bigint NOT NULL, \"title\" character varying NOT NULL, \"room_code\" character varying NOT NULL, \"theme\" character varying NOT NULL, \"question_kind\" character varying NOT NULL, \"question_count\" integer NOT NULL, \"question_duration_seconds\" integer NOT NULL, \"difficulty\" character varying NOT NULL, \"question_source\" character varying DEFAULT 'playgrounds' NOT NULL, \"advance_mode\" character varying NOT NULL, \"state\" character varying DEFAULT 'lobby_open' NOT NULL, \"current_question_position\" integer DEFAULT 0 NOT NULL, \"current_round_started_at\" timestamp(6), \"round_results_started_at\" timestamp(6), \"lobby_closed_at\" timestamp(6), \"started_at\" timestamp(6), \"ended_at\" timestamp(6), \"created_at\" timestamp(6) NOT NULL, \"updated_at\" timestamp(6) NOT NULL, CONSTRAINT \"fk_rails_96485aa429\"",
+        "(1.7ms)  CREATE INDEX \"index_arena_rooms_on_host_id\" ON \"arena_rooms\" (\"host_id\")",
+        "(0.7ms)  CREATE UNIQUE INDEX \"index_arena_rooms_on_room_code\" ON \"arena_rooms\" (\"room_code\")",
+        "(6.5ms)  CREATE TABLE \"arena_participants\" (\"id\" bigserial primary key, \"arena_room_id\" bigint NOT NULL, \"user_id\" bigint NOT NULL, \"nickname\" character varying NOT NULL, \"role\" character varying DEFAULT 'player' NOT NULL, \"points\" integer DEFAULT 0 NOT NULL, \"correct_answers\" integer DEFAULT 0 NOT NULL, \"answered_questions\" integer DEFAULT 0 NOT NULL, \"total_response_time_ms\" integer DEFAULT 0 NOT NULL, \"joined_at\" timestamp(6) NOT NULL, \"created_at\" timestamp(6) NOT NULL, \"updated_at\" timestamp(6) NOT NULL, CONSTRAINT \"fk_rails_31e6d2d0b1\"",
+        "(1.0ms)  CREATE INDEX \"index_arena_participants_on_arena_room_id\" ON \"arena_participants\" (\"arena_room_id\")",
+        "(0.7ms)  CREATE INDEX \"index_arena_participants_on_user_id\" ON \"arena_participants\" (\"user_id\")",
+        "(0.7ms)  CREATE UNIQUE INDEX \"index_arena_participants_on_arena_room_id_and_user_id\" ON \"arena_participants\" (\"arena_room_id\", \"user_id\")",
+        "(4.5ms)  CREATE TABLE \"arena_round_questions\" (\"id\" bigserial primary key, \"arena_room_id\" bigint NOT NULL, \"position\" integer NOT NULL, \"theme\" character varying NOT NULL, \"prompt_kind\" character varying NOT NULL, \"source_kind\" character varying NOT NULL, \"question_text\" text NOT NULL, \"correct_slot_key\" character varying NOT NULL, \"content_data\" jsonb DEFAULT '{}' NOT NULL, \"answer_slots\" jsonb DEFAULT '[]' NOT NULL, \"created_at\" timestamp(6) NOT NULL, \"updated_at\" timestamp(6) NOT NULL, CONSTRAINT \"fk_rails_376384ac36\"",
+        "(0.7ms)  CREATE INDEX \"index_arena_round_questions_on_arena_room_id\" ON \"arena_round_questions\" (\"arena_room_id\")",
+        "(0.7ms)  CREATE UNIQUE INDEX \"index_arena_round_questions_on_room_and_position\" ON \"arena_round_questions\" (\"arena_room_id\", \"position\")",
+        "(5.7ms)  CREATE TABLE \"arena_responses\" (\"id\" bigserial primary key, \"arena_round_question_id\" bigint NOT NULL, \"arena_participant_id\" bigint NOT NULL, \"slot_key\" character varying NOT NULL, \"option_id\" character varying NOT NULL, \"correct\" boolean DEFAULT FALSE NOT NULL, \"points_awarded\" integer DEFAULT 0 NOT NULL, \"response_time_ms\" integer DEFAULT 0 NOT NULL, \"answered_at\" timestamp(6) NOT NULL, \"created_at\" timestamp(6) NOT NULL, \"updated_at\" timestamp(6) NOT NULL, CONSTRAINT \"fk_rails_a514401f46\"",
+        "(0.8ms)  CREATE INDEX \"index_arena_responses_on_arena_round_question_id\" ON \"arena_responses\" (\"arena_round_question_id\")",
+        "(0.6ms)  CREATE INDEX \"index_arena_responses_on_arena_participant_id\" ON \"arena_responses\" (\"arena_participant_id\")",
+        "(0.8ms)  CREATE UNIQUE INDEX \"index_arena_responses_on_question_and_participant\" ON \"arena_responses\" (\"arena_round_question_id\", \"arena_participant_id\")",
+        "ActiveRecord::SchemaMigration Create (0.7ms)  INSERT INTO \"schema_migrations\" (\"version\") VALUES ('20260320120000') RETURNING \"version\"",
+        "TRANSACTION (0.9ms)  COMMIT"
+      ]
+    },
+    {
+      "version": "20260325120000",
+      "class": "CreateArenaCore",
+      "line": 132009,
+      "operations_observed": [
+        "(13.3ms)  CREATE TABLE \"arena_rooms\" (\"id\" bigserial primary key, \"host_id\" bigint NOT NULL, \"title\" character varying NOT NULL, \"visibility\" character varying DEFAULT 'private' NOT NULL, \"theme\" character varying DEFAULT 'misto' NOT NULL, \"question_kind\" character varying DEFAULT 'mista' NOT NULL, \"difficulty\" character varying DEFAULT 'intermediario' NOT NULL, \"advance_mode\" character varying DEFAULT 'automatico' NOT NULL, \"room_code\" character varying NOT NULL, \"state\" character varying DEFAULT 'lobby_open' NOT NULL, \"question_count\" integer DEFAULT 6 NOT NULL, \"question_duration_seconds\" integer DEFAULT 20 NOT NULL, \"current_question_position\" integer DEFAULT 0 NOT NULL, \"started_at\" timestamp(6), \"current_round_started_at\" timestamp(6), \"round_results_started_at\" timestamp(6), \"lobby_closed_at\" timestamp(6), \"ended_at\" timestamp(6), \"created_at\" timestamp(6) NOT NULL, \"updated_at\" timestamp(6) NOT NULL, CONSTRAINT \"fk_rails_96485aa429\"",
+        "TRANSACTION (0.1ms)  ROLLBACK"
+      ]
+    },
+    {
+      "version": "20260325120000",
+      "class": "CreateArenaCore",
+      "line": 132021,
+      "operations_observed": [
+        "(3.5ms)  CREATE TABLE \"arena_rooms\" (\"id\" bigserial primary key, \"host_id\" bigint NOT NULL, \"title\" character varying NOT NULL, \"visibility\" character varying DEFAULT 'private' NOT NULL, \"theme\" character varying DEFAULT 'misto' NOT NULL, \"question_kind\" character varying DEFAULT 'mista' NOT NULL, \"difficulty\" character varying DEFAULT 'intermediario' NOT NULL, \"advance_mode\" character varying DEFAULT 'automatico' NOT NULL, \"room_code\" character varying NOT NULL, \"state\" character varying DEFAULT 'lobby_open' NOT NULL, \"question_count\" integer DEFAULT 6 NOT NULL, \"question_duration_seconds\" integer DEFAULT 20 NOT NULL, \"current_question_position\" integer DEFAULT 0 NOT NULL, \"started_at\" timestamp(6), \"current_round_started_at\" timestamp(6), \"round_results_started_at\" timestamp(6), \"lobby_closed_at\" timestamp(6), \"ended_at\" timestamp(6), \"created_at\" timestamp(6) NOT NULL, \"updated_at\" timestamp(6) NOT NULL, CONSTRAINT \"fk_rails_96485aa429\"",
+        "TRANSACTION (0.1ms)  ROLLBACK"
+      ]
+    },
+    {
+      "version": "20260325120000",
+      "class": "CreateArenaCore",
+      "line": 132034,
+      "operations_observed": [
+        "ActiveRecord::SchemaMigration Create (0.6ms)  INSERT INTO \"schema_migrations\" (\"version\") VALUES ('20260325120000') RETURNING \"version\"",
+        "TRANSACTION (0.5ms)  COMMIT"
+      ]
+    },
+    {
+      "version": "20260325123000",
+      "class": "AddVisibilityToArenaRooms",
+      "line": 132190,
+      "operations_observed": [
+        "(11.0ms)  ALTER TABLE \"arena_rooms\" ADD \"visibility\" character varying DEFAULT 'private' NOT NULL",
+        "ActiveRecord::SchemaMigration Create (0.3ms)  INSERT INTO \"schema_migrations\" (\"version\") VALUES ('20260325123000') RETURNING \"version\"",
+        "TRANSACTION (1.0ms)  COMMIT"
+      ]
+    },
+    {
+      "version": "20260325101500",
+      "class": "AddPerformanceFieldsToStudyActivities",
+      "line": 144364,
+      "operations_observed": [
+        "(2.5ms)  ALTER TABLE \"study_activities\" ADD \"correct\" boolean",
+        "(2.7ms)  ALTER TABLE \"study_activities\" ADD \"source\" character varying DEFAULT 'legacy' NOT NULL",
+        "(7.9ms)  CREATE INDEX \"index_study_activities_on_user_id_and_source_and_occurred_on\" ON \"study_activities\" (\"user_id\", \"source\", \"occurred_on\")",
+        "(2.1ms)  CREATE INDEX \"index_study_activities_on_user_id_and_area_and_occurred_on\" ON \"study_activities\" (\"user_id\", \"area\", \"occurred_on\")",
+        "ActiveRecord::SchemaMigration Create (0.2ms)  INSERT INTO \"schema_migrations\" (\"version\") VALUES ('20260325101500') RETURNING \"version\"",
+        "TRANSACTION (2.7ms)  COMMIT"
+      ]
+    },
+    {
+      "version": "20260325114000",
+      "class": "CreatePlaygroundAttempts",
+      "line": 162070,
+      "operations_observed": [
+        "(12.4ms)  CREATE TABLE \"playground_attempts\" (\"id\" bigserial primary key, \"user_id\" bigint NOT NULL, \"activity\" character varying NOT NULL, \"area\" character varying NOT NULL, \"correct\" boolean NOT NULL, \"occurred_on\" date NOT NULL, \"answered_at\" timestamp(6) NOT NULL, \"response_time_ms\" integer, \"metadata\" jsonb DEFAULT '{}' NOT NULL, \"created_at\" timestamp(6) NOT NULL, \"updated_at\" timestamp(6) NOT NULL, CONSTRAINT \"fk_rails_cbfd1b93ec\"",
+        "(0.8ms)  CREATE INDEX \"index_playground_attempts_on_user_id\" ON \"playground_attempts\" (\"user_id\")",
+        "(0.8ms)  CREATE INDEX \"idx_on_user_id_activity_occurred_on_d975e5f56a\" ON \"playground_attempts\" (\"user_id\", \"activity\", \"occurred_on\")",
+        "(1.2ms)  CREATE INDEX \"index_playground_attempts_on_user_id_and_area_and_occurred_on\" ON \"playground_attempts\" (\"user_id\", \"area\", \"occurred_on\")",
+        "(1.4ms)  CREATE INDEX \"index_playground_attempts_on_user_id_and_answered_at\" ON \"playground_attempts\" (\"user_id\", \"answered_at\")",
+        "ActiveRecord::SchemaMigration Create (0.2ms)  INSERT INTO \"schema_migrations\" (\"version\") VALUES ('20260325114000') RETURNING \"version\"",
+        "TRANSACTION (0.4ms)  COMMIT"
+      ]
+    }
+  ],
+  "source_notes": "DDL observations are partial evidence, not replacements for the unrecovered Ruby files. Only the two proven originals were restored.",
+  "schema_sha256": "6888fb3253ab7852b96279705a076da9d12a89ef2aae9dd836d28af741fc3093",
+  "migration_sha256": {
+    "20260315221425_devise_create_users.rb": "b185407e6a6efd5cf9b2e9c577f7885cccda03c6480020077288f4d9e86498bd",
+    "20260315221434_add_music_profile_fields_to_users.rb": "eb5602fb52aafaa25ec4ed76aca726f32a7e3243bb9b3d3a2245112f1cf28f6c",
+    "20260315222824_add_omniauth_to_users.rb": "df05cb65edd6e09fadbfd0587ae88358833614bc027ed017e31b3b368593af25",
+    "20260316103000_create_study_activities.rb": "69cb38e758aa3bb02bc0a8b71daa7dff5015aa732059d6aa8b2fb4e840960ed2",
+    "20260316144932_create_active_storage_tables.active_storage.rb": "88562a48786e98726a9ef1350fca5816391175986dbce8522efdc28eeeed2f60",
+    "20260325101500_add_performance_fields_to_study_activities.rb": "959e064992a66305fcffe4b56fa00ede7ca4f7ec1496ad1d209d7f6b179a9b89",
+    "20260325114000_create_playground_attempts.rb": "03179fcad6aa1058d5e4e620b9932770ddd74b977259b3980575db43eb99a39d",
+    "20261018000000_create_exercise_integrity_records.rb": "ee6947c66b426dd5addfe39797bc1b2ba7be7b7ab7d07471880883d7aca8ab43"
+  },
+  "source_search": {
+    "git_objects_inspected": 619,
+    "historical_class_definitions_in_git": 0,
+    "filename_search_files": 312185,
+    "original_session": "2026/03/25/private-session-reference-omitted"
+  },
+  "comparisons": {
+    "migrations": {
+      "differences": 112,
+      "by_status": {
+        "missing": 112
+      },
+      "by_category": {
+        "columns": 69,
+        "constraints": 12,
+        "indexes": 21,
+        "sequences": 5,
+        "tables": 5
+      }
+    },
+    "schema": {
+      "differences": 1,
+      "by_status": {
+        "changed": 1
+      },
+      "by_category": {
+        "constraints": 1
+      }
+    },
+    "recovered": {
+      "differences": 89,
+      "by_status": {
+        "missing": 88,
+        "changed": 1
+      },
+      "by_category": {
+        "columns": 56,
+        "constraints": 11,
+        "indexes": 14,
+        "sequences": 4,
+        "tables": 4
+      }
+    },
+    "full_schema": {
+      "differences": 1,
+      "by_status": {
+        "changed": 1
+      },
+      "by_category": {
+        "constraints": 1
+      }
+    },
+    "restore": {
+      "differences": 1,
+      "by_status": {
+        "changed": 1
+      },
+      "by_category": {
+        "constraints": 1
+      }
+    }
+  }
+}

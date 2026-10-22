@@ -54,6 +54,8 @@ gem "omniauth-google-oauth2"
 gem "omniauth-apple"
 gem "omniauth-rails_csrf_protection"
 gem "head_music"
+# Generate invitation QR matrices locally; no external QR/image service.
+gem "rqrcode_core", "~> 2.1"
 
 group :development, :test do
   gem "dotenv-rails"

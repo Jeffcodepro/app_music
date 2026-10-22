@@ -1,0 +1,25 @@
+// Dashboard only: the approved Practice index and other screens keep their layout.
+.platform-ui.study-editorial .dashboard-editorial {
+  .study-welcome { margin-bottom: 28px; align-items: end; h1 { margin-bottom: 8px; font-size: clamp(26px,3vw,34px); } .study-kicker { margin-bottom: 6px; } }
+  .dashboard-start { display: flex; flex-direction: column; align-items: end; gap: 8px; flex-shrink: 0; > span { font-size: 13px; color: var(--ui-muted); } }
+  .dashboard-start .app-btn { min-height: 44px; padding: 10px 16px; }
+  .study-desk { grid-template-columns: minmax(0,1.35fr) minmax(0,1fr); gap: 32px; }
+  .study-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; h2 { font-size: 20px; margin: 0; } a { font-size: 13px; white-space: nowrap; } }
+  .study-index__entry { padding: 18px 0; gap: 16px; h3 { font-size: 20px; margin-bottom: 4px; } p { font-size: 14px; max-width: 40ch; } }
+  .study-index__action { min-height: 44px; }
+  .study-journal { padding: 20px 24px; border: 1px solid var(--ui-border); border-radius: 6px; background: var(--ui-surface); align-self: start; }
+  .study-journal__list li { gap: 10px; padding-block: 14px; h3 { font-size: 15px; } p { font-size: 13px; } time { font-size: 12px; } }
+  .study-journal__list li:first-child { margin-top: 12px; }
+  .study-journal__result { font-size: 17px; width: 20px; flex-basis: 20px; }
+  .study-journal__empty { padding: 28px 0 12px; h3 { font-size: 17px; } p { font-size: 14px; } > .ui-icon { margin-bottom: 16px; } a { min-height: 44px; } }
+  .study-record { margin-top: 24px; padding-top: 20px; gap: 8px 24px; strong { font-size: 24px; overflow-wrap: anywhere; } span { font-size: 13px; } > p { margin-top: 0; font-size: 12px; } }
+  @media (max-width: 1050px) { .study-desk { grid-template-columns: minmax(0,1fr); gap: 24px; } }
+  @media (max-width: 767px) {
+    .study-welcome { margin-bottom: 24px; gap: 16px; align-items: start; }
+    .dashboard-start { align-items: start; gap: 6px; }
+    .study-section-heading { h2 { font-size: 18px; } }
+    .study-index__entry { padding-block: 14px; h3 { font-size: 18px; } }
+    .study-journal { padding: 16px; }
+    .study-record { gap: 8px 12px; strong { font-size: 22px; } span { font-size: 12px; } }
+  }
+}

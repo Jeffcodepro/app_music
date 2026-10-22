@@ -1,0 +1,4 @@
+<div class="playground-control listening-level-control">
+  <%= label_tag :level, "Dificuldade do conteúdo", class: "playground-control__label" %>
+  <%= select_tag :level, options_for_select([["Treino livre", ""], ["Nível 1 · Inicial", 1], ["Nível 2 · Básico", 2], ["Nível 3 · Intermediário", 3], ["Nível 4 · Avançado", 4]], selected_level), data: { action: "change->#{player}-player#stop change->preferences#submit" } %>
+</div>

@@ -1,0 +1,93 @@
+<%= turbo_frame_tag "perception_playground" do %>
+  <% e = perception_exercise %>
+  <% voiced = %w[voices-v1 voices-v2].include?(e[:dictation_format]) %>
+  <% score_layout = VoicedDictationSvgRenderer.layout_for(e[:options].map { |option| option[:voices] }, total_steps: e[:total_steps]) if voiced %>
+  <% answered_correctly = feedback_for_round?(playground_feedback, e, area: "percepcao") && playground_feedback[:correct] %>
+  <article class="platform-card playground-stage" data-controller="melody-player preferences"
+           data-audio-diagnostics="<%= Rails.env.development? || (Rails.env.test? && ENV["APP_MUSIC_AUDIO_DIAGNOSTICS"] == "1") %>"
+           data-melody-player-sequence-value="<%= (e[:audio_sequence] || []).to_json %>"
+           <% if voiced %>
+           data-melody-player-format-value="<%= e[:dictation_format] %>"
+           data-melody-player-events-value="<%= e[:audio_events].to_json %>"
+           data-melody-player-voice-count-value="<%= e[:voice_count] %>"
+           data-melody-player-total-steps-value="<%= e[:total_steps] %>"
+           data-melody-player-bpm-unit-steps-value="<%= e[:bpm_unit_steps] %>"
+           <% end %>
+           data-melody-player-auto-play-value="<%= perception_autoplay ? 'true' : 'false' %>"
+           data-melody-player-tempo-bpm-value="<%= e[:tempo_bpm] %>"
+           data-melody-player-exercise-signature-value="<%= e[:assignment_id] %>"
+           data-melody-player-instrument-value="<%= e[:instrument] %>">
+    <div class="playground-scoreboard" aria-label="Resultados desta sessão">
+      <span class="playground-scoreboard__item"><span class="playground-scoreboard__label">Acertos</span><strong><%= perception_scoreboard[:correct_count] %></strong></span>
+      <span class="playground-scoreboard__item"><span class="playground-scoreboard__label">Erros</span><strong><%= perception_scoreboard[:incorrect_count] %></strong></span>
+    </div>
+    <details class="playground-settings" data-preferences-target="panel" data-action="toggle->preferences#rememberExpanded" data-preferences-key="percepcao">
+      <summary>Configurar treino <span>Ditado melódico · <%= voiced ? e[:voice_count] : 1 %> <%= voiced && e[:voice_count] > 1 ? "vozes" : "voz" %><%= " · Nível #{e[:level]}" if voiced %></span></summary>
+      <%= form_with url: app_playground_path, method: :get, class: "playground-controls playground-controls--stacked", data: { turbo_frame: "perception_playground", turbo_action: "replace", preferences_target: "form" } do %>
+        <%= hidden_field_tag :activity, "percepcao" %>
+        <%= render "student_hub/listening_level_control", selected_level: perception_preferences[:level], player: "melody" %>
+        <%= render "student_hub/perception_mode_control", perception_preferences: perception_preferences, player: "melody" %>
+        <%= render "student_hub/instrument_control", instruments: perception_instruments, selected_instrument: perception_preferences[:instrument], player: "melody" %>
+        <% if perception_instruments.size == 1 %><p class="exercise-context">Piano nos ditados de três ou quatro vozes.</p><% end %>
+      <% end %>
+    </details>
+    <div class="playground-stage__grid">
+      <div class="playground-trainer">
+        <h2 class="exercise-question">Qual partitura você ouviu?</h2>
+        <% if voiced %>
+          <p class="exercise-context"><%= e[:voice_count] %> <%= e[:voice_count] > 1 ? "vozes" : "voz" %> · Dó maior · 4/4 · ♩ = 80</p>
+        <% else %>
+          <p class="exercise-context">Ditado melódico · 1 voz · Dó maior · início em Dó4 · 4/4 · ♩ = 80</p>
+        <% end %>
+        <div class="playground-player-controls">
+          <% if answered_correctly %>
+            <%= link_to app_playground_path(activity: "percepcao", refresh: 1, autoplay: 1, **perception_preferences),
+                        class: "playground-player-button playground-player-button--primary",
+                        data: { turbo_frame: "perception_playground", action: "click->melody-player#stop" },
+                        aria: { label: "Próximo ditado e tocar" } do %>
+              <%= ui_icon("play") %><span>Próximo e tocar</span>
+            <% end %>
+          <% else %>
+            <button type="button" class="playground-player-button playground-player-button--primary" data-action="melody-player#playBlocked" data-melody-player-target="trigger" aria-label="Tocar ditado melódico"><%= ui_icon("play") %><span>Tocar</span></button>
+          <% end %>
+          <button type="button" class="playground-player-button" data-action="melody-player#repeat" data-melody-player-target="trigger" aria-label="Repetir ditado melódico"><%= interface_symbol_icon("restart") %><span>Repetir</span></button>
+        </div>
+        <%= render "student_hub/audio_status", player: "melody" %>
+      </div>
+      <div class="playground-response-panel">
+        <h3 class="visually-hidden">Partituras alternativas</h3>
+        <p hidden role="status" data-melody-player-target="hint">Ouça o áudio completo antes de responder.</p>
+        <div class="perception-options rhythm-options melody-options <%= 'voiced-options' if voiced %>">
+          <% e[:options].each_with_index do |option, index| %>
+            <% if voiced %>
+              <div class="voiced-answer">
+                <div class="voiced-score-scroll" role="region" aria-label="Partitura <%= index+1 %>" tabindex="0" style="--score-min-width:<%= (score_layout[:width] * 0.7).round %>px">
+            <% end %>
+            <%= button_to submit_app_playground_answer_path, method: :post,
+                  params: { activity: "percepcao", question_mode: "melodic_dictation", level: perception_preferences[:level], instrument: perception_preferences[:instrument], selected_option_id: option[:id], assignment_id: e[:assignment_id], attempt_token: e[:attempt_token], playback_status: "" },
+                  class: "perception-option rhythm-option", disabled: answered_correctly,
+                  aria: { label: "Responder com partitura #{index+1}" },
+                  data: { action: "click->melody-player#guardAnswer" }, form: { data: { turbo_frame: "perception_playground" } } do %>
+              <% if voiced %>
+                <%= VoicedDictationSvgRenderer.new(voices: option[:voices], total_steps: e[:total_steps], layout: score_layout).call %>
+              <% else %>
+              <span class="rhythm-notation-card"><%= MelodicDictationSvgRenderer.new(option[:pitches]).call %></span>
+              <span class="visually-hidden"><%= option[:pitches].map { |pitch| ExercisePresentation.pitch_label(pitch) }.join(", ") %></span>
+              <% end %>
+            <% end %>
+            <% if voiced %></div></div><% end %>
+          <% end %>
+        </div>
+        <% if feedback_for_round?(playground_feedback, e, area: "percepcao") %>
+          <div class="playground-feedback <%= answered_correctly ? 'is-correct' : 'is-incorrect' %>" role="status" aria-live="polite" data-melody-player-target="feedback">
+            <h3><%= answered_correctly ? "Resposta correta" : "Resposta incorreta" %></h3>
+            <p><%= answered_correctly ? "Você reconheceu a melodia." : "Tente outra partitura ou repita o áudio se quiser." %></p>
+          </div>
+        <% end %>
+        <div class="playground-next">
+          <%= link_to "Próximo ditado →", app_playground_path(activity: "percepcao", refresh: 1, **perception_preferences), class: "playground-next-button", data: { turbo_frame: "perception_playground", action: "click->melody-player#stop" } %>
+        </div>
+      </div>
+    </div>
+  </article>
+<% end %>

@@ -13,7 +13,7 @@ module PlatformHelper
       slug: "ritmica",
       title: "Playground de rítmica",
       badge: "Disponível",
-      description: "Pulso, subdivisão, síncopa e precisão de tempo com padrões gerados automaticamente.",
+      description: "Pulso, subdivisão e precisão de tempo com padrões gerados automaticamente.",
       icon: "drum",
       available: true
     },
@@ -128,7 +128,8 @@ module PlatformHelper
     PLAYGROUND_ACTIVITIES.find { |activity| activity[:slug] == slug.to_s }
   end
 
-  def instrument_option_icon(instrument_id)
+  def instrument_option_icon(instrument_id, monochrome: false)
+    return instrument_line_icon(instrument_id) if monochrome
     icon_asset = {
       "piano" => "instruments/piano_.png",
       "flute" => "instruments/flute_8939281.png",
@@ -137,8 +138,8 @@ module PlatformHelper
       "organ" => "instruments/organ.png"
     }[instrument_id.to_s]
 
-    if icon_asset.present?
-      return image_tag(icon_asset, alt: "", class: "playground-select-card__icon-image")
+    if icon_asset.present? && !monochrome
+      return image_tag(icon_asset, alt: "", class: "playground-select-card__icon-image #{'instrument-pictogram--ink' if %w[flute clarinet guitar].include?(instrument_id.to_s)}")
     end
 
     svg_markup = case instrument_id.to_s
@@ -200,8 +201,24 @@ module PlatformHelper
     ReadingStaffSvgRenderer.new(exercise:).call.html_safe
   end
 
-  def rhythm_staff_svg(pattern_signature)
-    RhythmStaffSvgRenderer.new(pattern_signature:).call.html_safe
+  def instrument_line_icon(instrument_id)
+    shapes = {
+      "piano" => '<rect x="5" y="12" width="38" height="25" rx="2"/><path d="M5 20h38M13 20v17m7-17v17m8-17v17m7-17v17"/><path d="M11 20v9m7-9v9m12-9v9m7-9v9" stroke-width="3.5"/>',
+      "flute" => '<g transform="rotate(-16 24 24)"><rect x="4" y="21" width="40" height="6" rx="2"/><path d="M9 21v6m29-6v6"/><circle cx="14" cy="24" r=".9" fill="currentColor"/><circle cx="20" cy="24" r=".9" fill="currentColor"/><circle cx="26" cy="24" r=".9" fill="currentColor"/><circle cx="32" cy="24" r=".9" fill="currentColor"/><path d="M40 18v3"/></g>',
+      "clarinet" => '<g transform="rotate(18 24 24)"><path d="M22 5h4l-1 7h-3l-1-4Zm0 7h4v21l4 8H18l4-8Z"/><path d="M21 17h6m-6 13h6m-5 4h4"/><circle cx="24" cy="21" r=".8" fill="currentColor"/><circle cx="24" cy="25" r=".8" fill="currentColor"/><path d="M19 41h10"/></g>',
+      "guitar" => '<path d="m28 21 9-13 4 3-10 13c4 4 4 8 0 11-2 1-3 1-4 3-3 5-9 6-13 2-4-3-4-9 0-13 2-1 2-2 2-4 2-5 7-6 12-2Z"/><circle cx="24" cy="28" r="3"/><path d="m37 8 2-4 5 4-3 3M18 34l5 4m-4-2 20-28m-3-2-2-1m8 6 2 1"/>',
+      "organ" => '<path d="M8 29h32v13H8ZM11 29V13h5v16m5 0V6h6v23m5 0V13h5v16M8 34h32m-25 0v8m6-8v8m6-8v8m6-8v8"/><path d="M13.5 18h0m10.5-7h0m10.5 7h0" stroke-width="2.5"/>'
+    }
+    content_tag(:svg, shapes.fetch(instrument_id.to_s, shapes.fetch("piano")).html_safe, viewBox: "0 0 48 48", fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true", class: "instrument-icon")
+  end
+
+  def rhythm_staff_svg(pattern_signature, exercise: nil)
+    if exercise&.dig(:rhythm_format) == "meter-v1"
+      meter = MusicTheory::Meter.fetch(exercise[:meter_id], level: exercise[:level])
+      RhythmStaffSvgRenderer.new(pattern_signature:, meter:, measure_count: exercise[:measure_count]).call.html_safe
+    else
+      RhythmStaffSvgRenderer.new(pattern_signature:).call.html_safe
+    end
   end
 
   def interface_symbol_icon(name)

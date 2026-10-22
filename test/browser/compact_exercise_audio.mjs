@@ -1,0 +1,52 @@
+export default async function verifyCompactExerciseAudio(page) {
+  const origin='http://127.0.0.1:3001'
+  if(new URL(page.url()).origin!==origin)throw Error('Use isolated browser DB')
+  const result=[]
+  const ready=()=>page.waitForFunction(()=>{const c=window.__compactPlayer;return c&&!c.isPlaying&&(c.playbackChannel ? c.playbackChannel().lastPlayedDigest===c.currentPlaybackDigest() : c.audioState.lastPlayedSignature===c.exerciseSignatureValue)})
+  const bind=async identifier=>{await page.waitForFunction(id=>{const el=document.querySelector(`[data-controller~="${id}"]`);return el&&window.Stimulus?.getControllerForElementAndIdentifier(el,id)},identifier);await page.evaluate(id=>{window.__compactPlayer=window.Stimulus.getControllerForElementAndIdentifier(document.querySelector(`[data-controller~="${id}"]`),id)},identifier)}
+  await page.goto(origin+'/app/playground?activity=ritmica&activity_mode=subdivision')
+  await bind('rhythm-player')
+  await page.evaluate(()=>{const c=window.__compactPlayer;window.__compactHits=[];const original=c.scheduleRhythmHit;c.scheduleRhythmHit=function(...args){window.__compactHits.push(args);return original.apply(this,args)}})
+  await page.getByRole('button',{name:'Tocar ditado rítmico',exact:true}).click();await ready()
+  const rhythm=await page.evaluate(()=>({legacyCycles:window.__compactPlayer.playbackCyclesValue,expected:window.__compactPlayer.eventsValue.length,hits:window.__compactHits.length}))
+  if(rhythm.hits!==rhythm.expected||rhythm.legacyCycles!==2)throw Error('Rhythm must play one legacy cycle')
+  await page.getByRole('button',{name:'Repetir a última escuta',exact:true}).click();await ready()
+  rhythm.repeatedHits=await page.evaluate(()=>window.__compactHits.length)
+  if(rhythm.repeatedHits!==2*rhythm.expected)throw Error('Repeat must add one pass')
+  result.push({area:'rhythm',...rhythm})
+  await page.goto(origin+'/app/playground?activity=percepcao&question_mode=melodic_dictation')
+  await bind('melody-player')
+  await page.evaluate(()=>{window.__compactSampleCalls=[];const c=window.__compactPlayer;const original=c.scheduleBlockedSoundfontChord;c.scheduleBlockedSoundfontChord=function(player,pitches,time,duration,request){window.__compactSampleCalls.push({pitches,time,duration});return original.call(this,player,pitches,time,duration,request)}})
+  let posts=0;const counter=r=>{if(r.method()==='POST'&&r.url().includes('/app/playground/answer'))posts++}
+  page.on('request',counter)
+  await page.locator('.melody-options button').first().click()
+  if(posts)throw Error('Unheard melody submitted')
+  await page.getByRole('button',{name:'Tocar ditado melódico',exact:true}).click();await ready()
+  const melody=await page.evaluate(()=>({calls:window.__compactSampleCalls,program:window.__compactPlayer.cacheState.soundfontPlayers.piano?.name,sequence:window.__compactPlayer.sequenceValue.map(n=>n.pitches)}))
+  if(melody.calls.length!==4||melody.program!=='acoustic_grand_piano')throw Error('Real sampled melody not completed')
+  melody.calls.forEach((n,i)=>{if(n.pitches[0]!==melody.sequence[i][0]||Math.abs(n.time-melody.calls[0].time-i*0.75)>1e-7)throw Error('Melodic timing mismatch')})
+  await page.getByRole('button',{name:'Repetir ditado melódico',exact:true}).click();await ready()
+  if(await page.evaluate(()=>window.__compactSampleCalls.length)!==8)throw Error('Melody repeat must add exactly four notes')
+  result.push({area:'melody',engine:'soundfont',repeat:true,earlyAnswerPosts:posts,...melody})
+  page.off('request',counter)
+  await page.route('https://gleitz.github.io/**',route=>route.abort())
+  try{
+    await page.goto(origin+'/app/playground?activity=percepcao&question_mode=melodic_dictation')
+    await bind('melody-player')
+    await page.evaluate(()=>{window.__compactSynthCalls=[];const c=window.__compactPlayer;const original=c.scheduleBlockedSynthChord;c.scheduleBlockedSynthChord=function(notes,time,duration,request){window.__compactSynthCalls.push({notes,time,duration});return original.call(this,notes,time,duration,request)}})
+    await page.getByRole('button',{name:'Tocar ditado melódico',exact:true}).click();await ready()
+    const synth=await page.evaluate(()=>({calls:window.__compactSynthCalls,state:document.querySelector('.playback-status').dataset.state}))
+    if(synth.calls.length!==4||synth.state!=='completed')throw Error('Real synth fallback failed')
+    result.push({area:'melody',engine:'synth',networkBlocked:true,...synth})
+    await page.evaluate(()=>{const c=window.__compactPlayer;c.stop();c.playSequenceWithSynth=()=>{throw Error('simulated output failure')}})
+    await page.getByRole('button',{name:'Tocar ditado melódico',exact:true}).click()
+    await page.locator('[data-playback-error]').waitFor({state:'visible'})
+    posts=0;page.on('request',counter)
+    await page.locator('.melody-options button').first().click()
+    const neutral=await page.evaluate(()=>!window.__compactPlayer.isPlaying&&window.__compactPlayer.playbackChannel().lastPlayedDigest===null&&document.querySelector('.playback-status').dataset.state==='unavailable')
+    if(!neutral||posts!==0)throw Error('Failed playback submitted an answer')
+    result.push({area:'melody',completeFailure:true,neutral,answerPosts:posts})
+    page.off('request',counter)
+  } finally {await page.unroute('https://gleitz.github.io/**')}
+  return result
+}

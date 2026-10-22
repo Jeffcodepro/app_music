@@ -26,9 +26,10 @@ class ReadingStaffSvgRenderer
   end
 
   def call
+    top, bottom = visible_vertical_bounds
     <<~SVG
-      <svg viewBox="0 0 #{SVG_WIDTH} #{SVG_HEIGHT}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="#{ERB::Util.html_escape(@exercise[:pitch_label])} em #{ERB::Util.html_escape(@exercise[:clef_label])}">
-        <rect width="#{SVG_WIDTH}" height="#{SVG_HEIGHT}" rx="20" fill="#fcfbf8" />
+      <svg viewBox="0 #{top} #{SVG_WIDTH} #{bottom - top}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nota na pauta em #{ERB::Util.html_escape(@exercise[:clef_label])}">
+        <rect y="#{top}" width="#{SVG_WIDTH}" height="#{bottom - top}" rx="20" fill="#fcfbf8" />
         #{staff_lines_svg}
         #{ledger_lines_svg}
         #{clef_svg}
@@ -39,6 +40,15 @@ class ReadingStaffSvgRenderer
   end
 
   private
+
+  # Keep the staff geometry fixed. Expand only the visible canvas when ledger
+  # notes/accidentals need more space, including font fallback and stroke bounds.
+  def visible_vertical_bounds
+    return [0, SVG_HEIGHT] if @exercise[:notation_kind] == "key_signature"
+
+    y = staff_position_y(@exercise[:staff_position_index])
+    [[0, y - 32].min, [SVG_HEIGHT, y + 32].max]
+  end
 
   def staff_lines_svg
     (1..5).map do |line_number|
@@ -88,10 +98,10 @@ class ReadingStaffSvgRenderer
   end
 
   def note_accidental_svg
-    return "" if @exercise[:note_accidental_symbol].blank? || @exercise[:notation_kind] == "key_signature"
+    return "" if @exercise[:note_accidental_id].blank? || @exercise[:notation_kind] == "key_signature"
 
     accidental_text_svg(
-      symbol: @exercise[:note_accidental_symbol],
+      symbol: ExercisePresentation::ACCIDENTALS.fetch(@exercise.fetch(:note_accidental_id)).fetch(:symbol),
       x: ACCIDENTAL_X,
       y: staff_position_y(@exercise[:staff_position_index])
     )

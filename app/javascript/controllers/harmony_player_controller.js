@@ -1,7 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
+import { pianoSoundfontOptions, instrumentSoundfontOptions, pianoSynthPreset, toneEnvelope, audioDiagnostic, SOUNDFONT_LOAD_TIMEOUT_MS, rememberCompletedListening, hasCompletedListening, forgetCompletedListening } from "audio/exercise_piano"
 
 export default class extends Controller {
-  static targets = ["trigger", "feedback"]
+  static targets = ["trigger", "feedback", "hint", "status"]
   static values = {
     sequence: Array,
     exerciseSignature: String,
@@ -20,6 +21,7 @@ export default class extends Controller {
     this.claimPlaybackChannel()
     this.lastStyle = this.defaultPlaybackStyle()
     this.preloadCurrentInstrument()
+    if (hasCompletedListening(this)) this.setPlaybackStatus("Escuta concluída. Você pode responder.", "completed")
   }
 
   disconnect() {
@@ -52,10 +54,26 @@ export default class extends Controller {
     return this.play(style)
   }
 
+  showPlaybackError() {
+    let message = this.element.querySelector("[data-playback-error]")
+    if (!message) {
+      message = document.createElement("p")
+      message.dataset.playbackError = "true"
+      message.setAttribute("role", "status")
+      this.element.prepend(message)
+    }
+    message.textContent = "Não foi possível concluir o áudio. Tente reproduzir novamente; nenhuma resposta foi contabilizada."
+  }
+
   guardAnswer(event) {
-    if (this.playbackChannel().lastPlayedDigest === this.currentPlaybackDigest()) return
+    if (!this.isPlaying && (this.playbackChannel().lastPlayedDigest === this.currentPlaybackDigest() || hasCompletedListening(this))) {
+      const status = event.currentTarget.form?.querySelector('[name="playback_status"]')
+      if (status) status.value = "ready"
+      return
+    }
 
     event.preventDefault()
+    if (this.hasHintTarget) this.hintTarget.hidden = false
     if (this.hasFeedbackTarget) {
       this.feedbackTarget.hidden = false
     }
@@ -73,6 +91,13 @@ export default class extends Controller {
     this.isPlaying = false
     this.setTriggersDisabled(false)
     this.invalidatePlayback()
+    this.setPlaybackStatus("Pronto para ouvir", "ready")
+  }
+
+  setPlaybackStatus(message, state) {
+    if (!this.hasStatusTarget) return
+    this.statusTarget.textContent = message
+    this.statusTarget.dataset.state = state
   }
 
   async play(style) {
@@ -83,6 +108,7 @@ export default class extends Controller {
     this.isPlaying = true
     this.lastStyle = resolvedStyle
     this.setTriggersDisabled(true)
+    this.setPlaybackStatus("Preparando áudio…", "loading")
 
     try {
       await this.activatePlaybackContexts()
@@ -91,7 +117,20 @@ export default class extends Controller {
       const totalDuration = await this.playSequence(resolvedStyle, playbackRequest)
       if (!this.isPlaybackRequestCurrent(playbackRequest)) return
 
+      if (!Number.isFinite(totalDuration) || totalDuration <= 0) throw new RangeError("Invalid playback duration")
+      this.setPlaybackStatus("Reproduzindo…", "playing")
       await this.sleep(totalDuration * 1000)
+      this.markPlaybackReady(playbackRequest)
+      if (this.isPlaybackRequestCurrent(playbackRequest)) this.setPlaybackStatus("Escuta concluída. Você pode responder.", "completed")
+    } catch (error) {
+      if (this.isPlaybackRequestCurrent(playbackRequest)) {
+        this.invalidatePlayback()
+        this.isPlaying = false
+        this.setTriggersDisabled(false)
+        this.showPlaybackError()
+        this.setPlaybackStatus("Áudio indisponível. Tente novamente.", "unavailable")
+      }
+      console.warn("Exercise audio could not be completed", error)
     } finally {
       if (this.isPlaybackRequestCurrent(playbackRequest)) {
         this.setTriggersDisabled(false)
@@ -112,20 +151,25 @@ export default class extends Controller {
   }
 
   async playSequence(style, playbackRequest) {
-    const player = await this.waitForSoundfontPlayer(2200)
+    const player = await this.waitForSoundfontPlayer(SOUNDFONT_LOAD_TIMEOUT_MS)
     if (!this.isPlaybackRequestCurrent(playbackRequest)) return 0
     if (player) {
       try {
         return await this.playSequenceWithSoundfont(player, style, playbackRequest)
       } catch (error) {
+        if (!this.isPlaybackRequestCurrent(playbackRequest)) return 0
+        this.stopActivePlayback(this.playbackChannel())
+        audioDiagnostic(this, "fallback", null, { reason: "sample-playback-failed" })
         console.warn("Soundfont playback failed, falling back to synth.", error)
       }
     }
 
+    if (!player) audioDiagnostic(this, "fallback", null, { reason: "soundfont-unavailable-or-timeout" })
     return this.playSequenceWithSynth(style, playbackRequest)
   }
 
   async playSequenceWithSoundfont(player, style, playbackRequest) {
+    this.validateSequence()
     const audioContext = await this.ensureToneAudioContext(true)
     if (!this.isPlaybackRequestCurrent(playbackRequest)) return 0
 
@@ -134,6 +178,9 @@ export default class extends Controller {
     const chordGap = style === "blocked" ? 0.4 : 0.24
     let cursor = audioContext.currentTime + 0.05
 
+    audioDiagnostic(this, "soundfont", audioContext, { style,
+      optionsByChord: this.sequenceValue.map(chord => this.soundfontPlaybackOptions(style === "blocked" ? chord.pitches.length : 1)),
+      sequence: this.sequenceValue.map(c => c.pitches) })
     this.sequenceValue.forEach((chord) => {
       if (style === "blocked") {
         this.scheduleBlockedSoundfontChord(player, chord.pitches, cursor, noteDuration, playbackRequest)
@@ -143,7 +190,6 @@ export default class extends Controller {
       }
     })
 
-    this.markPlaybackReady(playbackRequest)
     return (cursor - audioContext.currentTime) + 0.14
   }
 
@@ -151,7 +197,7 @@ export default class extends Controller {
     pitches.forEach((pitch) => {
       this.trackPlaybackHandle(player.play(this.normalizePitchForSoundfont(pitch), startAt, {
         duration: durationInSeconds,
-        gain: this.soundfontGain()
+        ...this.soundfontPlaybackOptions(pitches.length)
       }), playbackRequest)
     })
   }
@@ -162,7 +208,7 @@ export default class extends Controller {
     pitches.forEach((pitch) => {
       this.trackPlaybackHandle(player.play(this.normalizePitchForSoundfont(pitch), cursor, {
         duration: durationInSeconds,
-        gain: this.soundfontGain()
+        ...this.soundfontPlaybackOptions()
       }), playbackRequest)
       cursor += durationInSeconds + noteGap
     })
@@ -171,6 +217,7 @@ export default class extends Controller {
   }
 
   async playSequenceWithSynth(style, playbackRequest) {
+    this.validateSequence()
     this.audioContext = await this.ensureAudioContext()
     if (!this.isPlaybackRequestCurrent(playbackRequest)) return 0
 
@@ -180,6 +227,9 @@ export default class extends Controller {
     const chordGap = style === "blocked" ? 0.4 : 0.28
     let cursor = this.audioContext.currentTime + 0.04
 
+    audioDiagnostic(this, "synth", this.audioContext, { style, preset,
+      gainScalesByChord: this.sequenceValue.map(chord => style === "blocked" && this.instrumentValue === "piano" ? 1 / Math.sqrt(chord.frequencies.length) : 1),
+      sequence: this.sequenceValue.map(c => c.frequencies) })
     this.sequenceValue.forEach((chord) => {
       if (style === "blocked") {
         this.scheduleBlockedSynthChord(chord.frequencies, cursor, chordDuration, playbackRequest)
@@ -189,13 +239,12 @@ export default class extends Controller {
       }
     })
 
-    this.markPlaybackReady(playbackRequest)
     return (cursor - this.audioContext.currentTime) + preset.release + 0.14
   }
 
   scheduleBlockedSynthChord(frequencies, startAt, durationInSeconds, playbackRequest) {
     frequencies.forEach((frequency) => {
-      this.scheduleTone(frequency, startAt, durationInSeconds, playbackRequest)
+      this.scheduleTone(frequency, startAt, durationInSeconds, playbackRequest, this.instrumentValue === "piano" ? 1 / Math.sqrt(frequencies.length) : 1)
     })
   }
 
@@ -292,6 +341,7 @@ export default class extends Controller {
         }
       )
 
+      audioDiagnostic(this, "soundfont-loaded", audioContext, { soundfont: "MusyngKite", loadedProgram: player.name })
       this.cacheState.soundfontPlayers[instrumentId] = player
       delete this.cacheState.soundfontPromises[instrumentId]
       return player
@@ -307,15 +357,19 @@ export default class extends Controller {
       flute: "flute",
       clarinet: "clarinet",
       guitar: "acoustic_guitar_nylon",
-      organ: "drawbar_organ"
+      organ: "church_organ"
     }
 
     return mappings[instrumentId] || mappings.piano
   }
 
+  soundfontPlaybackOptions(voices = 1) {
+    return instrumentSoundfontOptions(this.instrumentValue, this.soundfontGain(), voices)
+  }
+
   soundfontGain() {
+    if (this.instrumentValue === "piano") return pianoSoundfontOptions().gain
     const gains = {
-      piano: 1.45,
       flute: 1.18,
       clarinet: 1.2,
       guitar: 1.28,
@@ -371,10 +425,10 @@ export default class extends Controller {
     return this.cacheState.synthContext
   }
 
-  scheduleTone(frequency, startAt, durationInSeconds, playbackRequest) {
+  scheduleTone(frequency, startAt, durationInSeconds, playbackRequest, gainScale = 1) {
     const preset = this.instrumentPreset()
     const stopAt = startAt + durationInSeconds + preset.release + 0.08
-    const output = this.createOutputChain(startAt, preset)
+    const output = this.createOutputChain(startAt, preset, gainScale)
 
     preset.voices.forEach((voice) => {
       this.trackPlaybackHandle(this.startOscillatorVoice({
@@ -399,17 +453,18 @@ export default class extends Controller {
     }
   }
 
+  validateSequence() {
+    if (!this.sequenceValue?.length || !this.sequenceValue.every(chord =>
+      Array.isArray(chord.pitches) && Array.isArray(chord.frequencies) &&
+      chord.pitches.length > 0 && chord.pitches.length === chord.frequencies.length &&
+      chord.frequencies.every(f => Number.isFinite(f) && f > 0 && f <= 20000))) {
+      throw new RangeError("Invalid chord audio sequence")
+    }
+  }
+
   instrumentPreset() {
     const presets = {
-      piano: {
-        outputGain: 0.9,
-        release: 0.2,
-        filter: { type: "lowpass", frequency: 3600, q: 0.7 },
-        voices: [
-          { type: "triangle", ratio: 1, peak: 0.17, attack: 0.01, decay: 0.18, sustain: 0.016, release: 0.1, detune: 0 },
-          { type: "sine", ratio: 2, peak: 0.045, attack: 0.01, decay: 0.14, sustain: 0.007, release: 0.08, detune: 2 }
-        ]
-      },
+      piano: pianoSynthPreset(),
       flute: {
         outputGain: 0.62,
         release: 0.06,
@@ -468,9 +523,9 @@ export default class extends Controller {
     return filter
   }
 
-  createOutputChain(startAt, preset) {
+  createOutputChain(startAt, preset, gainScale = 1) {
     const output = this.audioContext.createGain()
-    output.gain.setValueAtTime(preset.outputGain, startAt)
+    output.gain.setValueAtTime(preset.outputGain * gainScale, startAt)
 
     if (preset.filter) {
       const filter = this.createFilter(preset.filter, startAt)
@@ -484,6 +539,7 @@ export default class extends Controller {
   }
 
   startOscillatorVoice({ frequency, startAt, durationInSeconds, stopAt, output, voice, vibrato }) {
+    const { attackEnd, decayEnd, releaseEnd } = toneEnvelope({ frequency, startAt, durationInSeconds, stopAt, voice })
     const oscillator = this.audioContext.createOscillator()
     const gain = this.audioContext.createGain()
 
@@ -509,9 +565,9 @@ export default class extends Controller {
     }
 
     gain.gain.setValueAtTime(0.0001, startAt)
-    gain.gain.linearRampToValueAtTime(voice.peak, startAt + voice.attack)
-    gain.gain.exponentialRampToValueAtTime(voice.sustain, startAt + voice.attack + voice.decay)
-    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + durationInSeconds + voice.release)
+    gain.gain.linearRampToValueAtTime(voice.peak, attackEnd)
+    gain.gain.exponentialRampToValueAtTime(voice.sustain, decayEnd)
+    gain.gain.exponentialRampToValueAtTime(0.0001, releaseEnd)
 
     oscillator.connect(gain)
     gain.connect(output)
@@ -522,6 +578,15 @@ export default class extends Controller {
   }
 
   startNoiseVoice({ startAt, durationInSeconds, stopAt, output, noise }) {
+    const values = [startAt, durationInSeconds, stopAt, noise.attack, noise.decay, noise.release]
+    if (!values.every(Number.isFinite) || startAt < 0 || durationInSeconds <= 0 ||
+        stopAt <= startAt || [noise.attack, noise.decay, noise.release].some((value) => value < 0)) {
+      throw new RangeError("Invalid noise envelope timing")
+    }
+    const attackEnd = startAt + Math.min(noise.attack, durationInSeconds)
+    const releaseEnd = startAt + Math.max(Math.min(durationInSeconds, noise.decay), attackEnd - startAt) + noise.release
+    if (releaseEnd > stopAt) throw new RangeError("Noise envelope exceeds its stop time")
+
     const source = this.audioContext.createBufferSource()
     const gain = this.audioContext.createGain()
     const filter = this.createFilter(noise.filter, startAt)
@@ -530,8 +595,8 @@ export default class extends Controller {
     source.loop = true
 
     gain.gain.setValueAtTime(0.0001, startAt)
-    gain.gain.linearRampToValueAtTime(noise.peak, startAt + noise.attack)
-    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + [durationInSeconds, noise.decay].min + noise.release)
+    gain.gain.linearRampToValueAtTime(noise.peak, attackEnd)
+    gain.gain.exponentialRampToValueAtTime(0.0001, releaseEnd)
 
     source.connect(filter)
     filter.connect(gain)
@@ -596,6 +661,7 @@ export default class extends Controller {
   }
 
   startPlaybackRequest() {
+    forgetCompletedListening(this)
     const channel = this.claimPlaybackChannel()
     this.stopActivePlayback(channel)
     channel.playbackToken += 1
@@ -614,11 +680,13 @@ export default class extends Controller {
     if (!this.isPlaybackRequestCurrent(playbackRequest)) return
 
     this.playbackChannel().lastPlayedDigest = playbackRequest.digest
+    rememberCompletedListening(this)
   }
 
   invalidatePlayback() {
     const channel = this.playbackChannel()
     if (channel.ownerId !== this.controllerId) return
+    forgetCompletedListening(this)
 
     channel.playbackToken += 1
     channel.currentDigest = null
@@ -639,7 +707,7 @@ export default class extends Controller {
 
   trackPlaybackHandle(handle, playbackRequest) {
     if (!handle || typeof handle.stop !== "function") {
-      return handle
+      throw new Error("Audio source did not start")
     }
 
     if (this.isPlaybackRequestCurrent(playbackRequest)) {
@@ -698,13 +766,10 @@ export default class extends Controller {
 
   setupSharedAudioState() {
     const sharedCache = window.__appMusicAudioCache ||= {}
-    sharedCache.harmony ||= {
-      soundfontPlayers: {},
-      soundfontPromises: {},
-      synthContext: null
-    }
-
-    this.cacheState = sharedCache.harmony
+    this.cacheState = sharedCache.harmony ||= {}
+    this.cacheState.soundfontPlayers ||= {}
+    this.cacheState.soundfontPromises ||= {}
+    this.cacheState.synthContext ||= null
     this.playbackState = window.__appMusicPlayback ||= { channels: {} }
   }
 }

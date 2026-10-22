@@ -1,28 +1,6 @@
-<section class="platform-shell">
-  <div class="platform-container">
-    <h1 class="platform-title">Prática e playgrounds</h1>
-
-    <article class="platform-card">
-      <h2>Selecione o tipo de atividade</h2>
-      <p>Escolha qual laboratório você quer abrir agora. Percepção, leitura e harmonia já estão funcionais com rodadas geradas automaticamente, mantendo rítmica como próxima etapa.</p>
-
-      <div class="playground-activity-grid">
-        <% playground_activity_catalog.each do |activity| %>
-          <%= link_to app_playground_path(activity: activity[:slug]), class: "playground-activity-card #{'is-available' if activity[:available]}" do %>
-            <div class="playground-activity-card__head">
-              <span class="playground-activity-card__icon">
-                <i data-lucide="<%= activity[:icon] %>"></i>
-              </span>
-              <span class="playground-status <%= activity[:available] ? 'is-available' : '' %>"><%= activity[:badge] %></span>
-            </div>
-            <h3><%= activity[:title] %></h3>
-            <p><%= activity[:description] %></p>
-            <span class="playground-activity-card__cta">
-              <%= activity[:available] ? "Abrir agora" : "Escolher atividade" %>
-            </span>
-          <% end %>
-        <% end %>
-      </div>
-    </article>
-  </div>
+<%= render "platform/page_header", eyebrow: "Prática musical", title: "Escolha sua prática." %>
+<section class="study-index practice-index" aria-labelledby="practice-areas-title">
+  <h2 class="visually-hidden" id="practice-areas-title">Áreas disponíveis</h2>
+  <%= render "platform/study_index" %>
 </section>
+<%= link_to app_practice_result_path, class: "ui-text-link practice-history-link" do %>Consultar meu histórico <%= ui_icon("arrow") %><% end %>

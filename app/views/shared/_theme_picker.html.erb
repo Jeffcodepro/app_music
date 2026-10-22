@@ -1,0 +1,11 @@
+<details class="theme-picker" data-controller="practice-switcher"
+         data-action="toggle->practice-switcher#sync keydown.esc->practice-switcher#escape click@document->practice-switcher#outside turbo:before-cache@document->practice-switcher#beforeCache">
+  <summary data-practice-switcher-target="summary" data-theme-target="toggle" aria-label="Tema da interface" title="Alterar tema">
+    <% %w[light dark system].each do |mode| %><span class="theme-picker__current theme-picker__current--<%= mode %>" aria-hidden="true"><%= ui_icon({ "light" => "sun", "dark" => "moon", "system" => "monitor" }.fetch(mode)) %></span><% end %>
+  </summary>
+  <div class="theme-picker__options" role="group" aria-label="Escolher tema">
+    <% { "light" => ["Claro", "sun"], "dark" => ["Escuro", "moon"], "system" => ["Sistema", "monitor"] }.each do |mode, (label, icon)| %>
+      <button type="button" value="<%= mode %>" data-theme-target="choice" data-action="click->theme#choose click->practice-switcher#confirm" aria-label="<%= label %>" aria-pressed="false" title="<%= label %>"><%= ui_icon(icon) %></button>
+    <% end %>
+  </div>
+</details>

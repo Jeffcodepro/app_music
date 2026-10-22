@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+# Never inherit DATABASE_URL or RAILS_ENV from the caller or dotenv.
+command = ARGV.empty? ? ["test"] : ARGV
+require_relative "../lib/isolated_test_command"
+unless IsolatedTestCommand.allowed?(command)
+  abort "Refusing command: this runner only supports isolated tests and migration checks."
+end
+require_relative "../lib/isolated_test_database"
+
+env = { "RAILS_ENV" => "test", "RACK_ENV" => "test", "DATABASE_URL" => ENV.fetch("APP_MUSIC_TEST_DATABASE_URL"),
+        "PARALLEL_WORKERS" => "1", "BUNDLE_FROZEN" => "true", "DISABLE_SPRING" => "1" }
+exec env, "bundle", "exec", "rails", *command

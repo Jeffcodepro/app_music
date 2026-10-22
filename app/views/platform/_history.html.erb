@@ -1,0 +1,14 @@
+<% if attempts.any? %>
+  <ol class="history-ledger">
+    <% attempts.each do |attempt| %>
+      <li data-testid="history-row">
+        <h3><%= platform_area_label(attempt.exercise_assignment.area) %></h3>
+        <p class="history-ledger__result"><span aria-hidden="true"><%= attempt.correct? ? "✓" : "↻" %></span> <%= attempt.correct? ? "Resposta correta" : "Resposta incorreta" %></p>
+        <time datetime="<%= attempt.created_at.iso8601 %>"><%= attempt.created_at.strftime("%d/%m/%Y · %H:%M %Z") %></time>
+        <p class="history-ledger__xp"><strong><%= attempt.xp_earned %></strong><span>XP nesta tentativa</span></p>
+      </li>
+    <% end %>
+  </ol>
+<% else %>
+  <div class="history-empty" data-testid="empty-history"><%= ui_icon("music") %><h3>Sua primeira nota começa aqui</h3><p>Ao responder um exercício, sua atividade aparecerá neste espaço.</p><%= link_to "Escolher uma prática", app_pratica_path, class: "ui-text-link" %></div>
+<% end %>

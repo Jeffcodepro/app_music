@@ -1,37 +1,14 @@
 <%= turbo_frame_tag "harmony_playground" do %>
   <% harmonic_instrument = PerceptionIntervalExerciseGenerator.harmonic_instrument?(harmony_preferences[:instrument]) %>
-  <article class="platform-card playground-stage"
+  <article class="platform-card playground-stage harmony-stage"
+           data-audio-diagnostics="<%= Rails.env.development? || (Rails.env.test? && ENV["APP_MUSIC_AUDIO_DIAGNOSTICS"] == "1") %>"
            data-controller="harmony-player preferences"
-           data-harmony-player-sequence-value="<%= harmony_exercise[:audio_sequence].to_json %>"
-           data-harmony-player-exercise-signature-value="<%= harmony_exercise[:signature] %>"
+           data-harmony-player-sequence-value="<%= harmony_exercise[:audio_sequence].map { |chord| chord.slice(:pitches, :frequencies) }.to_json %>"
+           data-harmony-player-exercise-signature-value="<%= harmony_exercise[:assignment_id] %>"
            data-harmony-player-instrument-value="<%= harmony_preferences[:instrument] %>">
-    <% feedback_for_current_round = playground_feedback.present? && playground_feedback[:exercise_signature] == harmony_exercise[:signature] %>
+    <% feedback_for_current_round = feedback_for_round?(playground_feedback, harmony_exercise, area: "harmonia") %>
     <% answered_correctly = feedback_for_current_round && playground_feedback[:correct] %>
-
-    <div class="playground-stage__header">
-      <div>
-        <p class="playground-eyebrow">Modo ativo</p>
-        <h2>Playground de harmonia</h2>
-        <p>Treino prático com áudio real: identifique tríades, tétrades e progressões pelo som, respeitando o tipo de instrumento escolhido.</p>
-      </div>
-    </div>
-
-    <% if playground_feedback.present? %>
-      <div class="playground-feedback <%= playground_feedback[:correct] ? 'is-correct' : 'is-incorrect' %>" data-harmony-player-target="feedback">
-        <p class="playground-eyebrow">Última resposta</p>
-        <% if playground_feedback[:synchronization_error] %>
-          <h3>Ouça novamente a rodada atual</h3>
-          <p>O áudio mais recente não correspondia a este exercício. Reproduza a escuta atual antes de responder.</p>
-        <% elsif playground_feedback[:correct] %>
-          <h3>Resposta correta</h3>
-          <p>Você acertou com <strong><%= playground_feedback[:selected_label] %></strong>.</p>
-          <p class="muted">Rodada anterior: <strong><%= playground_feedback[:question_type_label] %></strong> em <strong><%= playground_feedback[:key_label] %></strong>.</p>
-        <% else %>
-          <h3>Resposta incorreta</h3>
-          <p>Se quiser tentar novamente, reproduza a escuta atual no botão de repetir. Se preferir seguir em frente, avance para o próximo exercício.</p>
-        <% end %>
-      </div>
-    <% end %>
+    <%= render "student_hub/previous_round_result" if completed_previous_round?(playground_feedback, harmony_exercise, area: "harmonia") %>
 
     <div class="playground-scoreboard">
       <div class="playground-scoreboard__item is-correct">
@@ -44,8 +21,13 @@
       </div>
     </div>
 
-    <%= form_with url: app_playground_path, method: :get, class: "playground-controls playground-controls--stacked", data: { turbo_frame: "harmony_playground", preferences_target: "form" } do %>
+    <details class="playground-settings" data-preferences-target="panel"
+             data-action="toggle->preferences#rememberExpanded" data-preferences-key="harmonia">
+      <summary>Configurar treino <span><%= PerceptionIntervalExerciseGenerator.instrument_definition(harmony_preferences[:instrument])[:label] %></span></summary>
+    <%= form_with url: app_playground_path, method: :get, class: "playground-controls playground-controls--stacked", data: { turbo_frame: "harmony_playground", turbo_action: "replace", preferences_target: "form" } do %>
       <%= hidden_field_tag :activity, "harmonia" %>
+      <%= render "student_hub/listening_level_control", selected_level: harmony_preferences[:level], player: "harmony" %>
+      <% if @harmony_level_adjusted %><p role="status">As opções de atividade e acorde foram ajustadas ao nível selecionado.</p><% end %>
 
       <div class="playground-control">
         <span class="playground-control__label">Tipo de atividade</span>
@@ -73,37 +55,24 @@
         </div>
       </div>
 
-      <div class="playground-control">
-        <span class="playground-control__label">Instrumento</span>
-        <div class="playground-option-grid">
-          <% harmony_instruments.each do |instrument| %>
-            <% checked = harmony_preferences[:instrument] == instrument[:id] %>
-            <label class="playground-select-card <%= 'is-selected' if checked %>">
-              <%= radio_button_tag :instrument, instrument[:id], checked, class: "playground-select-card__input", data: { action: "change->preferences#submit" } %>
-              <span class="playground-select-card__icon"><%= instrument_option_icon(instrument[:id]) %></span>
-              <span class="playground-select-card__body">
-                <span class="playground-select-card__title"><%= instrument[:label] %></span>
-              </span>
-            </label>
-          <% end %>
-        </div>
-      </div>
+      <%= render "student_hub/instrument_control", instruments: harmony_instruments, selected_instrument: harmony_preferences[:instrument], player: "harmony" %>
     <% end %>
+
+    </details>
 
     <div class="playground-stage__grid">
       <div class="playground-trainer">
-        <p class="playground-eyebrow">Rodada atual</p>
-        <h3><%= harmony_exercise[:question_type_label] %></h3>
-        <p><%= harmony_exercise[:question] %></p>
+        <h2 class="exercise-question"><%= harmony_exercise[:question] %></h2>
 
-        <div class="harmony-context-grid">
-          <% harmony_exercise[:context_items].each do |item| %>
-            <div class="harmony-context-card">
-              <span class="harmony-context-card__label"><%= item[:label] %></span>
-              <strong><%= item[:value] %></strong>
-            </div>
-          <% end %>
-        </div>
+        <p class="harmony-essential-context"><% harmony_exercise[:context_items].first(2).each_with_index do |item, index| %><%= " · " if index.positive? %><%= item[:label] %>: <strong><%= item[:value] %></strong><% end %><% if harmony_exercise[:level] %> · Nível <%= harmony_exercise[:level] %><%= " · Inversões" if harmony_exercise[:level] == 4 %><% end %></p>
+        <details class="harmony-reference">
+          <summary>Referência desta rodada</summary>
+          <div class="harmony-context-grid">
+            <% harmony_exercise[:context_items].drop(2).each do |item| %>
+              <div class="harmony-context-card"><span class="harmony-context-card__label"><%= item[:label] %></span><strong><%= item[:value] %></strong></div>
+            <% end %>
+          </div>
+        </details>
 
         <div class="harmony-prompt-card">
           <span class="harmony-prompt-card__label"><%= harmony_exercise[:prompt_label] %></span>
@@ -121,18 +90,10 @@
           </div>
         <% end %>
 
-        <section class="harmony-player-panel">
-          <div class="harmony-player-panel__header">
-            <div>
-              <p class="playground-eyebrow">Escuta guiada</p>
-              <h4>Selecione a textura musical da reprodução</h4>
-            </div>
 
-            <% unless harmonic_instrument %>
-              <p class="harmony-player-panel__hint"><%= PerceptionIntervalExerciseGenerator.instrument_definition(harmony_preferences[:instrument])[:label] %> trabalha em linha melódica, então a escuta segue voz por voz.</p>
-            <% end %>
-          </div>
+      </div>
 
+        <section class="harmony-player-panel harmony-exercise-audio">
           <div class="harmony-player-grid <%= harmonic_instrument ? 'is-harmonic' : 'is-melodic' %>">
             <button type="button"
                     class="harmony-transport-button"
@@ -148,9 +109,7 @@
                       class="harmony-listen-button harmony-listen-button--vertical"
                       data-action="harmony-player#playBlocked"
                       data-harmony-player-target="trigger">
-                <span class="harmony-listen-button__eyebrow">Textura vertical</span>
-                <span class="harmony-listen-button__title">Escuta harmônica plena</span>
-                <span class="harmony-listen-button__meta">As vozes soam juntas para destacar a cor do acorde.</span>
+                  <span class="harmony-listen-button__title">Ouvir vozes juntas</span>
               </button>
             <% end %>
 
@@ -158,25 +117,17 @@
                     class="harmony-listen-button harmony-listen-button--linear"
                     data-action="harmony-player#playBroken"
                     data-harmony-player-target="trigger">
-              <span class="harmony-listen-button__eyebrow">Textura linear</span>
-              <span class="harmony-listen-button__title">Escuta em condução de vozes</span>
-              <span class="harmony-listen-button__meta">As notas aparecem em sequência para evidenciar o desenho do acorde.</span>
+              <span class="harmony-listen-button__title">Ouvir em sequência</span>
             </button>
 
-            <%= link_to app_playground_path(activity: "harmonia", refresh: 1, **harmony_preferences),
-                        class: "harmony-transport-button harmony-transport-button--next",
-                        data: { turbo_frame: "harmony_playground" },
-                        aria: { label: "Próximo exercício" } do %>
-              <span class="app-btn__icon"><%= interface_symbol_icon("next") %></span>
-              <span class="harmony-transport-button__label">Próximo</span>
-            <% end %>
+
           </div>
+        <%= render "student_hub/audio_status", player: "harmony" %>
         </section>
-      </div>
 
       <div class="playground-response-panel">
-        <p class="playground-eyebrow">Resposta</p>
-        <h3>Escolha a alternativa correta</h3>
+        <h3 class="visually-hidden">Alternativas</h3>
+        <p hidden role="status" data-harmony-player-target="hint">Ouça o áudio completo antes de responder.</p>
         <div class="perception-options">
           <% harmony_exercise[:options].each do |option| %>
             <%= button_to submit_app_playground_answer_path,
@@ -184,10 +135,13 @@
                           params: {
                             activity: "harmonia",
                             selected_option_id: option[:id],
-                            exercise_signature: harmony_exercise[:signature],
+                            assignment_id: harmony_exercise[:assignment_id],
+                            attempt_token: harmony_exercise[:attempt_token],
+                            playback_status: "",
                             question_mode: harmony_preferences[:question_mode],
                             chord_structure: harmony_preferences[:chord_structure],
-                            instrument: harmony_preferences[:instrument]
+                            instrument: harmony_preferences[:instrument],
+                            level: harmony_preferences[:level]
                           },
                           class: "perception-option",
                           disabled: answered_correctly,
@@ -197,6 +151,32 @@
             <% end %>
           <% end %>
         </div>
+      <% if feedback_for_current_round %>
+        <div role="status" aria-live="polite" aria-atomic="true" class="playground-feedback <%= playground_feedback[:correct] ? 'is-correct' : 'is-incorrect' %>" data-harmony-player-target="feedback">
+          <p class="playground-eyebrow">Última resposta</p>
+          <% if playground_feedback[:synchronization_error] %>
+            <h3>Ouça novamente a rodada atual</h3>
+            <p>O áudio mais recente não correspondia a este exercício. Reproduza a escuta atual antes de responder.</p>
+          <% elsif playground_feedback[:correct] %>
+            <h3>Resposta correta</h3>
+            <p>Você acertou com <strong><%= playground_feedback[:selected_label] %></strong>.</p>
+            <p class="muted">Rodada: <strong><%= playground_feedback[:question_type_label] %></strong> em <strong><%= playground_feedback[:key_label] %></strong>.</p>
+          <% else %>
+            <h3>Resposta incorreta</h3>
+            <p>Se quiser tentar novamente, reproduza a escuta atual no botão de repetir. Se preferir seguir em frente, avance para o próximo exercício.</p>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="playground-next">
+        <%= link_to app_playground_path(activity: "harmonia", refresh: 1, **harmony_preferences),
+                          class: "playground-next-button",
+                          data: { turbo_frame: "harmony_playground" },
+                          aria: { label: "Próximo exercício" } do %>
+                <span class="app-btn__icon"><%= interface_symbol_icon("next") %></span>
+              <span>Próximo exercício</span>
+            <% end %>
+      </div>
       </div>
     </div>
   </article>

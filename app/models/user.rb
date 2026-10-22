@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  before_destroy :lock_arena_identity_for_removal, prepend: true
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -7,6 +8,8 @@ class User < ApplicationRecord
 
   validates :full_name, presence: true, on: :create
   has_many :study_activities, dependent: :destroy
+  has_many :exercise_assignments, dependent: :destroy
+  has_many :daily_visits, dependent: :delete_all
   has_one_attached :avatar
 
   def self.from_omniauth(auth)
@@ -16,5 +19,15 @@ class User < ApplicationRecord
     user.password = Devise.friendly_token[0, 20] if user.encrypted_password.blank?
     user.save!
     user
+  end
+
+  private
+
+  def lock_arena_identity_for_removal
+    # Existing installations remain usable before the additive Arena migration.
+    if ArenaHostGrant.table_exists?
+      Arena::SchemaIntegrity.verify!
+      self.class.where(id: id).lock.pick(:id)
+    end
   end
 end

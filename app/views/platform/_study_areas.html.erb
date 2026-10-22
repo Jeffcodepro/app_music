@@ -1,0 +1,8 @@
+<div class="study-areas">
+  <% playground_activity_catalog.each do |activity| %>
+    <%= link_to app_playground_path(activity: activity[:slug]), class: "study-area study-area--#{activity[:slug]}" do %>
+      <span class="study-area__icon"><%= ui_icon({ "leitura" => "book", "ritmica" => "drum", "percepcao" => "headphones", "harmonia" => "music" }.fetch(activity[:slug])) %></span>
+      <div class="study-area__body"><h3><%= platform_area_label(activity[:slug]) %></h3><p><%= activity[:description] %></p><span class="study-area__cta">Praticar <span class="visually-hidden"><%= platform_area_label(activity[:slug]) %></span><%= ui_icon("arrow") %></span></div>
+    <% end %>
+  <% end %>
+</div>

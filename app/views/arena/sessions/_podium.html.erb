@@ -1,0 +1,23 @@
+<section class="arena-podium arena-card" data-arena-phase-panel data-arena-celebration>
+  <div class="arena-celebration-notes" aria-hidden="true"><% 72.times do |index| %><span style="--note-index:<%= index %>;--note-x:<%= (index * 37 + 7) % 100 %>%;--note-drift:<%= (index % 7 - 3) * 14 %>px;--note-duration:<%= 2.8 + (index % 5) * 0.25 %>s"><%= index.even? ? "♪" : "♩" %></span><% end %></div>
+  <div class="arena-podium-prelude" aria-hidden="true"><span>♫</span><strong>Quem subiu ao pódio?</strong><small>Uma última nota antes dos aplausos…</small><i></i><i></i><i></i></div>
+  <button type="button" class="arena-podium-skip arena-button arena-button--quiet" data-action="arena-live#skipPodium">Mostrar resultado</button>
+  <p class="arena-eyebrow">Um palco. Grandes encontros.</p><h2 class="arena-phase-title" tabindex="-1">Aplausos para a banda!</h2>
+  <% if state[:own_result] %><p>Você fez <strong><%= state[:own_result][:correct] %> de <%= state[:own_result][:total] %></strong> e somou <strong><%= state[:own_result][:points] %> pontos</strong>.</p><% else %><p>Uma salva de palmas para o grupo.</p><% end %>
+  <% if state[:podium].any? %>
+    <ol class="arena-podium-places" aria-label="Pódio da partida">
+      <% state[:podium].group_by { |row| row[:place] }.sort.reverse.each_with_index do |(place,players),step| %>
+        <li class="arena-podium-place" value="<%= place %>" data-place="<%= place %>" data-reveal-step="<%= step %>" style="--reveal-step:<%= step %>">
+          <div class="arena-podium-names"><% players.each do |player| %><span class="<%= 'arena-podium-you' if player[:you] %>"><%= render "arena/shared/avatar", avatar_id: player[:avatar_id] %><%= player[:nickname] %><%= " · Você" if player[:you] %></span><% end %></div>
+          <div class="arena-podium-plinth"><span class="arena-podium-rank"><%= place %>º</span><strong><%= players.first[:points] %></strong><small><%= players.size > 1 ? "pontos cada · empate" : "pontos" %></small><span class="arena-podium-orbit" aria-hidden="true">✦</span></div>
+        </li>
+      <% end %>
+    </ol>
+  <% end %>
+  <% if state[:share] %><section class="arena-score-share" aria-label="Compartilhar seu resultado"><h3>Essa conquista é sua.</h3><p><%= state[:share][:text] %></p><div class="arena-actions"><%= link_to "WhatsApp ↗", state[:share][:whatsapp], class: "arena-button", target: "_blank", rel: "noopener noreferrer" %><%= link_to "E-mail ↗", state[:share][:email], class: "arena-button" %><button type="button" class="arena-button" data-action="arena-live#copy" data-copy-text="<%= state[:share][:text] %>">Copiar resultado</button></div><p data-arena-live-target="copyStatus" class="arena-copy-status" role="status" aria-live="polite"></p></section><% end %>
+  <div class="arena-final-actions">
+    <% if state[:host] %><%= button_to "Jogar novamente", rematch_app_arena_session_path(state[:id]), params: { version: state[:version] }, class: "arena-button arena-button--primary" %><% end %>
+    <% if !state[:host] && state[:rematch_code] %><%= link_to "Entrar na revanche", app_arena_path(code: state[:rematch_code]), class: "arena-button arena-button--primary" %><% end %>
+    <%= link_to "Voltar para a Arena", app_arena_path, class: "arena-button" %>
+  </div>
+</section>

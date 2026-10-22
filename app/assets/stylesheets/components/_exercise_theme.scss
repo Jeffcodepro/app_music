@@ -1,0 +1,87 @@
+// Color and layout integration only: no musical coordinates or audio changes.
+.platform-ui .playground-page {
+  .platform-container { max-width: none; }
+  .platform-title { font-size: 1.6rem; color: var(--ui-ink); }
+  .playground-activity-card { background: var(--ui-surface); color: var(--ui-muted); border-color: var(--ui-border); box-shadow: none; transform: none; min-height: 48px; font-size: 13px; gap: 8px; }
+  .playground-activity-card.is-active { border-color: var(--ui-primary); background: var(--ui-soft); color: var(--ui-primary); box-shadow: inset 0 -2px var(--ui-primary); }
+  .playground-activity-card:hover { border-color: var(--ui-primary); }
+  .playground-stage { border-radius: var(--ui-radius); padding: 20px; box-shadow: var(--ui-shadow); }
+  .playground-stage__header h2 { font-size: 1.1rem; color: var(--ui-ink); }
+  .playground-scoreboard__item { box-shadow: none; min-width: 0; background: var(--ui-soft); border: 0; border-radius: 6px; strong { color: var(--ui-ink); } }
+  .playground-scoreboard__label { font-size: 10px; color: var(--ui-muted); }
+  .playground-settings summary { border-color: var(--ui-border); color: var(--ui-ink); background: var(--ui-surface); font-size: 13px; span { color: var(--ui-muted); } }
+  .playground-controls { background: var(--ui-soft); border-color: var(--ui-border); padding: 16px; }
+  .playground-select-card, .playground-direction-card { background: var(--ui-surface); border-color: var(--ui-border); color: var(--ui-ink); min-height: 48px; }
+  .playground-select-card.is-selected, .playground-direction-card.is-selected { background: var(--ui-soft); border-color: var(--ui-primary); box-shadow: inset 0 0 0 1px var(--ui-primary); }
+  .playground-direction-card__title, .playground-select-card__title, .playground-direction-card.is-selected .playground-direction-card__title, .playground-select-card.is-selected .playground-select-card__title { color: var(--ui-ink); }
+  .playground-direction-card__meta, .playground-direction-card.is-selected .playground-direction-card__meta { color: var(--ui-muted); }
+  .playground-control label, .playground-control__label { color: var(--ui-ink); }
+  .playground-select-card__icon, .playground-select-card.is-selected .playground-select-card__icon { background: var(--ui-soft); color: var(--ui-ink); border-color: var(--ui-border); }
+  .playground-trainer { background: var(--ui-soft); border: 0; color: var(--ui-ink); padding: 20px; border-radius: 12px; }
+  .playground-trainer h3, .playground-response-panel h3 { color: var(--ui-ink); font-size: 1.1rem; }
+  .playground-trainer p, .playground-trainer__meta { color: var(--ui-muted); font-size: 14px; }
+  .playground-eyebrow, .playground-trainer .playground-eyebrow { color: var(--ui-muted); font-size: 10px; }
+  .perception-option { background: var(--ui-surface); color: var(--ui-ink); border-color: var(--ui-border); min-height: 64px; text-align: left; justify-content: center; border-radius: 10px; box-shadow: none; &:hover { border-color: var(--ui-primary); background: var(--ui-soft); transform: none; } }
+  .perception-option__label, .rhythm-option__header { color: var(--ui-ink); }
+  .perception-option__meta { color: var(--ui-muted); }
+  .reading-notation-card, .rhythm-notation-card { background: var(--score-paper); border: 1px solid var(--ui-border); border-radius: 12px; }
+  .reading-notation-card svg, .rhythm-notation-card svg {
+    [fill="#fcfbf8"] { fill: var(--score-paper); }
+    [fill="#1c1917"] { fill: var(--score-ink); }
+    [stroke="#1c1917"] { stroke: var(--score-ink); }
+    [stroke="#5a524d"], [stroke="#6b625d"] { stroke: var(--score-staff); }
+  }
+  .playground-player-button, .playground-next-button, .harmony-listen-button, .harmony-transport-button { background: var(--ui-surface); color: var(--ui-ink); border-color: var(--ui-border); box-shadow: none; transform: none; &:hover { background: var(--ui-hover); border-color: var(--ui-primary); color: var(--ui-ink); transform: none; box-shadow: none; } }
+  .playground-player-button--primary { background: var(--ui-primary); color: var(--ui-on-primary); border-color: var(--ui-primary); &:hover { color: var(--ui-on-primary); background: var(--ui-primary); } }
+  .playground-player-button[disabled] { opacity: .55; color: var(--ui-muted); background: var(--ui-soft); }
+  .harmony-player-panel, .harmony-context-card, .harmony-prompt-card, .harmony-progression-step { background: var(--ui-surface); border-color: var(--ui-border); color: var(--ui-ink); }
+  .harmony-context-card strong, .harmony-prompt-card strong, .harmony-progression-step__roman, .harmony-progression-step__notes, .harmony-player-panel__header h4 { color: var(--ui-ink); }
+  .harmony-context-card__label, .harmony-prompt-card__label, .harmony-listen-button__eyebrow, .harmony-listen-button__meta, .harmony-transport-button__label { color: var(--ui-muted); }
+  .harmony-player-panel__hint { background: var(--ui-soft); border: 0; color: var(--ui-muted); padding: 8px; }
+  .harmony-progression-step.is-focus { background: var(--ui-accent-soft); border-color: var(--ui-accent); box-shadow: inset 0 -2px var(--ui-accent); }
+  .harmony-progression-step.is-focus::after { content: "Alvo"; display: block; font-weight: 700; color: var(--ui-accent); font-size: 11px; margin-top: 4px; }
+  .harmony-player-panel__header h4 { font-size: 13px; }
+  .harmony-listen-button__eyebrow { font-size: 10px; }
+  .playground-feedback { border-color: var(--ui-border); h3, p { color: inherit; } }
+  .playground-feedback.is-correct { background: var(--ui-success-bg); color: var(--ui-success); border-color: var(--ui-success); }
+  .playground-feedback.is-incorrect { background: var(--ui-danger-bg); color: var(--ui-danger); border-color: var(--ui-danger); }
+  .playground-next-button { font-size: 13px; }
+  .harmony-essential-context { font-size: 13px; margin-top: 12px; }
+  .harmony-reference { margin-top: 12px; summary { min-height: 44px; padding: 8px 0; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ui-primary); } }
+  .harmony-stage .playground-stage__grid { grid-template-columns: minmax(0,1fr); }
+  .harmony-stage .playground-trainer { padding: 20px; }
+  .harmony-stage .harmony-context-grid { margin-top: 0; }
+  .harmony-stage .harmony-player-panel { padding: 12px; margin-top: 12px; }
+  .harmony-stage .harmony-player-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .harmony-stage .harmony-transport-button { grid-column: 1/-1; grid-row: 2; min-height: 44px; }
+  .harmony-stage .harmony-listen-button { grid-column: auto; }
+  .harmony-stage .harmony-listen-button__meta { display: none; }
+  .harmony-stage .harmony-prompt-card { padding: 12px; }
+  .harmony-stage .perception-options { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .harmony-stage .harmony-context-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .perception-option, .playground-settings summary, .playground-next-button,
+  .playground-player-button, .harmony-listen-button, .harmony-transport-button,
+  .playground-direction-card, .playground-select-card { border-color: var(--ui-control-border); }
+  @media (max-width: 767px) {
+    .playground-stage { padding: 16px; }
+    .playground-trainer { padding: 16px; }
+    .playground-activity-card { font-size: 12px; }
+    .harmony-stage .perception-options { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .harmony-stage .harmony-context-grid { grid-template-columns: minmax(0,1fr); }
+    .harmony-listen-button { padding: 12px; }
+    .harmony-stage .harmony-listen-button__title { font-size: 12px; }
+  }
+}
+
+@media (min-width: 1100px) {
+  .platform-ui .playground-page .harmony-stage {
+    .playground-stage__grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .playground-trainer { grid-column: 1/-1; }
+    .harmony-exercise-audio { margin-top: 0; }
+    .playground-response-panel { margin-top: 0; }
+    .harmony-player-panel__header { flex-direction: column; }
+    .harmony-progression-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
+    .harmony-prompt-card { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; background: transparent; border: 0; padding: 4px 0; }
+    .harmony-prompt-card__label { margin: 0; }
+  }
+}

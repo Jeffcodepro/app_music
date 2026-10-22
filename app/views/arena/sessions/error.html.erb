@@ -1,0 +1,2 @@
+<% content_for :title, "Arena Musical" %>
+<section class="arena arena-card"><h1>Arena Musical</h1><p role="alert"><%= @arena_error %></p><div class="arena-actions"><% if controller_name == "sessions" && Arena::HostAccess::UUID.match?(params[:id].to_s) %><%= link_to "Atualizar sala", app_arena_session_path(params[:id]), class: "arena-button arena-button--primary" %><% end %><%= link_to "Voltar para a Arena", app_arena_path, class: "arena-button" %></div></section>

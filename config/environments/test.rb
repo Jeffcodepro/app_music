@@ -11,6 +11,10 @@ Rails.application.configure do
   # While tests run files are not watched, reloading is not necessary.
   config.enable_reloading = false
 
+  # The isolated pipeline builds from the approved baseline plus migrations.
+  # Reloading schema.rb would silently lose Arena functions/triggers.
+  config.active_record.maintain_test_schema = false
+
   # Eager loading loads your entire application. When running a single test locally,
   # this is usually not necessary, and can slow down your test suite. However, it's
   # recommended that you enable it in continuous integration systems to ensure eager
@@ -32,7 +36,10 @@ Rails.application.configure do
   config.action_dispatch.show_exceptions = :rescuable
 
   # Disable request forgery protection in test environment.
-  config.action_controller.allow_forgery_protection = false
+  config.action_controller.allow_forgery_protection = ENV["APP_MUSIC_ARENA_PREVIEW"] == "1"
+  if ENV["APP_MUSIC_ARENA_PREVIEW"] == "1"
+    config.session_store :cookie_store, key: "_app_music_arena_local_session", same_site: :lax, httponly: true
+  end
 
   # Store uploaded files on the local file system in a temporary directory.
   config.active_storage.service = :test
@@ -43,6 +50,7 @@ Rails.application.configure do
   # The :test delivery method accumulates sent emails in the
   # ActionMailer::Base.deliveries array.
   config.action_mailer.delivery_method = :test
+  config.action_mailer.default_url_options = { host: "example.test" }
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr

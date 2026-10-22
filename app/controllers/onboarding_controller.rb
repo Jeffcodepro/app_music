@@ -1,5 +1,6 @@
 class OnboardingController < ApplicationController
   before_action :authenticate_user!
+  layout "platform"
 
   def welcome
   end

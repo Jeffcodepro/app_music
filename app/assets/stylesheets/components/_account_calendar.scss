@@ -1,0 +1,51 @@
+.platform-ui {
+  .sidebar-toggle { border: 0; border-radius: 4px; background: transparent; }
+  .sidebar-toggle .ui-icon { width: 23px; height: 23px; }
+  .sidebar-account { display: flex; align-items: center; min-height: 64px; padding: 10px 4px; gap: 10px; color: var(--ui-ink); text-decoration: none; border-top: 1px solid var(--ui-border); }
+  .sidebar-account__text { min-width: 0; flex: 1; line-height: 1.4; strong { display: block; overflow: hidden; text-overflow: ellipsis; font-size: 13px; white-space: nowrap; } > span { font-size: 12px; color: var(--ui-muted); } }
+  .sidebar-account .app-avatar { width: 34px; height: 34px; flex-shrink: 0; background: var(--ui-soft); color: var(--ui-ink); }
+  .sidebar-account.is-active { box-shadow: inset 2px 0 var(--ui-ink); padding-left: 8px; }
+  .sidebar-account__arrow { font-size: 22px; }
+  .account-layout { grid-template-columns: minmax(220px,260px) minmax(0,1fr); align-items: start; gap: 28px; }
+  .account-links { border: 1px solid var(--ui-border); border-radius: 6px; padding: 8px; gap: 4px; }
+  .account-links a { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 10px 12px; border-radius: 4px; font-size: 14px; text-decoration: none; color: var(--ui-muted); span:nth-child(2) { flex: 1; } }
+  .account-links a[aria-current=page] { color: var(--ui-ink); background: var(--ui-soft); font-weight: 600; box-shadow: inset 2px 0 var(--ui-ink); }
+  .account-panel { padding: 24px; margin: 0; min-width: 0; h2 { font-size: 19px; margin: 0 0 10px; } > p + p { margin-top: 10px; } > .ui-icon { margin-bottom: 16px; } form { margin-top: 20px; } }
+  .account-overview { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; > div { flex: 1; min-width: 150px; overflow-wrap: anywhere; } }
+  .account-overview-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; .account-panel { display: flex; flex-direction: column; align-items: start; } a { margin-top: auto; padding-top: 20px; min-height: 44px; } }
+  .account-plan { font-size: 24px; font-weight: 600; color: var(--ui-ink); }
+  @media (min-width:1200px) { .is-sidebar-collapsed .sidebar-account { justify-content: center; padding-inline: 0; } }
+  @media (min-width:768px) and (max-width:1199px) { .sidebar-account { justify-content: center; } .is-drawer-open .sidebar-account { justify-content: start; } }
+  @media (max-width:1000px) { .account-layout { grid-template-columns: minmax(0,1fr); gap: 20px; } .account-links { display: flex; flex-direction: row; flex-wrap: wrap; position: static; } .account-links a { min-height: 44px; } }
+  @media (max-width:600px) { .account-overview-grid { grid-template-columns: minmax(0,1fr); } .account-panel { padding: 20px; } .account-links a { font-size: 13px; padding-inline: 8px; gap: 6px; } .account-links .ui-icon { width: 18px; } }
+}
+.platform-ui.study-editorial .dashboard-editorial {
+  .study-record { margin: 0 0 28px; padding: 20px 0; border-bottom: 1px solid var(--ui-border); border-top: 1px solid var(--ui-border); strong { font-size: 28px; } }
+  .study-desk { grid-template-columns: minmax(0,1.15fr) minmax(300px,1fr); align-items: start; gap: 32px; }
+  .study-journal { margin-top: 28px; padding: 20px 24px; }
+  .study-journal__list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 24px; }
+  .study-journal__list li:first-child { margin-top: 0; }
+  .study-calendar { padding: 20px; border: 1px solid var(--ui-border); border-radius: 6px; background: var(--ui-surface); min-width: 0; }
+  .study-calendar header { display: flex; align-items: center; justify-content: space-between; gap: 12px; h2 { font-size: 19px; margin: 0; } .study-kicker { margin-bottom: 4px; } }
+  .study-calendar nav { display: flex; a { display: grid; place-items: center; width: 44px; height: 44px; font-size: 24px; text-decoration: none; border-radius: 4px; } }
+  .calendar-summary { font-size: 13px; margin-block: 12px; }
+  .study-calendar table { width: 100%; table-layout: fixed; text-align: center; border-collapse: collapse; th { font-size: 11px; font-weight: 500; color: var(--ui-muted); padding-bottom: 10px; } td { padding: 2px; } time { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 42px; font-size: 13px; border-radius: 4px; color: var(--ui-ink); } .is-outside { opacity: .35; } .is-today time { outline: 1px solid var(--ui-control-border); outline-offset: -1px; } [data-practiced=true] time { background: var(--ui-soft); font-weight: 700; } }
+  .calendar-marks { display: flex; justify-content: center; gap: 3px; height: 11px; font-size: 9px; line-height: 1; }
+  .calendar-legend { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 12px; font-size: 12px; color: var(--ui-muted); }
+  .calendar-note { font-size: 11px; margin-top: 10px; }
+  @media (max-width:1050px) { .study-desk { grid-template-columns: minmax(0,1fr); gap: 24px; } }
+  @media (max-width:600px) { .study-journal__list { grid-template-columns: minmax(0,1fr); } .study-record { gap: 8px; strong { font-size: 25px; } span { font-size: 11px; } } .study-calendar { padding: 16px; } }
+}
+.platform-ui.exercise-workbench .playground-page {
+  .playground-stage { width: 100%; max-width: 920px; min-width: 0; }
+  .playground-stage__grid { max-width: none; }
+  .playground-select-card__icon { display: grid; place-items: center; height: 38px; width: 100%; background: transparent; border: 0; border-radius: 0; }
+  .playground-select-card__icon svg { display: block; width: 36px; height: 36px; }
+  .playground-select-card { min-height: 90px; gap: 8px; }
+  .playground-select-card.is-selected, .playground-direction-card.is-selected { border-color: var(--ui-ink); box-shadow: inset 0 0 0 1px var(--ui-ink); }
+  .rhythm-level-hint { font-size: 12px; line-height: 1.5; color: var(--ui-muted); }
+  .metrical-answer { display: flex; flex-direction: column; }
+  .metrical-answer .rhythm-score-scroll { display: flex; align-items: center; flex: 1; min-height: 110px; }
+  .metrical-answer form { margin-top: auto; }
+  .rhythm-meter-controls select:focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
+}

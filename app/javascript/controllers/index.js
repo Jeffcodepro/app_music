@@ -3,12 +3,14 @@
 // ./bin/rails generate stimulus controllerName
 
 import { application } from "./application"
+import ArenaLiveController from "./arena_live_controller"
+application.register("arena-live", ArenaLiveController)
 
 import AppShellController from "./app_shell_controller"
 application.register("app-shell", AppShellController)
 
-import DesignSystemController from "./design_system_controller"
-application.register("design-system", DesignSystemController)
+import ThemeController from "./theme_controller"
+application.register("theme", ThemeController)
 
 import FlashController from "./flash_controller"
 application.register("flash", FlashController)
@@ -19,17 +21,35 @@ application.register("hello", HelloController)
 import HarmonyPlayerController from "./harmony_player_controller"
 application.register("harmony-player", HarmonyPlayerController)
 
+import MelodyPlayerController from "./melody_player_controller"
+application.register("melody-player", MelodyPlayerController)
+
 import IntervalPlayerController from "./interval_player_controller"
 application.register("interval-player", IntervalPlayerController)
 
 import PreferencesController from "./preferences_controller"
 application.register("preferences", PreferencesController)
 
+import PracticeSwitcherController from "./practice_switcher_controller"
+application.register("practice-switcher", PracticeSwitcherController)
+
+import AccountMenuController from "./account_menu_controller"
+application.register("account-menu", AccountMenuController)
+
 import RhythmPlayerController from "./rhythm_player_controller"
 application.register("rhythm-player", RhythmPlayerController)
 
-import ScrollVideoController from "./scroll_video_controller"
-application.register("scroll-video", ScrollVideoController)
+import DesignSystemController from "./design_system_controller"
+application.register("design-system", DesignSystemController)
 
 import SeamlessLoopController from "./seamless_loop_controller"
 application.register("seamless-loop", SeamlessLoopController)
+
+import ArenaIdentityController from "./arena_identity_controller"
+application.register("arena-identity", ArenaIdentityController)
+
+import ArenaAudioController from "./arena_audio_controller"
+application.register("arena-audio", ArenaAudioController)
+
+import ArenaSetupController from "./arena_setup_controller"
+application.register("arena-setup", ArenaSetupController)

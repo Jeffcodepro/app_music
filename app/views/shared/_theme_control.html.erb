@@ -1,0 +1,10 @@
+<% if local_assigns[:icon_only] %>
+  <%= render "shared/theme_picker" %>
+<% else %>
+<label class="theme-control">
+  <%= ui_icon("sun") %><span class="visually-hidden">Tema da interface</span>
+  <select aria-label="Tema da interface" data-theme-target="select" data-action="change->theme#change">
+    <option value="system">Sistema</option><option value="light">Claro</option><option value="dark">Escuro</option>
+  </select>
+</label>
+<% end %>

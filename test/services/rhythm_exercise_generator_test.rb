@@ -12,21 +12,11 @@ class RhythmExerciseGeneratorTest < ActiveSupport::TestCase
     assert_equal 4, exercise[:count_in_beats]
   end
 
-  test "syncopation mode generates offbeat starts when possible" do
-    exercise = RhythmExerciseGenerator.new(random: Random.new(88), activity_mode: "syncopation").call
-    tokens = RhythmExerciseGenerator.parse_pattern_signature(exercise[:correct_option_id])
-    cursor = 0
-    beat_starts_with_rest = 0
-
-    tokens.each do |token|
-      beat_starts_with_rest += 1 if (cursor % RhythmExerciseGenerator::STEPS_PER_BEAT).zero? && token[:kind] == "rest"
-      cursor += token[:duration_steps]
+  test "syncopation is unavailable until sustained metric displacement can be validated" do
+    refute_includes RhythmExerciseGenerator.activity_mode_ids, "syncopation"
+    assert_raises(RhythmExerciseGenerator::GenerationError) do
+      RhythmExerciseGenerator.new(activity_mode: "syncopation").call
     end
-
-    assert_equal "syncopation", exercise[:activity_mode]
-    assert_equal 16, tokens.sum { |token| token[:duration_steps] }
-    assert_operator beat_starts_with_rest, :>=, 2
-    assert_includes exercise[:question].downcase, "ataques fora do tempo forte"
   end
 
   test "mixed mode avoids immediately repeating recent activity modes when alternatives exist" do

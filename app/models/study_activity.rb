@@ -9,6 +9,7 @@ class StudyActivity < ApplicationRecord
   ].freeze
 
   belongs_to :user
+  belongs_to :exercise_assignment, optional: true
 
   validates :area, presence: true, inclusion: { in: AREAS }
   validates :xp_earned, numericality: { greater_than_or_equal_to: 0 }

@@ -1,0 +1,836 @@
+[
+  {
+    "seed": 0,
+    "mode": "quality",
+    "structure": "triad",
+    "exercise": {
+      "question_type": "quality",
+      "question_type_label": "Tríades",
+      "question": "Ouça o acorde e identifique a qualidade da tríade.",
+      "function_convention_id": "major-functions-legacy-v1",
+      "key_id": "f_major",
+      "key_label": "Fá maior",
+      "chord_degree": 6,
+      "chord_degree_label": "vi (6º grau)",
+      "chord_roman": "vi",
+      "chord_quality_id": "minor_triad",
+      "chord_quality_label": "Tríade menor",
+      "chord_notes_label": "Ré - Fá - Lá",
+      "chord_root_label": "Ré",
+      "chord_function_id": "tonic",
+      "chord_function_label": "Tônica",
+      "prompt_label": "Escuta",
+      "prompt_value": "Acorde isolado",
+      "context_items": [
+        {
+          "label": "Tonalidade",
+          "value": "Fá maior"
+        },
+        {
+          "label": "Estrutura",
+          "value": "Tríades"
+        },
+        {
+          "label": "Foco",
+          "value": "Qualidade da tríade"
+        }
+      ],
+      "audio_sequence": [
+        {
+          "label": "vi",
+          "pitches": [
+            "D4",
+            "F4",
+            "A4"
+          ],
+          "frequencies": [
+            293.665,
+            349.228,
+            440.0
+          ]
+        }
+      ],
+      "correct_option_id": "minor_triad",
+      "correct_option_label": "Tríade menor",
+      "signature": "quality|f_major|triad|6|minor_triad",
+      "options": [
+        {
+          "id": "minor_triad",
+          "label": "Tríade menor"
+        },
+        {
+          "id": "augmented_triad",
+          "label": "Tríade aumentada"
+        },
+        {
+          "id": "major_triad",
+          "label": "Tríade maior"
+        },
+        {
+          "id": "diminished_triad",
+          "label": "Tríade diminuta"
+        }
+      ],
+      "question_mode": "quality",
+      "question_mode_label": "Qualidade",
+      "chord_structure": "triad",
+      "chord_structure_label": "Tríades"
+    }
+  },
+  {
+    "seed": 1,
+    "mode": "quality",
+    "structure": "tetrad",
+    "exercise": {
+      "question_type": "quality",
+      "question_type_label": "Tétrades",
+      "question": "Ouça o acorde e identifique a qualidade da tétrade.",
+      "function_convention_id": "major-functions-legacy-v1",
+      "key_id": "bb_major",
+      "key_label": "Si bemol maior",
+      "chord_degree": 4,
+      "chord_degree_label": "IVmaj7 (4º grau)",
+      "chord_roman": "IVmaj7",
+      "chord_quality_id": "major_major_seventh_chord",
+      "chord_quality_label": "Tétrade maior com sétima maior",
+      "chord_notes_label": "Mi bemol - Sol - Si bemol - Ré",
+      "chord_root_label": "Mi bemol",
+      "chord_function_id": "subdominant",
+      "chord_function_label": "Subdominante",
+      "prompt_label": "Escuta",
+      "prompt_value": "Acorde isolado",
+      "context_items": [
+        {
+          "label": "Tonalidade",
+          "value": "Si bemol maior"
+        },
+        {
+          "label": "Estrutura",
+          "value": "Tétrades"
+        },
+        {
+          "label": "Foco",
+          "value": "Qualidade da tétrade"
+        }
+      ],
+      "audio_sequence": [
+        {
+          "label": "IVmaj7",
+          "pitches": [
+            "E♭4",
+            "G4",
+            "B♭4",
+            "D5"
+          ],
+          "frequencies": [
+            311.127,
+            391.995,
+            466.164,
+            587.33
+          ]
+        }
+      ],
+      "correct_option_id": "major_major_seventh_chord",
+      "correct_option_label": "Tétrade maior com sétima maior",
+      "signature": "quality|bb_major|tetrad|4|major_major_seventh_chord",
+      "options": [
+        {
+          "id": "major_major_seventh_chord",
+          "label": "Tétrade maior com sétima maior"
+        },
+        {
+          "id": "major_minor_seventh_chord",
+          "label": "Tétrade dominante"
+        },
+        {
+          "id": "minor_major_seventh_chord",
+          "label": "Tétrade menor com sétima maior"
+        },
+        {
+          "id": "half_diminished_seventh_chord",
+          "label": "Tétrade meio-diminuta"
+        }
+      ],
+      "question_mode": "quality",
+      "question_mode_label": "Qualidade",
+      "chord_structure": "tetrad",
+      "chord_structure_label": "Tétrades"
+    }
+  },
+  {
+    "seed": 2,
+    "mode": "scale_degree",
+    "structure": "triad",
+    "exercise": {
+      "question_type": "scale_degree",
+      "question_type_label": "Graus",
+      "question": "Ouça primeiro a tônica da tonalidade e depois o acorde alvo. Identifique em qual grau do campo harmônico maior ele foi formado.",
+      "function_convention_id": "major-functions-legacy-v1",
+      "key_id": "c_major",
+      "key_label": "Dó maior",
+      "chord_degree": 6,
+      "chord_degree_label": "vi (6º grau)",
+      "chord_roman": "vi",
+      "chord_quality_id": "minor_triad",
+      "chord_quality_label": "Tríade menor",
+      "chord_notes_label": "Lá - Dó - Mi",
+      "chord_root_label": "Lá",
+      "chord_function_id": "tonic",
+      "chord_function_label": "Tônica",
+      "prompt_label": "Escuta",
+      "prompt_value": "Primeiro I, depois o acorde alvo",
+      "context_items": [
+        {
+          "label": "Tonalidade",
+          "value": "Dó maior"
+        },
+        {
+          "label": "Estrutura",
+          "value": "Tríades"
+        },
+        {
+          "label": "Foco",
+          "value": "Grau do campo harmônico"
+        },
+        {
+          "label": "Referência",
+          "value": "I da tonalidade antes do alvo"
+        }
+      ],
+      "audio_sequence": [
+        {
+          "label": "I",
+          "pitches": [
+            "C3",
+            "E3",
+            "G3"
+          ],
+          "frequencies": [
+            130.813,
+            164.814,
+            195.998
+          ]
+        },
+        {
+          "label": "vi",
+          "pitches": [
+            "A3",
+            "C4",
+            "E4"
+          ],
+          "frequencies": [
+            220.0,
+            261.626,
+            329.628
+          ]
+        }
+      ],
+      "correct_option_id": "6",
+      "correct_option_label": "vi (6º grau)",
+      "signature": "scale_degree|c_major|triad|6",
+      "options": [
+        {
+          "id": "5",
+          "label": "V (5º grau)"
+        },
+        {
+          "id": "1",
+          "label": "I (1º grau)"
+        },
+        {
+          "id": "6",
+          "label": "vi (6º grau)"
+        },
+        {
+          "id": "4",
+          "label": "IV (4º grau)"
+        }
+      ],
+      "question_mode": "scale_degree",
+      "question_mode_label": "Graus",
+      "chord_structure": "triad",
+      "chord_structure_label": "Tríades"
+    }
+  },
+  {
+    "seed": 3,
+    "mode": "scale_degree",
+    "structure": "tetrad",
+    "exercise": {
+      "question_type": "scale_degree",
+      "question_type_label": "Graus",
+      "question": "Ouça primeiro a tônica da tonalidade e depois o acorde alvo. Identifique em qual grau do campo harmônico maior ele foi formado.",
+      "function_convention_id": "major-functions-legacy-v1",
+      "key_id": "d_major",
+      "key_label": "Ré maior",
+      "chord_degree": 1,
+      "chord_degree_label": "Imaj7 (1º grau)",
+      "chord_roman": "Imaj7",
+      "chord_quality_id": "major_major_seventh_chord",
+      "chord_quality_label": "Tétrade maior com sétima maior",
+      "chord_notes_label": "Ré - Fá sustenido - Lá - Dó sustenido",
+      "chord_root_label": "Ré",
+      "chord_function_id": "tonic",
+      "chord_function_label": "Tônica",
+      "prompt_label": "Escuta",
+      "prompt_value": "Primeiro Imaj7, depois o acorde alvo",
+      "context_items": [
+        {
+          "label": "Tonalidade",
+          "value": "Ré maior"
+        },
+        {
+          "label": "Estrutura",
+          "value": "Tétrades"
+        },
+        {
+          "label": "Foco",
+          "value": "Grau do campo harmônico"
+        },
+        {
+          "label": "Referência",
+          "value": "Imaj7 da tonalidade antes do alvo"
+        }
+      ],
+      "audio_sequence": [
+        {
+          "label": "Imaj7",
+          "pitches": [
+            "D3",
+            "F♯3",
+            "A3",
+            "C♯4"
+          ],
+          "frequencies": [
+            146.832,
+            184.997,
+            220.0,
+            277.183
+          ]
+        },
+        {
+          "label": "Imaj7",
+          "pitches": [
+            "D3",
+            "F♯3",
+            "A3",
+            "C♯4"
+          ],
+          "frequencies": [
+            146.832,
+            184.997,
+            220.0,
+            277.183
+          ]
+        }
+      ],
+      "correct_option_id": "1",
+      "correct_option_label": "Imaj7 (1º grau)",
+      "signature": "scale_degree|d_major|tetrad|1",
+      "options": [
+        {
+          "id": "6",
+          "label": "vi7 (6º grau)"
+        },
+        {
+          "id": "3",
+          "label": "iii7 (3º grau)"
+        },
+        {
+          "id": "2",
+          "label": "ii7 (2º grau)"
+        },
+        {
+          "id": "1",
+          "label": "Imaj7 (1º grau)"
+        }
+      ],
+      "question_mode": "scale_degree",
+      "question_mode_label": "Graus",
+      "chord_structure": "tetrad",
+      "chord_structure_label": "Tétrades"
+    }
+  },
+  {
+    "seed": 4,
+    "mode": "harmonic_function",
+    "structure": "triad",
+    "exercise": {
+      "question_type": "harmonic_function",
+      "question_type_label": "Funções",
+      "question": "Ouça primeiro a tônica da tonalidade e depois o acorde alvo. Convenção didática: I, III e VI = tônica; II e IV = subdominante; V = dominante; VII = sensível.",
+      "function_convention_id": "major-functions-legacy-v1",
+      "key_id": "d_major",
+      "key_label": "Ré maior",
+      "chord_degree": 7,
+      "chord_degree_label": "vii° (7º grau)",
+      "chord_roman": "vii°",
+      "chord_quality_id": "diminished_triad",
+      "chord_quality_label": "Tríade diminuta",
+      "chord_notes_label": "Dó sustenido - Mi - Sol",
+      "chord_root_label": "Dó sustenido",
+      "chord_function_id": "leading_tone",
+      "chord_function_label": "Sensível",
+      "prompt_label": "Escuta",
+      "prompt_value": "Primeiro I, depois o acorde alvo",
+      "context_items": [
+        {
+          "label": "Tonalidade",
+          "value": "Ré maior"
+        },
+        {
+          "label": "Estrutura",
+          "value": "Tríades"
+        },
+        {
+          "label": "Foco",
+          "value": "Função dentro da tonalidade"
+        },
+        {
+          "label": "Referência",
+          "value": "I da tonalidade antes do alvo"
+        }
+      ],
+      "audio_sequence": [
+        {
+          "label": "I",
+          "pitches": [
+            "D3",
+            "F♯3",
+            "A3"
+          ],
+          "frequencies": [
+            146.832,
+            184.997,
+            220.0
+          ]
+        },
+        {
+          "label": "vii°",
+          "pitches": [
+            "C♯4",
+            "E4",
+            "G4"
+          ],
+          "frequencies": [
+            277.183,
+            329.628,
+            391.995
+          ]
+        }
+      ],
+      "correct_option_id": "leading_tone",
+      "correct_option_label": "Sensível",
+      "signature": "harmonic_function|d_major|triad|7|leading_tone",
+      "options": [
+        {
+          "id": "tonic",
+          "label": "Tônica"
+        },
+        {
+          "id": "dominant",
+          "label": "Dominante"
+        },
+        {
+          "id": "subdominant",
+          "label": "Subdominante"
+        },
+        {
+          "id": "leading_tone",
+          "label": "Sensível"
+        }
+      ],
+      "question_mode": "harmonic_function",
+      "question_mode_label": "Funções",
+      "chord_structure": "triad",
+      "chord_structure_label": "Tríades"
+    }
+  },
+  {
+    "seed": 5,
+    "mode": "harmonic_function",
+    "structure": "tetrad",
+    "exercise": {
+      "question_type": "harmonic_function",
+      "question_type_label": "Funções",
+      "question": "Ouça primeiro a tônica da tonalidade e depois o acorde alvo. Convenção didática: I, III e VI = tônica; II e IV = subdominante; V = dominante; VII = sensível.",
+      "function_convention_id": "major-functions-legacy-v1",
+      "key_id": "a_major",
+      "key_label": "Lá maior",
+      "chord_degree": 7,
+      "chord_degree_label": "viiø7 (7º grau)",
+      "chord_roman": "viiø7",
+      "chord_quality_id": "half_diminished_seventh_chord",
+      "chord_quality_label": "Tétrade meio-diminuta",
+      "chord_notes_label": "Sol sustenido - Si - Ré - Fá sustenido",
+      "chord_root_label": "Sol sustenido",
+      "chord_function_id": "leading_tone",
+      "chord_function_label": "Sensível",
+      "prompt_label": "Escuta",
+      "prompt_value": "Primeiro Imaj7, depois o acorde alvo",
+      "context_items": [
+        {
+          "label": "Tonalidade",
+          "value": "Lá maior"
+        },
+        {
+          "label": "Estrutura",
+          "value": "Tétrades"
+        },
+        {
+          "label": "Foco",
+          "value": "Função dentro da tonalidade"
+        },
+        {
+          "label": "Referência",
+          "value": "Imaj7 da tonalidade antes do alvo"
+        }
+      ],
+      "audio_sequence": [
+        {
+          "label": "Imaj7",
+          "pitches": [
+            "A3",
+            "C♯4",
+            "E4",
+            "G♯4"
+          ],
+          "frequencies": [
+            220.0,
+            277.183,
+            329.628,
+            415.305
+          ]
+        },
+        {
+          "label": "viiø7",
+          "pitches": [
+            "G♯4",
+            "B4",
+            "D5",
+            "F♯5"
+          ],
+          "frequencies": [
+            415.305,
+            493.883,
+            587.33,
+            739.989
+          ]
+        }
+      ],
+      "correct_option_id": "leading_tone",
+      "correct_option_label": "Sensível",
+      "signature": "harmonic_function|a_major|tetrad|7|leading_tone",
+      "options": [
+        {
+          "id": "dominant",
+          "label": "Dominante"
+        },
+        {
+          "id": "tonic",
+          "label": "Tônica"
+        },
+        {
+          "id": "subdominant",
+          "label": "Subdominante"
+        },
+        {
+          "id": "leading_tone",
+          "label": "Sensível"
+        }
+      ],
+      "question_mode": "harmonic_function",
+      "question_mode_label": "Funções",
+      "chord_structure": "tetrad",
+      "chord_structure_label": "Tétrades"
+    }
+  },
+  {
+    "seed": 6,
+    "mode": "progression",
+    "structure": "triad",
+    "exercise": {
+      "question_type": "progression",
+      "question_type_label": "Progressões",
+      "question": "Ouça a progressão inteira e identifique qual grau apareceu na 4ª posição.",
+      "progression_template_id": "ii_v_i",
+      "progression_focus_index": 4,
+      "key_id": "d_major",
+      "key_label": "Ré maior",
+      "chord_degree": 6,
+      "chord_degree_label": "vi (6º grau)",
+      "chord_roman": "vi",
+      "chord_quality_id": "minor_triad",
+      "chord_quality_label": "Tríade menor",
+      "chord_notes_label": "Si - Ré - Fá sustenido",
+      "chord_root_label": "Si",
+      "chord_function_id": "tonic",
+      "chord_function_label": "Tônica",
+      "prompt_label": "Ponto de escuta",
+      "prompt_value": "Qual grau apareceu na 4ª posição?",
+      "context_items": [
+        {
+          "label": "Tonalidade",
+          "value": "Ré maior"
+        },
+        {
+          "label": "Estrutura",
+          "value": "Tríades"
+        },
+        {
+          "label": "Alvo",
+          "value": "4ª posição"
+        }
+      ],
+      "progression_steps": [
+        {
+          "roman": "1ª posição",
+          "notes": "Memorize o acorde ouvido",
+          "focus": false
+        },
+        {
+          "roman": "2ª posição",
+          "notes": "Memorize o acorde ouvido",
+          "focus": false
+        },
+        {
+          "roman": "3ª posição",
+          "notes": "Memorize o acorde ouvido",
+          "focus": false
+        },
+        {
+          "roman": "4ª posição",
+          "notes": "Responda esta posição",
+          "focus": true
+        }
+      ],
+      "audio_sequence": [
+        {
+          "label": "ii",
+          "pitches": [
+            "E3",
+            "G3",
+            "B3"
+          ],
+          "frequencies": [
+            164.814,
+            195.998,
+            246.942
+          ]
+        },
+        {
+          "label": "V",
+          "pitches": [
+            "A3",
+            "C♯4",
+            "E4"
+          ],
+          "frequencies": [
+            220.0,
+            277.183,
+            329.628
+          ]
+        },
+        {
+          "label": "I",
+          "pitches": [
+            "D3",
+            "F♯3",
+            "A3"
+          ],
+          "frequencies": [
+            146.832,
+            184.997,
+            220.0
+          ]
+        },
+        {
+          "label": "vi",
+          "pitches": [
+            "B3",
+            "D4",
+            "F♯4"
+          ],
+          "frequencies": [
+            246.942,
+            293.665,
+            369.994
+          ]
+        }
+      ],
+      "correct_option_id": "6",
+      "correct_option_label": "vi (6º grau)",
+      "signature": "progression|d_major|triad|ii_v_i|4|6",
+      "options": [
+        {
+          "id": "5",
+          "label": "V (5º grau)"
+        },
+        {
+          "id": "6",
+          "label": "vi (6º grau)"
+        },
+        {
+          "id": "3",
+          "label": "iii (3º grau)"
+        },
+        {
+          "id": "2",
+          "label": "ii (2º grau)"
+        }
+      ],
+      "question_mode": "progression",
+      "question_mode_label": "Progressões",
+      "chord_structure": "triad",
+      "chord_structure_label": "Tríades"
+    }
+  },
+  {
+    "seed": 7,
+    "mode": "progression",
+    "structure": "tetrad",
+    "exercise": {
+      "question_type": "progression",
+      "question_type_label": "Progressões",
+      "question": "Ouça a progressão inteira e identifique qual grau apareceu na 3ª posição.",
+      "progression_template_id": "ii_v_i",
+      "progression_focus_index": 3,
+      "key_id": "f_major",
+      "key_label": "Fá maior",
+      "chord_degree": 1,
+      "chord_degree_label": "Imaj7 (1º grau)",
+      "chord_roman": "Imaj7",
+      "chord_quality_id": "major_major_seventh_chord",
+      "chord_quality_label": "Tétrade maior com sétima maior",
+      "chord_notes_label": "Fá - Lá - Dó - Mi",
+      "chord_root_label": "Fá",
+      "chord_function_id": "tonic",
+      "chord_function_label": "Tônica",
+      "prompt_label": "Ponto de escuta",
+      "prompt_value": "Qual grau apareceu na 3ª posição?",
+      "context_items": [
+        {
+          "label": "Tonalidade",
+          "value": "Fá maior"
+        },
+        {
+          "label": "Estrutura",
+          "value": "Tétrades"
+        },
+        {
+          "label": "Alvo",
+          "value": "3ª posição"
+        }
+      ],
+      "progression_steps": [
+        {
+          "roman": "1ª posição",
+          "notes": "Memorize o acorde ouvido",
+          "focus": false
+        },
+        {
+          "roman": "2ª posição",
+          "notes": "Memorize o acorde ouvido",
+          "focus": false
+        },
+        {
+          "roman": "3ª posição",
+          "notes": "Responda esta posição",
+          "focus": true
+        },
+        {
+          "roman": "4ª posição",
+          "notes": "Memorize o acorde ouvido",
+          "focus": false
+        }
+      ],
+      "audio_sequence": [
+        {
+          "label": "ii7",
+          "pitches": [
+            "G3",
+            "B♭3",
+            "D4",
+            "F4"
+          ],
+          "frequencies": [
+            195.998,
+            233.082,
+            293.665,
+            349.228
+          ]
+        },
+        {
+          "label": "V7",
+          "pitches": [
+            "C4",
+            "E4",
+            "G4",
+            "B♭4"
+          ],
+          "frequencies": [
+            261.626,
+            329.628,
+            391.995,
+            466.164
+          ]
+        },
+        {
+          "label": "Imaj7",
+          "pitches": [
+            "F3",
+            "A3",
+            "C4",
+            "E4"
+          ],
+          "frequencies": [
+            174.614,
+            220.0,
+            261.626,
+            329.628
+          ]
+        },
+        {
+          "label": "vi7",
+          "pitches": [
+            "D4",
+            "F4",
+            "A4",
+            "C5"
+          ],
+          "frequencies": [
+            293.665,
+            349.228,
+            440.0,
+            523.251
+          ]
+        }
+      ],
+      "correct_option_id": "1",
+      "correct_option_label": "Imaj7 (1º grau)",
+      "signature": "progression|f_major|tetrad|ii_v_i|3|1",
+      "options": [
+        {
+          "id": "6",
+          "label": "vi7 (6º grau)"
+        },
+        {
+          "id": "5",
+          "label": "V7 (5º grau)"
+        },
+        {
+          "id": "1",
+          "label": "Imaj7 (1º grau)"
+        },
+        {
+          "id": "7",
+          "label": "viiø7 (7º grau)"
+        }
+      ],
+      "question_mode": "progression",
+      "question_mode_label": "Progressões",
+      "chord_structure": "tetrad",
+      "chord_structure_label": "Tétrades"
+    }
+  }
+]

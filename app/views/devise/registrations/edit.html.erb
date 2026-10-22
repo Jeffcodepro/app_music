@@ -1,35 +1,17 @@
-<h2>Edit <%= resource_name.to_s.humanize %></h2>
-
-<%= simple_form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-  <%= f.error_notification %>
-
-  <div class="form-inputs">
-    <%= f.input :email, required: true, autofocus: true %>
-
-    <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-      <p>Currently waiting confirmation for: <%= resource.unconfirmed_email %></p>
+<%= render "platform/page_header", title: "Minha conta", description: "Dados de acesso" %>
+<div class="account-layout">
+  <%= render "platform/account_navigation" %>
+  <section class="ui-card account-panel">
+    <h2>Credenciais e segurança</h2><p>Confirme sua senha atual para alterar seus dados de acesso.</p>
+    <%= simple_form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+      <%= f.error_notification %>
+      <%= f.input :email, required: true, label: "E-mail", input_html: { autocomplete: "email" } %>
+      <%= f.input :password, required: false, label: "Nova senha", hint: "Deixe em branco para manter sua senha.", input_html: { autocomplete: "new-password" } %>
+      <%= f.input :password_confirmation, required: false, label: "Confirmar nova senha", input_html: { autocomplete: "new-password" } %>
+      <%= f.input :current_password, required: true, label: "Senha atual", input_html: { autocomplete: "current-password" } %>
+      <%= f.button :submit, "Salvar credenciais", class: "app-btn app-btn--primary" %>
     <% end %>
-
-    <%= f.input :password,
-                hint: "leave it blank if you don't want to change it",
-                required: false,
-                input_html: { autocomplete: "new-password" } %>
-    <%= f.input :password_confirmation,
-                required: false,
-                input_html: { autocomplete: "new-password" } %>
-    <%= f.input :current_password,
-                hint: "we need your current password to confirm your changes",
-                required: true,
-                input_html: { autocomplete: "current-password" } %>
-  </div>
-
-  <div class="form-actions">
-    <%= f.button :submit, "Update" %>
-  </div>
-<% end %>
-
-<h3>Cancel my account</h3>
-
-<div>Unhappy? <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?", turbo_confirm: "Are you sure?" }, method: :delete %></div>
-
-<%= link_to "Back", :back %>
+    <div class="platform-actions"><%= link_to "Voltar à minha conta", app_perfil_path, class: "ui-text-link" %></div>
+    <details class="ui-section"><summary>Encerrar minha conta</summary><p>Esta ação exclui a conta e seus registros de estudo.</p><div class="platform-actions"><%= button_to "Excluir minha conta", registration_path(resource_name), method: :delete, data: { turbo_confirm: "Excluir permanentemente sua conta e seus registros de estudo?" }, class: "app-btn app-btn--danger" %></div></details>
+  </section>
+</div>

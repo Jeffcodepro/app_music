@@ -1,0 +1,315 @@
+[
+  {
+    "area": "leitura",
+    "seed": 7,
+    "generator_options": {
+      "question_mode": "note_name",
+      "clef_mode": "treble"
+    },
+    "digest": "bc9988e4a0891569a66e8c0f3c538df1a55bc505bdccec998652ebe7c08b4bfe",
+    "exercise": {
+      "question": "Observe a pauta e identifique a nota escrita.",
+      "question_type": "note_name",
+      "question_type_label": "Nome da nota",
+      "season_mode": "mixed",
+      "season_mode_label": "Misto",
+      "season_id": "level_4",
+      "season_label": "Nível 4",
+      "season_topics": [
+        "Leitura aplicada a contextos mais avançados",
+        "Interpretação estrutural da escrita musical"
+      ],
+      "clef_mode": "treble",
+      "clef_mode_label": "Somente Sol",
+      "clef_id": "treble",
+      "clef_label": "Clave de Sol",
+      "clef_symbol": "𝄞",
+      "clef_symbol_label": "Sol",
+      "head_music_clef": "treble_clef",
+      "correct_option_id": "c",
+      "correct_option_label": "Dó",
+      "signature": "note_name|treble|C4",
+      "options": [
+        {
+          "id": "a",
+          "label": "Lá"
+        },
+        {
+          "id": "e",
+          "label": "Mi"
+        },
+        {
+          "id": "c",
+          "label": "Dó"
+        },
+        {
+          "id": "b",
+          "label": "Si"
+        }
+      ],
+      "staff_position_index": -2,
+      "pitch_name": "C4",
+      "pitch_label": "Dó 4",
+      "notation_kind": "note",
+      "question_mode": "note_name",
+      "question_mode_label": "Notas"
+    }
+  },
+  {
+    "area": "leitura",
+    "seed": 10,
+    "generator_options": {
+      "question_mode": "accidental",
+      "clef_mode": "bass",
+      "season_mode": "level_4"
+    },
+    "digest": "50d54f374ae459985d16a0c6f8b6c119968fce7278917e61fb48b6206f390aa7",
+    "exercise": {
+      "question": "Observe a nota na pauta e identifique a nota completa com o acidente musical indicado.",
+      "question_type": "accidental",
+      "question_type_label": "Acidente da nota",
+      "season_mode": "level_4",
+      "season_mode_label": "Nível 4",
+      "season_id": "level_4",
+      "season_label": "Nível 4",
+      "season_topics": [
+        "Leitura aplicada a contextos mais avançados",
+        "Interpretação estrutural da escrita musical"
+      ],
+      "clef_mode": "bass",
+      "clef_mode_label": "Somente Fá",
+      "clef_id": "bass",
+      "clef_label": "Clave de Fá",
+      "clef_symbol": "𝄢",
+      "clef_symbol_label": "Fá",
+      "head_music_clef": "bass_clef",
+      "correct_option_id": "c__double_flat",
+      "correct_option_label": "Dó duplo bemol",
+      "signature": "accidental|bass|C3|double_flat",
+      "options": [
+        {
+          "id": "c__sharp",
+          "label": "Dó sustenido"
+        },
+        {
+          "id": "d__natural",
+          "label": "Ré bequadro"
+        },
+        {
+          "id": "c__double_flat",
+          "label": "Dó duplo bemol"
+        },
+        {
+          "id": "a__natural",
+          "label": "Lá bequadro"
+        }
+      ],
+      "staff_position_index": 3,
+      "pitch_name": "C3",
+      "pitch_label": "Dó 3",
+      "note_accidental_id": "double_flat",
+      "note_accidental_label": "Duplo bemol",
+      "note_accidental_symbol": "𝄫",
+      "notation_kind": "note",
+      "question_mode": "accidental",
+      "question_mode_label": "Acidentes"
+    }
+  },
+  {
+    "area": "leitura",
+    "seed": 2,
+    "generator_options": {
+      "question_mode": "key_signature",
+      "clef_mode": "alto"
+    },
+    "digest": "e5a119e51b6c29191abdce2280dbb8dcea795dea417221bc7fb72bcc6fd74ec8",
+    "exercise": {
+      "question": "Observe a armadura de clave e identifique a tonalidade maior correspondente.",
+      "question_type": "key_signature",
+      "question_type_label": "Tonalidade da armadura",
+      "season_mode": "mixed",
+      "season_mode_label": "Misto",
+      "season_id": "level_1",
+      "season_label": "Nível 1",
+      "season_topics": [
+        "Pauta musical",
+        "Claves",
+        "Símbolos básicos",
+        "Organização visual da música",
+        "Leitura inicial"
+      ],
+      "clef_mode": "alto",
+      "clef_mode_label": "Somente Dó",
+      "clef_id": "alto",
+      "clef_label": "Clave de Dó",
+      "clef_symbol": "𝄡",
+      "clef_symbol_label": "Dó",
+      "head_music_clef": "alto_clef",
+      "correct_option_id": "g_major",
+      "correct_option_label": "Sol maior",
+      "signature": "key_signature|alto|g_major",
+      "options": [
+        {
+          "id": "cb_major",
+          "label": "Dó bemol maior"
+        },
+        {
+          "id": "bb_major",
+          "label": "Si bemol maior"
+        },
+        {
+          "id": "g_major",
+          "label": "Sol maior"
+        },
+        {
+          "id": "cs_major",
+          "label": "Dó sustenido maior"
+        }
+      ],
+      "key_signature_id": "g_major",
+      "key_signature_label": "Sol maior",
+      "key_signature_accidentals": [
+        {
+          "accidental_id": "sharp",
+          "symbol": "♯",
+          "staff_position_index": 7
+        }
+      ],
+      "notation_kind": "key_signature",
+      "question_mode": "key_signature",
+      "question_mode_label": "Armadura"
+    }
+  },
+  {
+    "area": "percepcao",
+    "seed": 7,
+    "generator_options": {
+      "direction_mode": "ascending"
+    },
+    "digest": "5c80f506727665118b3198e338aee7d6c93aab8f3bdf3c14e32ff49bdcb09e53",
+    "exercise": {
+      "question": "Ouça duas notas consecutivas e identifique o intervalo melódico.",
+      "instrument": "piano",
+      "instrument_label": "Piano",
+      "direction_mode": "ascending",
+      "direction_mode_label": "Ascendente",
+      "direction": "ascending",
+      "direction_label": "Crescente",
+      "reference_pitch": "E3",
+      "target_pitch": "A4",
+      "reference_frequency": 164.814,
+      "target_frequency": 440.0,
+      "correct_option_id": "perfect_eleventh",
+      "correct_option_label": "Décima primeira justa (P11)",
+      "correct_interval_name": "perfect eleventh",
+      "correct_interval_shorthand": "P11",
+      "signature": "perfect_eleventh|ascending|E3|A4",
+      "options": [
+        {
+          "id": "perfect_fifteenth",
+          "label": "Décima quinta justa (P15)"
+        },
+        {
+          "id": "minor_seventh",
+          "label": "Sétima menor (m7)"
+        },
+        {
+          "id": "major_third",
+          "label": "Terça maior (M3)"
+        },
+        {
+          "id": "perfect_eleventh",
+          "label": "Décima primeira justa (P11)"
+        }
+      ]
+    }
+  },
+  {
+    "area": "percepcao",
+    "seed": 9,
+    "generator_options": {
+      "direction_mode": "descending"
+    },
+    "digest": "d308af3a8642f63bf144d6170254f97e85c6fe88e8c2d5da5e085b1e845e3f2c",
+    "exercise": {
+      "question": "Ouça duas notas consecutivas e identifique o intervalo melódico.",
+      "instrument": "piano",
+      "instrument_label": "Piano",
+      "direction_mode": "descending",
+      "direction_mode_label": "Descendente",
+      "direction": "descending",
+      "direction_label": "Decrescente",
+      "reference_pitch": "A4",
+      "target_pitch": "A2",
+      "reference_frequency": 440.0,
+      "target_frequency": 110.0,
+      "correct_option_id": "perfect_fifteenth",
+      "correct_option_label": "Décima quinta justa (P15)",
+      "correct_interval_name": "perfect fifteenth",
+      "correct_interval_shorthand": "P15",
+      "signature": "perfect_fifteenth|descending|A4|A2",
+      "options": [
+        {
+          "id": "minor_fourteenth",
+          "label": "Décima quarta menor (m14)"
+        },
+        {
+          "id": "major_seventh",
+          "label": "Sétima maior (M7)"
+        },
+        {
+          "id": "major_second",
+          "label": "Segunda maior (M2)"
+        },
+        {
+          "id": "perfect_fifteenth",
+          "label": "Décima quinta justa (P15)"
+        }
+      ]
+    }
+  },
+  {
+    "area": "percepcao",
+    "seed": 4,
+    "generator_options": {
+      "direction_mode": "ascending"
+    },
+    "digest": "c9e6f009a4e1ff738b0f2341cb486af89440900f3e03f4e758cef1972167e494",
+    "exercise": {
+      "question": "Ouça duas notas consecutivas e identifique o intervalo melódico.",
+      "instrument": "piano",
+      "instrument_label": "Piano",
+      "direction_mode": "ascending",
+      "direction_mode_label": "Ascendente",
+      "direction": "ascending",
+      "direction_label": "Crescente",
+      "reference_pitch": "A3",
+      "target_pitch": "C♯5",
+      "reference_frequency": 220.0,
+      "target_frequency": 554.365,
+      "correct_option_id": "major_tenth",
+      "correct_option_label": "Décima maior (M10)",
+      "correct_interval_name": "major tenth",
+      "correct_interval_shorthand": "M10",
+      "signature": "major_tenth|ascending|A3|C♯5",
+      "options": [
+        {
+          "id": "perfect_fifth",
+          "label": "Quinta justa (P5)"
+        },
+        {
+          "id": "major_second",
+          "label": "Segunda maior (M2)"
+        },
+        {
+          "id": "major_tenth",
+          "label": "Décima maior (M10)"
+        },
+        {
+          "id": "perfect_octave",
+          "label": "Oitava justa (P8)"
+        }
+      ]
+    }
+  }
+]

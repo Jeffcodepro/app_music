@@ -1,20 +1,2 @@
-<section class="platform-shell">
-  <div class="platform-container">
-    <h1 class="platform-title">Ranking</h1>
-
-    <div class="platform-grid">
-      <article class="platform-card">
-        <h2>Ranking semanal</h2>
-        <p>Posição geral na liga atual com base em XP e consistência.</p>
-      </article>
-      <article class="platform-card">
-        <h2>Ranking por categoria</h2>
-        <p>Comparativo por leitura, ritmo, percepção e harmonia.</p>
-      </article>
-      <article class="platform-card">
-        <h2>Temporada atual</h2>
-        <p>Histórico de pontuação, metas e marcos atingidos.</p>
-      </article>
-    </div>
-  </div>
-</section>
+<%= render "platform/page_header", title: "Ranking" %>
+<%= render "platform/empty_state", icon: "award", title: "Ainda não há um ranking", description: "A comparação entre estudantes depende de regras de avaliação que ainda estão em preparação. Você pode consultar seu próprio histórico de prática." %>
