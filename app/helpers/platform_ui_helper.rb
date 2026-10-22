@@ -7,7 +7,7 @@ module PlatformUiHelper
     { label: "Minha conta", route: :app_perfil_path, icon: "user", section: "account" },
     { label: "Aulas", route: :app_aulas_path, icon: "book", section: "lessons", preparing: true },
     { label: "Modo carreira", route: :app_carreira_path, icon: "award", section: "career", preparing: true },
-    { label: "Arena ao vivo", route: :app_arena_path, icon: "radio", section: "arena", preparing: true }
+    { label: "Arena Musical", route: :app_arena_path, icon: "radio", section: "arena" }
   ].map(&:freeze).freeze
 
   def platform_navigation
@@ -40,7 +40,7 @@ module PlatformUiHelper
     return "lessons" if path.start_with?("/app/aulas")
     return "history" if path == "/app/pratica/resultado"
     return "practice" if path.start_with?("/app/pratica", "/app/playground")
-    return "arena" if path == "/app/arena"
+    return "arena" if path == "/app/arena" || path.start_with?("/app/arena/")
     return "career" if path.match?(%r{\A/app/(carreira|desafios|ranking|conquistas|bolsa-evolucao)})
     return "account" if path.start_with?("/app/perfil", "/app/assinatura", "/onboarding", "/users/edit")
     "home"

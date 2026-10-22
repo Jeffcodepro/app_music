@@ -766,13 +766,10 @@ export default class extends Controller {
 
   setupSharedAudioState() {
     const sharedCache = window.__appMusicAudioCache ||= {}
-    sharedCache.harmony ||= {
-      soundfontPlayers: {},
-      soundfontPromises: {},
-      synthContext: null
-    }
-
-    this.cacheState = sharedCache.harmony
+    this.cacheState = sharedCache.harmony ||= {}
+    this.cacheState.soundfontPlayers ||= {}
+    this.cacheState.soundfontPromises ||= {}
+    this.cacheState.synthContext ||= null
     this.playbackState = window.__appMusicPlayback ||= { channels: {} }
   }
 }

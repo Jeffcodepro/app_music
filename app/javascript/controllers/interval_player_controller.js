@@ -551,11 +551,12 @@ export default class extends Controller {
   }
 
   setupSharedAudioState() {
-    this.cacheState = window.__appMusicAudioCache ||= {
-      soundfontPlayers: {},
-      soundfontPromises: {},
-      synthContext: null
-    }
+    this.cacheState = window.__appMusicAudioCache ||= {}
+    // Harmony/melody can create the shared container first during Turbo visits.
+    // Fill missing namespaces without discarding already loaded samples.
+    this.cacheState.soundfontPlayers ||= {}
+    this.cacheState.soundfontPromises ||= {}
+    this.cacheState.synthContext ||= null
     this.playbackState = window.__appMusicPlayback ||= { channels: {} }
   }
 

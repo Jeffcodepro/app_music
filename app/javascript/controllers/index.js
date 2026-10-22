@@ -3,6 +3,8 @@
 // ./bin/rails generate stimulus controllerName
 
 import { application } from "./application"
+import ArenaLiveController from "./arena_live_controller"
+application.register("arena-live", ArenaLiveController)
 
 import AppShellController from "./app_shell_controller"
 application.register("app-shell", AppShellController)
@@ -42,3 +44,12 @@ application.register("design-system", DesignSystemController)
 
 import SeamlessLoopController from "./seamless_loop_controller"
 application.register("seamless-loop", SeamlessLoopController)
+
+import ArenaIdentityController from "./arena_identity_controller"
+application.register("arena-identity", ArenaIdentityController)
+
+import ArenaAudioController from "./arena_audio_controller"
+application.register("arena-audio", ArenaAudioController)
+
+import ArenaSetupController from "./arena_setup_controller"
+application.register("arena-setup", ArenaSetupController)

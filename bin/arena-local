@@ -1,0 +1,125 @@
+#!/usr/bin/env ruby
+# Local synthetic pilot only. Never uses config/database.yml's implicit DBs.
+require_relative "../config/boot"
+require "json"
+require "tmpdir"
+require "fileutils"
+require "securerandom"
+require "open3"
+require "socket"
+require "ipaddr"
+require "uri"
+
+abort "Usage: rbenv exec ruby bin/arena-local" unless ARGV.empty?
+root = File.expand_path("..", __dir__)
+Dir.chdir(root)
+ENV.keys.grep(/\APG/).each { |key| ENV.delete(key) }
+local_dir = File.join(root, "tmp/arena-local")
+FileUtils.mkdir_p(local_dir, mode: 0o700)
+abort "Unsafe local runtime directory" unless File.realpath(local_dir) == local_dir && File.stat(local_dir).uid == Process.uid
+File.chmod(0o700, local_dir)
+instance_lock = File.open(File.join(local_dir, "instance.lock"), File::RDWR | File::CREAT, 0o600)
+abort "A Arena local já está em execução; encerre essa instância antes de iniciar outra." unless instance_lock.flock(File::LOCK_EX | File::LOCK_NB)
+runtime_path = File.join(local_dir, "runtime.json")
+runtime = if File.exist?(runtime_path)
+  JSON.parse(File.read(runtime_path))
+else
+  private_root = Dir.mktmpdir("app-music-arena-local-", "/private/tmp")
+  { "scratch" => private_root, "initialized" => false }
+end
+scratch = runtime.fetch("scratch")
+abort "Unsafe scratch" unless scratch.start_with?("/private/tmp/app-music-arena-local-") && File.realpath(scratch) == scratch && File.stat(scratch).uid == Process.uid && (File.stat(scratch).mode & 0o077).zero?
+File.write(runtime_path, JSON.pretty_generate(runtime) + "\n", perm: 0o600)
+pg_bin = ENV.fetch("APP_MUSIC_PG_BIN", "/opt/homebrew/opt/postgresql@15/bin")
+port = Integer(ENV.fetch("APP_MUSIC_ARENA_PORT", "3001"))
+abort "Local port must be 3001..3999" unless (3001..3999).cover?(port)
+bind_address = ENV.fetch("APP_MUSIC_ARENA_BIND", "127.0.0.1")
+begin
+  bind_ip = IPAddr.new(bind_address)
+  abort "Use a loopback or private IPv4 address (or 0.0.0.0 for your local network)." unless bind_ip.ipv4? && (bind_ip.loopback? || bind_ip.private? || bind_address == "0.0.0.0")
+rescue IPAddr::InvalidAddressError
+  abort "Invalid APP_MUSIC_ARENA_BIND"
+end
+if ENV["APP_MUSIC_ARENA_PUBLIC_URL"]
+  begin
+    public_uri = URI.parse(ENV.fetch("APP_MUSIC_ARENA_PUBLIC_URL"))
+    public_ip = IPAddr.new(public_uri.host.to_s)
+    valid_origin = public_uri.scheme == "http" && public_ip.ipv4? && (public_ip.loopback? || public_ip.private?) && public_uri.port == port && public_uri.userinfo.nil? && ["", "/"].include?(public_uri.path) && public_uri.query.nil? && public_uri.fragment.nil?
+    abort "Use the local Arena origin only, such as http://192.168.1.10:#{port}." unless valid_origin
+    abort "The invitation origin must match APP_MUSIC_ARENA_BIND, or use 0.0.0.0 to listen on local interfaces." if bind_address != "0.0.0.0" && public_ip != bind_ip
+  rescue URI::InvalidURIError, IPAddr::InvalidAddressError
+    abort "Invalid APP_MUSIC_ARENA_PUBLIC_URL"
+  end
+end
+begin
+  Socket.tcp("127.0.0.1", port, connect_timeout: 1) { abort "Port #{port} already in use; choose APP_MUSIC_ARENA_PORT." }
+rescue Errno::ECONNREFUSED
+end
+setup_log = File.join(local_dir, "setup.log")
+run = ->(env, *args) do
+  ok = system(env, *args, out: [setup_log, "a"], err: [:child, :out])
+  abort "Local pilot setup failed; inspect tmp/arena-local/setup.log" unless ok
+end
+data = File.join(scratch, "data")
+unless File.exist?(File.join(data, "PG_VERSION"))
+  run.call({}, File.join(pg_bin, "initdb"), "-D", data, "-U", "arena_local", "-A", "trust", "--encoding=UTF8", "--no-locale")
+end
+abort "Unsafe data directory" unless File.realpath(data) == data && File.stat(data).uid == Process.uid && (File.stat(data).mode & 0o077).zero?
+running = system(File.join(pg_bin, "pg_ctl"), "-D", data, "status", out: File::NULL, err: File::NULL)
+unless running
+  run.call({}, File.join(pg_bin, "pg_ctl"), "-D", data, "-l", File.join(scratch, "postgres.log"), "-o", "-c listen_addresses='' -p 55449 -k #{scratch}", "-w", "start")
+end
+url = "postgresql:///app_music_integrity_arena_local_test?host=#{scratch}&port=55449&user=arena_local"
+# Check the actual server before creating the application database.
+require "pg"
+PG.connect(host: scratch, port: 55449, user: "arena_local", dbname: "postgres") do |connection|
+  identity = connection.exec("SELECT current_setting('data_directory') AS directory,current_setting('listen_addresses') AS listeners,current_user AS role").first
+  abort "Unexpected PostgreSQL identity" unless File.realpath(identity.fetch("directory")) == data && identity.fetch("listeners").empty? && identity.fetch("role") == "arena_local"
+  exists = connection.exec("SELECT 1 FROM pg_database WHERE datname='app_music_integrity_arena_local_test'").any?
+  connection.exec("CREATE DATABASE app_music_integrity_arena_local_test") unless exists
+end
+ENV["APP_MUSIC_TEST_DATABASE_URL"] = url
+require_relative "../lib/isolated_test_database"
+env = { "RAILS_ENV" => "test", "RACK_ENV" => "test", "DATABASE_URL" => nil,
+  "APP_MUSIC_TEST_DATABASE_URL" => url, "APP_MUSIC_ARENA_PREVIEW" => nil, "SCHEMA" => nil, "CI" => nil }
+unless runtime.fetch("initialized")
+  run.call(env, RbConfig.ruby, "bin/arena-baseline", "bootstrap")
+end
+run.call(env.merge("SCHEMA" => File.join(scratch, "schema-after-migrations.rb")), RbConfig.ruby, "bin/test-isolated", "db:migrate")
+runtime["initialized"] = true
+File.write(runtime_path, JSON.pretty_generate(runtime) + "\n", perm: 0o600)
+credentials_path = File.join(local_dir, "credentials.json")
+unless File.exist?(credentials_path)
+  credentials = { "anfitriao" => { "email" => "teacher@arena.local.test", "name" => "Anfitrião local" },
+    "aluno1" => { "email" => "learner1@arena.local.test", "name" => "Aluno local 1" },
+    "aluno2" => { "email" => "learner2@arena.local.test", "name" => "Aluno local 2" } }
+  credentials.each_value { |account| account["password"] = SecureRandom.base64(24) }
+  File.write(credentials_path, JSON.pretty_generate(credentials) + "\n", perm: 0o600)
+end
+pilot_env = env.merge("DATABASE_URL" => url, "APP_MUSIC_ARENA_PREVIEW" => "1", "PARALLEL_WORKERS" => "1", "RAILS_MAX_THREADS" => "5")
+seed = <<~'RUBY'
+  require "json"
+  Arena::SchemaIntegrity.verify!
+  accounts = JSON.parse(File.read(ARGV.fetch(0)))
+  accounts.each_value do |account|
+    User.find_by(email: account.fetch("email")) || User.create!(email: account.fetch("email"), full_name: account.fetch("name"), password: account.fetch("password"), plan: "Primeira Nota")
+  end
+  Arena::Catalog.create_preview!
+  Arena::Catalog.create_visual_previews!
+RUBY
+run.call(pilot_env, RbConfig.ruby, "-rbundler/setup", "-r./lib/isolated_test_database", "-r./config/environment", "-e", seed, credentials_path)
+display_host = bind_address == "0.0.0.0" ? "127.0.0.1" : bind_address
+display_origin = ENV["APP_MUSIC_ARENA_PUBLIC_URL"] || "http://#{display_host}:#{port}"
+puts "Arena local: #{URI.join(display_origin, '/app/arena')}"
+puts "Contas fictícias e senhas privadas: tmp/arena-local/credentials.json"
+puts "Use janelas/perfis separados para anfitrião e alunos. Ctrl+C encerra este servidor e seu cluster privado."
+puts "Para celular na mesma rede: APP_MUSIC_ARENA_BIND=0.0.0.0 e abra a Arena pelo IP privado do Mac." if bind_ip.loopback?
+puts "Rede local habilitada: abra a Arena pelo IP privado do Mac para gerar o convite acessível ao celular." if bind_address == "0.0.0.0"
+$stdout.flush
+begin
+  system(pilot_env, RbConfig.ruby, "bin/rails", "server", "-e", "test", "-b", bind_address, "-p", port.to_s, "-P", File.join(scratch, "rails.pid"))
+rescue Interrupt
+  # Rails shares the foreground process group and receives the same interrupt.
+ensure
+  system(File.join(pg_bin, "pg_ctl"), "-D", data, "-m", "fast", "-w", "stop", out: [setup_log, "a"], err: [:child, :out])
+end

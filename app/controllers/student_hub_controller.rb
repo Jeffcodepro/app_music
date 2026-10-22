@@ -329,7 +329,7 @@ class StudentHubController < ApplicationController
       correct:,
       selected_label: selected_option&.dig(:label) || "Resposta inválida",
       correct_label: exercise[:correct_option_label],
-      direction_label: exercise[:direction_label],
+      direction_label: ExercisePresentation::DIRECTION_MODES.fetch(exercise[:direction].to_s, exercise[:direction_label]),
       assignment_id: exercise[:assignment_id],
       question_mode: exercise[:question_mode] || "interval",
       notes: exercise[:question_type] == "melodic_dictation" ? nil : localized_pitch_pair(exercise[:reference_pitch], exercise[:target_pitch]),

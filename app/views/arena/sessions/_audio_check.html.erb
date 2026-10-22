@@ -1,0 +1,19 @@
+<% check = state.fetch(:audio_check) %>
+<section class="arena-preflight arena-card" data-arena-phase-panel>
+  <div class="arena-preflight-orbit" aria-hidden="true"><span>♪</span><span>♫</span><span>♩</span></div>
+  <p class="arena-eyebrow">Passagem de som</p>
+  <h2 class="arena-phase-title" tabindex="-1"><%= check[:own_ready] ? "Seu som está pronto!" : "Prepare o som. O palco espera." %></h2>
+  <div class="arena-preflight-clock"><span data-arena-live-target="timer" aria-label="Segundos para ativar o áudio">45s</span><small>para a banda ficar pronta</small></div>
+  <div class="arena-preflight-progress"><span style="--ready:<%= check[:required_count].positive? ? check[:ready_count] * 100.0 / check[:required_count] : 0 %>%"></span></div>
+  <p class="arena-preflight-count"><strong><%= check[:ready_count] %> de <%= check[:required_count] %></strong> <%= check[:presenter] ? "aparelho pronto" : "jogadores com áudio pronto" %></p>
+  <% if check[:needs_activation] && !check[:own_ready] %>
+    <button type="button" class="arena-button arena-button--primary arena-soundcheck-button" data-action="arena-live#activateAudio">Ativar meu áudio <span aria-hidden="true">♪</span></button>
+    <p class="arena-hint">Ative antes do prazo para entrar no jogo.</p>
+  <% elsif check[:own_ready] %>
+    <p class="arena-preflight-ready" role="status"><span aria-hidden="true">✓</span> Tudo certo por aqui. Assim que todos estiverem prontos, começamos.</p>
+  <% else %>
+    <p class="arena-hint">O anfitrião ativa o áudio no telão. Você só precisa se preparar para responder.</p>
+  <% end %>
+  <ul class="arena-check-players" aria-label="Preparação do áudio"><% check[:players].each do |player| %><li class="<%= 'is-ready' if player[:ready] %>" <%= tag.attributes(data: { arena_audio_ready_key: "#{check[:id]}:#{player[:key]}" }) if player[:ready] %>><%= render "arena/shared/avatar", avatar_id: player[:avatar_id] %><span><strong><%= player[:nickname] %><%= " · Você" if player[:you] %></strong><small><%= player[:ready] ? "Áudio pronto" : "Ativando áudio…" %></small></span><i aria-hidden="true"><%= player[:ready] ? "✓" : "♪" %></i></li><% end %></ul>
+  <p class="arena-preflight-rule"><%= check[:presenter] ? "A partida começa quando o áudio do anfitrião estiver pronto. Sem ativação no prazo, ela será encerrada." : "O jogo começa antes se todos ativarem. Ao fim dos 45 segundos, quem não ativou sai desta partida e a turma pronta segue." %></p>
+</section>

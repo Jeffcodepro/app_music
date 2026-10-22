@@ -1,0 +1,15 @@
+<% unless ArenaSession::TERMINAL.include?(state[:state]) %>
+  <% if state[:host] %>
+    <section class="arena-director arena-control-bar" aria-label="Controles do anfitrião">
+      <div class="arena-control-owner"><span class="arena-control-dot" aria-hidden="true"></span><strong>Você conduz</strong><small><%= state[:state] == "paused" ? "Tempo e respostas pausados" : "Controles do anfitrião" %></small></div>
+      <nav class="arena-control-buttons" aria-label="Conduzir partida">
+        <% arena_host_commands(state).reject { |command,_| command == "end" }.each do |command,label| %>
+          <%= button_to command_app_arena_session_path(state[:id]), params: { command: command, version: state[:version] }, class: "arena-button #{'arena-button--primary' if %w[start resume next].include?(command)}", data: { arena_command: command }, disabled: command == "start" && state[:participant_count].zero? do %><span class="arena-control-symbol" aria-hidden="true"><%= { "start" => "▶", "pause" => "Ⅱ", "resume" => "▶", "close" => "■", "next" => "→", "explain" => "?", "void" => "↷" }[command] %></span><%= label %><% end %>
+        <% end %>
+        <details class="arena-end-game" data-arena-persistent-control="finish"><summary class="arena-button arena-button--quiet"><span aria-hidden="true">×</span> Encerrar jogo</summary><div class="arena-confirm-action"><strong>Finalizar esta partida?</strong><p>As respostas já enviadas e os pontos serão preservados. As questões não apresentadas ficam fora do resultado.</p><div class="arena-actions"><button type="button" class="arena-button" data-action="arena-live#cancelDisclosure" data-arena-persistent-action="cancel">Continuar jogando</button><%= button_to "Sim, encerrar jogo", command_app_arena_session_path(state[:id]), params: { command: "finish", version: state[:version] }, class: "arena-button arena-button--danger", data: { arena_command: "finish", arena_persistent_action: "confirm" } %></div></div></details>
+      </nav>
+    </section>
+  <% elsif state[:participant] %>
+    <div class="arena-guest-bar"><span>Você joga. O anfitrião conduz.</span><details class="arena-leave-game" data-arena-persistent-control="leave"><summary class="arena-button arena-button--quiet">Sair da sala <span aria-hidden="true">↗</span></summary><div class="arena-confirm-action"><strong>Voltar para a Arena?</strong><p>Você deixa de responder nesta partida. Seus pontos continuam no placar e podem aparecer no pódio.</p><div class="arena-actions"><button type="button" class="arena-button" data-action="arena-live#cancelDisclosure" data-arena-persistent-action="cancel">Ficar na sala</button><%= button_to "Sair e manter meus pontos", leave_app_arena_session_path(state[:id]), class: "arena-button", data: { arena_persistent_action: "confirm" } %></div></div></details></div>
+  <% end %>
+<% end %>

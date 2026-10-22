@@ -1,0 +1,21 @@
+<% stimulus = round[:question][:stimulus]; kind = stimulus.fetch("kind"); player = "#{kind == 'interval' ? 'interval' : kind == 'harmony' ? 'harmony' : kind == 'melody' ? 'melody' : 'rhythm'}-player" %>
+<% if round.dig(:playback,:can_play) %>
+  <% attributes = { controller: "arena-audio #{player}", arena_audio_key: "#{round[:id]}:#{round.dig(:playback,:generation)}", arena_audio_player_value: player, arena_audio_start_url_value: playback_app_arena_round_path(round[:id]), arena_audio_complete_url_value: complete_playback_app_arena_round_path(round[:id]), arena_audio_generation_value: round.dig(:playback,:generation), arena_audio_policy_value: round.dig(:playback,:policy), arena_audio_slots_value: round.dig(:playback,:slots)&.to_json, arena_audio_server_now_value: state[:server_now], arena_audio_repetitions_value: state[:listening_repetitions], "#{player}-exercise-signature-value" => round[:id], "#{player}-instrument-value" => "piano", "#{player}-auto-play-value" => false } %>
+  <% values = case kind
+    when "interval" then stimulus.slice("first_pitch","second_pitch","first_frequency","second_frequency")
+    when "harmony" then stimulus.slice("sequence")
+    when "melody" then { "format" => stimulus["dictation_format"], "sequence" => [], "events" => stimulus["audio_events"], **stimulus.slice("voice_count","total_steps","bpm_unit_steps","tempo_bpm") }
+    else { "events" => stimulus["audio_events"], **stimulus.slice("meter","measure_count","total_steps","tempo_bpm","count_in_beats","metronome_during_pattern","playback_cycles") }
+    end %>
+  <% values.each { |key,value| attributes["#{player}-#{key.tr('_','-')}-value"] = value.is_a?(Hash) || value.is_a?(Array) ? value.to_json : value } %>
+  <%= tag.div(class: "arena-audio #{'arena-audio--sequence' if round.dig(:playback,:policy) == 'sequence-v1'}", data: attributes) do %>
+    <p class="arena-eyebrow">Escuta · Questão <%= round[:position] %></p>
+    <% if round.dig(:playback,:policy) == "sequence-v1" %><p class="arena-listen-cue" data-arena-audio-target="cue" role="status" aria-live="polite">Prepare os ouvidos…</p><div class="arena-listen-beats" aria-hidden="true"><% state[:listening_repetitions].times do %><i></i><% end %></div><p class="arena-hint">As respostas abrem após <%= state[:listening_repetitions] %> <%= state[:listening_repetitions] == 1 ? "escuta" : "escutas" %>.</p><% else %>
+    <p data-arena-audio-guidance><%= round.dig(:playback,:presenter) ? "Toque para a turma. Depois da escuta, todos recebem o mesmo tempo para responder." : "Ouça o trecho. O cronômetro começa depois que todos concluírem a escuta." %></p>
+    <% end %>
+    <button type="button" class="arena-button arena-button--primary" data-action="arena-audio#play" data-arena-audio-target="trigger" <%= "data-#{player}-target=trigger" %>>▶ Tocar</button>
+    <p role="status" aria-live="polite" data-arena-audio-target="status" <%= "data-#{player}-target=status" %> data-state="ready">Pronto para ouvir</p>
+  <% end %>
+<% elsif state[:phase] == "listening" %>
+  <div class="arena-audio"><p data-arena-audio-guidance><%= round.dig(:playback,:presenter) ? "Ouça o trecho na tela do anfitrião. Aguarde a abertura das respostas." : "Sua escuta foi confirmada. Aguarde o restante da turma." %></p></div>
+<% end %>

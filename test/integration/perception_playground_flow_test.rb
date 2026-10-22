@@ -23,4 +23,14 @@ class PerceptionPlaygroundFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Qual intervalo você ouviu?"
     assert_includes response.body, "Tocar intervalo"
   end
+  test "feedback uses musical direction terms without changing legacy exercise payloads" do
+    controller = StudentHubController.new
+    %w[ascending descending].zip(%w[Ascendente Descendente]).each do |direction, label|
+      exercise = { direction: direction, direction_label: direction == "descending" ? "Decrescente" : "Crescente", reference_pitch: "D5", target_pitch: "C5" }
+      feedback = controller.send(:build_perception_playground_feedback, exercise: exercise, selected_option: { label: "Segunda maior (M2)" }, correct: true)
+      assert_equal label, feedback[:direction_label]
+      assert_equal direction == "descending" ? "Decrescente" : "Crescente", exercise[:direction_label]
+    end
+  end
+
 end

@@ -1,0 +1,10 @@
+<% content_for :title, "Arena Musical" %>
+<section class="arena" data-controller="arena-live" data-arena-live-url-value="<%= app_arena_session_path(@room) %>" data-arena-live-arena-url-value="<%= app_arena_path %>" data-arena-live-audio-ready-url-value="<%= audio_ready_app_arena_session_path(@room) %>" data-arena-live-settle-url-value="<%= settle_app_arena_session_path(@room) %>">
+  <p class="arena-ready-notice" data-arena-live-target="readyNotice" role="status" aria-live="polite" aria-atomic="true"></p>
+  <p class="arena-connection" data-arena-live-target="connection" role="status" aria-live="polite"></p>
+  <p class="arena-connection" data-arena-live-target="answerStatus" role="status" aria-live="polite"></p>
+  <p class="visually-hidden" data-arena-live-target="announcement" role="status" aria-live="polite" aria-atomic="true"></p>
+  <div class="arena-audio-activation" data-arena-live-target="audioActivation" hidden><span>♪ Prepare o som uma vez. As próximas escutas são automáticas.</span><button type="button" class="arena-button" data-action="arena-live#activateAudio">Ativar áudio</button></div>
+  <div class="arena-audio-rack" data-arena-live-target="audio" hidden></div>
+  <div data-arena-live-target="content"><%= render "session", state: @state %></div>
+</section>

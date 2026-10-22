@@ -23,14 +23,15 @@ class PublicExperienceTest < ActionDispatch::IntegrationTest
     refute_match(/Caderno de Ensaio|Encontre seu foco de hoje/, response.body)
   end
 
-  test "available navigation has four entries with account at the bottom and future resources separate" do
+  test "available navigation includes Arena with account at the bottom and future resources separate" do
     user = User.create!(email: "navigation@example.test", password: "password123", full_name: "Teste", plan: "Pulso")
     post user_session_path, params: { user: { email: user.email, password: "password123" } }
     get app_practice_result_path
-    assert_select "nav[aria-label='Navegação principal'] a", count: 4
+    assert_select "nav[aria-label='Navegação principal'] a", count: 5
+    assert_select "nav[aria-label='Navegação principal'] a[href='#{app_arena_path}']", count: 1
     assert_select ".sidebar-bottom a[href='#{app_perfil_path}']", count: 1
     assert_select "nav[aria-label='Navegação principal'] a[aria-current=page][href='#{app_practice_result_path}']", count: 1
-    assert_select "nav[aria-label='Em preparação'] a", count: 3
+    assert_select "nav[aria-label='Em preparação'] a", count: 2
   end
 
   test "all audible exercises expose neutral playback status without changing answer identity" do

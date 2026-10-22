@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <% if controller_path.start_with?("arena/") %><meta name="turbo-cache-control" content="no-cache"><% end %>
     <%= render "shared/theme_boot" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>

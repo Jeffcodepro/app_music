@@ -15,3 +15,24 @@ for(const kind of ['interval','harmony'])test(`${kind}: every instrument uses it
   assert(chord.gain<=solo.gain/(id==='piano'?2:4))
  }
 })
+
+test('Turbo visits to harmony and melody preserve sampled perception instruments in either order', async () => {
+ const helper=fs.readFileSync('app/javascript/audio/exercise_piano.js','utf8').replace(/^export /gm,'')
+ for(const order of [['harmony','interval'],['melody','interval'],['interval','harmony','interval']]){
+  const window={Soundfont:{async instrument(context,program){return{name:program}}}}
+  const harmonySource=fs.readFileSync('app/javascript/controllers/harmony_player_controller.js','utf8').replace(/^import[^\n]*\n/gm,'').replace('export default class extends Controller','class Harmony extends Controller')
+  const HarmonyPlayerController=vm.runInNewContext(`${helper}\n${harmonySource}\nHarmony`,{Controller:class{},window})
+  let remembered
+  for(const kind of order){
+   const source=fs.readFileSync(`app/javascript/controllers/${kind}_player_controller.js`,'utf8').replace(/^import[^\n]*\n/gm,'').replace('export default class extends Controller','class Player extends Controller').replace('export default class extends HarmonyPlayerController','class Player extends HarmonyPlayerController')
+   const Player=vm.runInNewContext(`${helper}\n${source}\nPlayer`,{Controller:class{},HarmonyPlayerController,window})
+   const p=Object.create(Player.prototype);p.setupSharedAudioState()
+   if(kind==='interval'){
+    p.ensureToneAudioContext=async()=>({});p.element={dataset:{}}
+    for(const id of ['piano','flute','clarinet','guitar','organ']){p.instrumentValue=id;assert.equal((await p.soundfontInstrument()).name,p.soundfontProgramName())}
+    if(remembered)assert.equal(p.cacheState.soundfontPlayers.flute,remembered)
+    remembered=p.cacheState.soundfontPlayers.flute
+   }
+  }
+ }
+})

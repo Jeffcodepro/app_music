@@ -121,7 +121,7 @@
           <% elsif playground_feedback[:correct] %>
             <h3>Resposta correta</h3>
             <p>Você acertou com <strong><%= playground_feedback[:selected_label] %></strong>.</p>
-            <p class="muted">Rodada: <strong><%= playground_feedback[:direction_label] %></strong> | Notas sorteadas: <strong><%= playground_feedback[:notes] %></strong></p>
+            <p class="muted">Rodada: <strong><%= { "Crescente" => "Ascendente", "Decrescente" => "Descendente" }.fetch(playground_feedback[:direction_label], playground_feedback[:direction_label]) %></strong> | Notas sorteadas: <strong><%= playground_feedback[:notes] %></strong></p>
           <% else %>
             <h3>Resposta incorreta. Vamos ouvir de novo?</h3>
             <p>Tente outra resposta ou repita o áudio se quiser.</p>
